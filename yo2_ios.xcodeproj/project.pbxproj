@@ -1,0 +1,424 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B0010001 /* Yo2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* Yo2App.swift */; };
+		B0010002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010002 /* RootView.swift */; };
+		B0010003 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010003 /* SignInView.swift */; };
+		B0010004 /* AuthState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010004 /* AuthState.swift */; };
+		B0010005 /* AppleSignInHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010005 /* AppleSignInHelper.swift */; };
+		B0010006 /* SignInWithAppleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010006 /* SignInWithAppleButton.swift */; };
+		B0010007 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010007 /* User.swift */; };
+		B0010008 /* Yo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010008 /* Yo.swift */; };
+		B0010009 /* FirestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010009 /* FirestoreService.swift */; };
+		B0010010 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010010 /* MainTabView.swift */; };
+		B0010011 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010011 /* FriendsView.swift */; };
+		B0010012 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010012 /* InboxView.swift */; };
+		B0010013 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010013 /* ProfileView.swift */; };
+		B0010014 /* AddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010014 /* AddFriendView.swift */; };
+		B001001A /* PushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010018 /* PushService.swift */; };
+		B0010015 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F0010015 /* GoogleService-Info.plist */; };
+		B0010016 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = P0010001 /* FirebaseAuth */; };
+		B0010017 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = P0010002 /* FirebaseFirestore */; };
+		B0010018 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = P0010003 /* FirebaseMessaging */; };
+		B0010019 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = P0010004 /* FirebaseFirestoreSwift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		T0010001 /* yo2_ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yo2_ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0010001 /* Yo2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Yo2App.swift; sourceTree = "<group>"; };
+		F0010002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		F0010003 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		F0010004 /* AuthState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthState.swift; sourceTree = "<group>"; };
+		F0010005 /* AppleSignInHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInHelper.swift; sourceTree = "<group>"; };
+		F0010006 /* SignInWithAppleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithAppleButton.swift; sourceTree = "<group>"; };
+		F0010007 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		F0010008 /* Yo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Yo.swift; sourceTree = "<group>"; };
+		F0010009 /* FirestoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
+		F0010010 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		F0010011 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		F0010012 /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
+		F0010013 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		F0010014 /* AddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendView.swift; sourceTree = "<group>"; };
+		F0010018 /* PushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushService.swift; sourceTree = "<group>"; };
+		F0010015 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		F0010016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F0010017 /* yo2_ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = yo2_ios.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E0010001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0010016 /* FirebaseAuth in Frameworks */,
+				B0010017 /* FirebaseFirestore in Frameworks */,
+				B0010018 /* FirebaseMessaging in Frameworks */,
+				B0010019 /* FirebaseFirestoreSwift in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G0010001 = {
+			isa = PBXGroup;
+			children = (
+				G0010002 /* yo2_ios */,
+				G0010003 /* Products */,
+				F0010015 /* GoogleService-Info.plist */,
+			);
+			sourceTree = "<group>";
+		};
+		G0010002 /* yo2_ios */ = {
+			isa = PBXGroup;
+			children = (
+				G0010004 /* App */,
+				G0010005 /* Auth */,
+				G0010006 /* Models */,
+				G0010007 /* Services */,
+				G0010008 /* Features */,
+				F0010016 /* Info.plist */,
+				F0010017 /* yo2_ios.entitlements */,
+			);
+			path = yo2_ios;
+			sourceTree = "<group>";
+		};
+		G0010003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				T0010001 /* yo2_ios.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		G0010004 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F0010001 /* Yo2App.swift */,
+				F0010002 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		G0010005 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				F0010003 /* SignInView.swift */,
+				F0010004 /* AuthState.swift */,
+				F0010005 /* AppleSignInHelper.swift */,
+				F0010006 /* SignInWithAppleButton.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		G0010006 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F0010007 /* User.swift */,
+				F0010008 /* Yo.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		G0010007 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F0010009 /* FirestoreService.swift */,
+				F0010018 /* PushService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		G0010008 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				F0010010 /* MainTabView.swift */,
+				G0010009 /* Friends */,
+				G0010010 /* Inbox */,
+				G0010011 /* Profile */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		G0010009 /* Friends */ = {
+			isa = PBXGroup;
+			children = (
+				F0010011 /* FriendsView.swift */,
+			);
+			path = Friends;
+			sourceTree = "<group>";
+		};
+		G0010010 /* Inbox */ = {
+			isa = PBXGroup;
+			children = (
+				F0010012 /* InboxView.swift */,
+			);
+			path = Inbox;
+			sourceTree = "<group>";
+		};
+		G0010011 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				F0010013 /* ProfileView.swift */,
+				F0010014 /* AddFriendView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		N0010001 /* yo2_ios */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0010002 /* Build configuration list for PBXNativeTarget "yo2_ios" */;
+			buildPhases = (
+				E0010002 /* Sources */,
+				E0010001 /* Frameworks */,
+				E0010003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = yo2_ios;
+			packageProductDependencies = (
+				P0010001 /* FirebaseAuth */,
+				P0010002 /* FirebaseFirestore */,
+				P0010003 /* FirebaseMessaging */,
+				P0010004 /* FirebaseFirestoreSwift */,
+			);
+			productReference = T0010001 /* yo2_ios.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		R0010001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = C0010001 /* Build configuration list for PBXProject "yo2_ios" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ja;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				ja,
+			);
+			mainGroup = G0010001;
+			packageReferences = (
+				R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			productRefGroup = G0010003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				N0010001 /* yo2_ios */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E0010003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0010015 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E0010002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0010001 /* Yo2App.swift in Sources */,
+				B0010002 /* RootView.swift in Sources */,
+				B0010003 /* SignInView.swift in Sources */,
+				B0010004 /* AuthState.swift in Sources */,
+				B0010005 /* AppleSignInHelper.swift in Sources */,
+				B0010006 /* SignInWithAppleButton.swift in Sources */,
+				B0010007 /* User.swift in Sources */,
+				B0010008 /* Yo.swift in Sources */,
+				B0010009 /* FirestoreService.swift in Sources */,
+				B0010010 /* MainTabView.swift in Sources */,
+				B0010011 /* FriendsView.swift in Sources */,
+				B0010012 /* InboxView.swift in Sources */,
+				B0010013 /* ProfileView.swift in Sources */,
+				B0010014 /* AddFriendView.swift in Sources */,
+				B001001A /* PushService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C0010003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C0010004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_OPTIMIZATION_LEVEL = s;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C0010005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = yo2_ios/yo2_ios.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = yo2_ios/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Yo;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.yo2ios;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		C0010006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = yo2_ios/yo2_ios.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = yo2_ios/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Yo;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.yo2ios;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C0010001 /* Build configuration list for PBXProject "yo2_ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0010003 /* Debug */,
+				C0010004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0010002 /* Build configuration list for PBXNativeTarget "yo2_ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0010005 /* Debug */,
+				C0010006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		P0010001 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		P0010002 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		P0010003 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		P0010004 /* FirebaseFirestoreSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestoreSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = R0010001 /* Project object */;
+}
