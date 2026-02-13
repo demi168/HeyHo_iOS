@@ -1,9 +1,8 @@
-# Yo — ショートコミュニケーション iOS アプリ
+# HeyHo - ショートコミュニケーション iOS アプリ
 
-友だちに「Yo」を1タップで送り、受け取った側は通知と履歴で確認できるミニマルなiOSアプリです。
+友だちに「Hey」を1タップで送り、受け取った側は通知と履歴で確認できるミニマルなiOSアプリです。
 
 ## 技術スタック
-
 - **UI**: SwiftUI（iOS 16+）
 - **認証**: Firebase Auth（Apple Sign In）
 - **データ**: Cloud Firestore（users, friends, yos）
@@ -12,7 +11,6 @@
 ## セットアップ
 
 ### 1. Firebase プロジェクト
-
 1. [Firebase Console](https://console.firebase.google.com/) でプロジェクトを作成
 2. iOS アプリを追加（Bundle ID: `com.example.yo2ios` または任意）
 3. **GoogleService-Info.plist** をダウンロードし、`yo2_ios/` 直下に配置（既存のプレースホルダーを上書き）
@@ -21,7 +19,7 @@
 
 ### 2. Xcode
 
-1. `yo2_ios.xcodeproj` を開く
+1. `heyho_ios.xcodeproj` を開く
 2. **Signing & Capabilities** でチームを設定
 3. **+ Capability** で以下を追加:
    - **Sign in with Apple**
@@ -43,17 +41,17 @@
 
 ## プロジェクト構成
 
-- `yo2_ios/App/` — エントリポイント、ルート表示
-- `yo2_ios/Auth/` — Apple Sign In、サインイン画面
-- `yo2_ios/Models/` — User, Yo（Firestore モデル）
-- `yo2_ios/Services/` — FirestoreService, PushService
-- `yo2_ios/Features/` — Friends（友だち一覧・Yo送信）、Inbox（受信）、Profile（表示名・友だち追加・ログアウト）
+- `heyho_ios/App/` — エントリポイント、ルート表示
+- `heyho_ios/Auth/` — Apple Sign In、サインイン画面
+- `heyho_ios/Models/` — User, Yo（Firestore モデル）
+- `heyho_ios/Services/` — FirestoreService, PushService
+- `heyho_ios/Features/` — Friends（友だち一覧・Yo送信）、Inbox（受信）、Profile（表示名・友だち追加・ログアウト）
 
 ## 使い方
 
 1. 起動後、Apple でサインイン（初回は表示名を入力）
 2. プロフィール > 友だちを追加で表示名検索し、追加
-3. 友だちタブで「Yo」ボタンをタップして送信
+3. 友だちタブで「Hey」ボタンをタップして送信
 4. 相手はプッシュ通知と受信タブで確認
 
 ## 注意
