@@ -46,3 +46,6 @@ yarn-error.log*
 # IDE
 .idea/
 *.xcuserstate
+
+# Archived files
+_archived/

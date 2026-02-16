@@ -2,7 +2,7 @@ import SwiftUI
 import FirebaseCore
 
 @main
-struct Yo2App: App {
+struct HeyHoApp: App {
     init() {
         FirebaseApp.configure()
         PushService.shared.configure()

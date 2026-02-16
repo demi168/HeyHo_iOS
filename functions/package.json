@@ -1,6 +1,6 @@
 {
-  "name": "yo2-functions",
-  "description": "Cloud Functions for Yo: send FCM when a Yo is created",
+  "name": "heyho-functions",
+  "description": "Cloud Functions for HeyHo: send FCM when a Hey or Ho is created",
   "scripts": {
     "build": "tsc",
     "serve": "npm run build && firebase emulators:start --only functions",

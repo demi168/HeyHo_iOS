@@ -29,19 +29,23 @@ final class AuthState: ObservableObject {
 
     /// Apple Sign In で取得した credential と nonce で Firebase にサインインする
     func signInWithApple(idToken: Data, rawNonce: String) async throws -> (isNewUser: Bool, displayName: String?) {
+        guard let idTokenString = String(data: idToken, encoding: .utf8) else {
+            throw NSError(domain: "AuthState", code: -1, userInfo: [
+                NSLocalizedDescriptionKey: "IDトークンの変換に失敗しました"
+            ])
+        }
         let credential = OAuthProvider.appleCredential(
-            withIDToken: idToken,
+            withIDToken: idTokenString,
             rawNonce: rawNonce,
             fullName: nil
         )
         let result = try await Auth.auth().signIn(with: credential)
-        let name: String?
-        if let fullName = result.user.displayName, !fullName.isEmpty {
-            name = fullName
-        } else {
-            name = [result.user.displayName].compactMap { $0 }.joined(separator: " ")
-            if name?.isEmpty == true { name = nil }
-        }
+        let name: String? = {
+            if let fullName = result.user.displayName, !fullName.isEmpty {
+                return fullName
+            }
+            return nil
+        }()
         return (result.additionalUserInfo?.isNewUser ?? false, name)
     }
 
