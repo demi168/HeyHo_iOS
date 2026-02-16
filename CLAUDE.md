@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-HeyHo is a minimal iOS app (iOS 16+) for sending short "Hey" messages to friends with one tap. Built with SwiftUI and Firebase.
+HeyHo is a minimal iOS app (iOS 16+) for sending "Hey" and "Ho" messages to friends with one tap. When you send "Hey" to a friend, they can reply with "Ho", creating a rally conversation. Built with SwiftUI and Firebase.
 
 ## Build and Run
 
@@ -31,7 +31,7 @@ npm run deploy         # Deploy to Firebase
 
 The app follows a feature-based organization:
 
-- `App/` - Entry point (`Yo2App.swift`) initializes Firebase and `PushService`, then renders `RootView`
+- `App/` - Entry point (`HeyHoApp.swift`) initializes Firebase and `PushService`, then renders `RootView`
 - `Auth/` - Authentication logic and UI
   - `AuthState` is an `@ObservableObject` that manages Firebase Auth state and is injected via `@EnvironmentObject`
   - `AppleSignInHelper` handles Apple Sign In credential creation
@@ -71,6 +71,7 @@ users/{userId}
 yos/{yoId}
   - fromUserId: string
   - toUserId: string
+  - messageType: string ("hey" or "ho")
   - createdAt: timestamp (server-side)
 ```
 

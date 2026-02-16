@@ -1,6 +1,5 @@
 import Foundation
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 final class FirestoreService {
     static let shared = FirestoreService()
@@ -135,7 +134,7 @@ final class FirestoreService {
     func sendYo(fromUserId: String, toUserId: String) async throws {
         let messageType = try await getNextMessageType(fromUserId: fromUserId, toUserId: toUserId)
         let ref = db.collection("yos").document()
-        try ref.setData([
+        try await ref.setData([
             "fromUserId": fromUserId,
             "toUserId": toUserId,
             "messageType": messageType,

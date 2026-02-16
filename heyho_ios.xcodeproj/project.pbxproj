@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B0010001 /* Yo2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* Yo2App.swift */; };
+		77B29A542F42E52E00B18CFB /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B29A532F42E52E00B18CFB /* ViewModifiers.swift */; };
+		77B29A592F42FBA700B18CFB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 77B29A582F42FBA700B18CFB /* FirebaseFirestore */; };
+		B0010001 /* HeyHoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* HeyHoApp.swift */; };
 		B0010002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010002 /* RootView.swift */; };
 		B0010003 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010003 /* SignInView.swift */; };
 		B0010004 /* AuthState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010004 /* AuthState.swift */; };
@@ -21,17 +23,15 @@
 		B0010012 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010012 /* InboxView.swift */; };
 		B0010013 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010013 /* ProfileView.swift */; };
 		B0010014 /* AddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010014 /* AddFriendView.swift */; };
-		B001001A /* PushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010018 /* PushService.swift */; };
 		B0010015 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F0010015 /* GoogleService-Info.plist */; };
 		B0010016 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = P0010001 /* FirebaseAuth */; };
-		B0010017 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = P0010002 /* FirebaseFirestore */; };
 		B0010018 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = P0010003 /* FirebaseMessaging */; };
-		B0010019 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = P0010004 /* FirebaseFirestoreSwift */; };
+		B001001A /* PushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010018 /* PushService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		T0010001 /* yo2_ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yo2_ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F0010001 /* Yo2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Yo2App.swift; sourceTree = "<group>"; };
+		77B29A532F42E52E00B18CFB /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
+		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
 		F0010002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		F0010003 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		F0010004 /* AuthState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthState.swift; sourceTree = "<group>"; };
@@ -45,10 +45,11 @@
 		F0010012 /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
 		F0010013 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		F0010014 /* AddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendView.swift; sourceTree = "<group>"; };
-		F0010018 /* PushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushService.swift; sourceTree = "<group>"; };
 		F0010015 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F0010016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F0010017 /* yo2_ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = yo2_ios.entitlements; sourceTree = "<group>"; };
+		F0010017 /* heyho_ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = heyho_ios.entitlements; sourceTree = "<group>"; };
+		F0010018 /* PushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushService.swift; sourceTree = "<group>"; };
+		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,25 +58,33 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0010016 /* FirebaseAuth in Frameworks */,
-				B0010017 /* FirebaseFirestore in Frameworks */,
 				B0010018 /* FirebaseMessaging in Frameworks */,
-				B0010019 /* FirebaseFirestoreSwift in Frameworks */,
+				77B29A592F42FBA700B18CFB /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		77B29A572F42F4C700B18CFB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		G0010001 = {
 			isa = PBXGroup;
 			children = (
-				G0010002 /* yo2_ios */,
+				77B29A532F42E52E00B18CFB /* ViewModifiers.swift */,
+				G0010002 /* heyho_ios */,
 				G0010003 /* Products */,
 				F0010015 /* GoogleService-Info.plist */,
+				77B29A572F42F4C700B18CFB /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
-		G0010002 /* yo2_ios */ = {
+		G0010002 /* heyho_ios */ = {
 			isa = PBXGroup;
 			children = (
 				G0010004 /* App */,
@@ -84,15 +93,15 @@
 				G0010007 /* Services */,
 				G0010008 /* Features */,
 				F0010016 /* Info.plist */,
-				F0010017 /* yo2_ios.entitlements */,
+				F0010017 /* heyho_ios.entitlements */,
 			);
-			path = yo2_ios;
+			path = heyho_ios;
 			sourceTree = "<group>";
 		};
 		G0010003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				T0010001 /* yo2_ios.app */,
+				T0010001 /* HeyHo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,7 +109,7 @@
 		G0010004 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				F0010001 /* Yo2App.swift */,
+				F0010001 /* HeyHoApp.swift */,
 				F0010002 /* RootView.swift */,
 			);
 			path = App;
@@ -174,9 +183,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		N0010001 /* yo2_ios */ = {
+		N0010001 /* HeyHo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C0010002 /* Build configuration list for PBXNativeTarget "yo2_ios" */;
+			buildConfigurationList = C0010002 /* Build configuration list for PBXNativeTarget "HeyHo" */;
 			buildPhases = (
 				E0010002 /* Sources */,
 				E0010001 /* Frameworks */,
@@ -186,14 +195,14 @@
 			);
 			dependencies = (
 			);
-			name = yo2_ios;
+			name = HeyHo;
 			packageProductDependencies = (
 				P0010001 /* FirebaseAuth */,
-				P0010002 /* FirebaseFirestore */,
 				P0010003 /* FirebaseMessaging */,
-				P0010004 /* FirebaseFirestoreSwift */,
+				77B29A582F42FBA700B18CFB /* FirebaseFirestore */,
 			);
-			productReference = T0010001 /* yo2_ios.app */;
+			productName = yo2_ios;
+			productReference = T0010001 /* HeyHo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -204,9 +213,9 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2620;
 			};
-			buildConfigurationList = C0010001 /* Build configuration list for PBXProject "yo2_ios" */;
+			buildConfigurationList = C0010001 /* Build configuration list for PBXProject "heyho_ios" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = ja;
 			hasScannedForEncodings = 0;
@@ -223,7 +232,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				N0010001 /* yo2_ios */,
+				N0010001 /* HeyHo */,
 			);
 		};
 /* End PBXProject section */
@@ -244,7 +253,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0010001 /* Yo2App.swift in Sources */,
+				B0010001 /* HeyHoApp.swift in Sources */,
 				B0010002 /* RootView.swift in Sources */,
 				B0010003 /* SignInView.swift in Sources */,
 				B0010004 /* AuthState.swift in Sources */,
@@ -255,6 +264,7 @@
 				B0010009 /* FirestoreService.swift in Sources */,
 				B0010010 /* MainTabView.swift in Sources */,
 				B0010011 /* FriendsView.swift in Sources */,
+				77B29A542F42E52E00B18CFB /* ViewModifiers.swift in Sources */,
 				B0010012 /* InboxView.swift in Sources */,
 				B0010013 /* ProfileView.swift in Sources */,
 				B0010014 /* AddFriendView.swift in Sources */,
@@ -270,23 +280,52 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -297,17 +336,46 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -318,20 +386,26 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = yo2_ios/yo2_ios.entitlements;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = heyho_ios/heyho_ios.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = yo2_ios/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Yo;
+				INFOPLIST_FILE = heyho_ios/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HeyHo;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.yo2ios;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.HeyHoiOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -343,20 +417,26 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = yo2_ios/yo2_ios.entitlements;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = heyho_ios/heyho_ios.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = yo2_ios/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Yo;
+				INFOPLIST_FILE = heyho_ios/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HeyHo;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.yo2ios;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.HeyHoiOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -366,7 +446,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C0010001 /* Build configuration list for PBXProject "yo2_ios" */ = {
+		C0010001 /* Build configuration list for PBXProject "heyho_ios" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0010003 /* Debug */,
@@ -375,7 +455,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C0010002 /* Build configuration list for PBXNativeTarget "yo2_ios" */ = {
+		C0010002 /* Build configuration list for PBXNativeTarget "HeyHo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0010005 /* Debug */,
@@ -398,25 +478,20 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		77B29A582F42FBA700B18CFB /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		P0010001 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
 		};
-		P0010002 /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
 		P0010003 /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
-		};
-		P0010004 /* FirebaseFirestoreSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = R0010002 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestoreSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

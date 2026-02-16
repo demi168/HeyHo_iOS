@@ -1,6 +1,6 @@
 # HeyHo - ショートコミュニケーション iOS アプリ
 
-友だちに「Hey」を1タップで送り、受け取った側は通知と履歴で確認できるミニマルなiOSアプリです。
+友だちに「Hey」を1タップで送り、受け取った側は「Ho」で返答できる、ラリー型のミニマルなiOSアプリです。
 
 ## 技術スタック
 - **UI**: SwiftUI（iOS 16+）
@@ -45,14 +45,15 @@
 - `heyho_ios/Auth/` — Apple Sign In、サインイン画面
 - `heyho_ios/Models/` — User, Yo（Firestore モデル）
 - `heyho_ios/Services/` — FirestoreService, PushService
-- `heyho_ios/Features/` — Friends（友だち一覧・Yo送信）、Inbox（受信）、Profile（表示名・友だち追加・ログアウト）
+- `heyho_ios/Features/` — Friends（友だち一覧・Hey送信）、Inbox（受信）、Profile（表示名・友だち追加・ログアウト）
 
 ## 使い方
 
 1. 起動後、Apple でサインイン（初回は表示名を入力）
 2. プロフィール > 友だちを追加で表示名検索し、追加
 3. 友だちタブで「Hey」ボタンをタップして送信
-4. 相手はプッシュ通知と受信タブで確認
+4. 相手はプッシュ通知と受信タブで確認し、「Ho」で返答
+5. 「Hey」→「Ho」→「Hey」→「Ho」とラリーが続く
 
 ## 注意
 
