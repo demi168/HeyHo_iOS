@@ -27,10 +27,18 @@ final class PushService: NSObject {
 
     func saveTokenToFirestoreIfNeeded() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        Messaging.messaging().token { token, _ in
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("FCMトークンの取得に失敗: \(error.localizedDescription)")
+                return
+            }
             guard let token = token else { return }
             Task {
-                try? await FirestoreService.shared.updateFCMToken(userId: uid, token: token)
+                do {
+                    try await FirestoreService.shared.updateFCMToken(userId: uid, token: token)
+                } catch {
+                    print("FCMトークンの保存に失敗: \(error.localizedDescription)")
+                }
             }
         }
     }

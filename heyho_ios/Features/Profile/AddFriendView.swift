@@ -6,6 +6,7 @@ struct AddFriendView: View {
     @State private var searchResults: [AppUser] = []
     @State private var isSearching = false
     @State private var errorMessage: String?
+    @State private var searchTask: Task<Void, Never>?
     @EnvironmentObject var authState: AuthState
 
     var body: some View {
@@ -43,15 +44,16 @@ struct AddFriendView: View {
                     Button("キャンセル") { dismiss() }
                 }
             }
-            .alert("エラー", isPresented: .constant(errorMessage != nil)) {
-                Button("OK") { errorMessage = nil }
-            } message: {
-                if let msg = errorMessage { Text(msg) }
-            }
+            .errorAlert($errorMessage)
         }
         .onChange(of: searchText) { _, newValue in
+            searchTask?.cancel()
             if newValue.count >= 2 {
-                Task { await search() }
+                searchTask = Task {
+                    try? await Task.sleep(for: .milliseconds(300))
+                    guard !Task.isCancelled else { return }
+                    await search()
+                }
             } else {
                 searchResults = []
             }
