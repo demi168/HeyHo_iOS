@@ -10,7 +10,7 @@ struct SignInView: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            Text("Yo")
+            Text("HeyHo")
                 .font(.system(size: 64, weight: .bold))
             Text("1タップでつながる")
                 .font(.title3)

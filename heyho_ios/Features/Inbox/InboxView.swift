@@ -12,9 +12,9 @@ struct InboxView: View {
             Group {
                 if yos.isEmpty {
                     ContentUnavailableView(
-                        "Yo はまだ届いていません",
+                        "メッセージはまだ届いていません",
                         systemImage: "tray",
-                        description: Text("友だちが Yo を送るとここに表示されます")
+                        description: Text("友だちが Hey を送るとここに表示されます")
                     )
                 } else {
                     List(yos) { yo in
@@ -45,15 +45,19 @@ struct InboxView: View {
     }
 
     private func loadSenderNames() async {
-        let ids = Set(yos.map(\.fromUserId))
-        var names: [String: String] = [:]
-        for id in ids {
-            if let user = try? await FirestoreService.shared.getUser(userId: id) {
-                names[id] = user.displayName
+        let ids = Array(Set(yos.map(\.fromUserId)))
+        guard !ids.isEmpty else { return }
+
+        do {
+            let users = try await FirestoreService.shared.getUsers(userIds: ids)
+            let names = Dictionary(uniqueKeysWithValues: users.compactMap { user in
+                user.id.map { ($0, user.displayName) }
+            })
+            await MainActor.run {
+                senderNames = names
             }
-        }
-        await MainActor.run {
-            senderNames = names
+        } catch {
+            print("送信者名の取得に失敗: \(error.localizedDescription)")
         }
     }
 }
@@ -72,8 +76,9 @@ struct InboxRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Text("Yo")
+            Text(yo.messageType == "hey" ? "Hey" : "Ho")
                 .font(.title2.bold())
+                .foregroundStyle(yo.messageType == "hey" ? .blue : .orange)
         }
         .padding(.vertical, 8)
     }

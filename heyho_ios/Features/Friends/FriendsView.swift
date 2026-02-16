@@ -5,6 +5,7 @@ struct FriendsView: View {
     @State private var friends: [AppUser] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var lastSentFriendId: String?
 
     var body: some View {
         NavigationStack {
@@ -20,7 +21,10 @@ struct FriendsView: View {
                     )
                 } else {
                     List(friends) { friend in
-                        FriendRow(friend: friend) {
+                        FriendRow(
+                            friend: friend,
+                            justSent: lastSentFriendId == friend.id
+                        ) {
                             sendYo(to: friend)
                         }
                     }
@@ -29,11 +33,7 @@ struct FriendsView: View {
             .navigationTitle("友だち")
             .refreshable { await loadFriends() }
             .onAppear { Task { await loadFriends() } }
-            .alert("エラー", isPresented: .constant(errorMessage != nil)) {
-                Button("OK") { errorMessage = nil }
-            } message: {
-                if let msg = errorMessage { Text(msg) }
-            }
+            .errorAlert($errorMessage)
         }
     }
 
@@ -53,8 +53,18 @@ struct FriendsView: View {
         Task {
             do {
                 try await FirestoreService.shared.sendYo(fromUserId: uid, toUserId: friendId)
+                await MainActor.run {
+                    lastSentFriendId = friendId
+                    // 1秒後にリセット
+                    Task {
+                        try? await Task.sleep(for: .seconds(1))
+                        lastSentFriendId = nil
+                    }
+                }
             } catch {
-                errorMessage = error.localizedDescription
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                }
             }
         }
     }
@@ -62,6 +72,7 @@ struct FriendsView: View {
 
 struct FriendRow: View {
     let friend: AppUser
+    let justSent: Bool
     let onSendYo: () -> Void
 
     var body: some View {
@@ -69,10 +80,11 @@ struct FriendRow: View {
             Text(friend.displayName)
                 .font(.body)
             Spacer()
-            Button("Yo") {
+            Button(justSent ? "送信済み ✓" : "Hey") {
                 onSendYo()
             }
             .buttonStyle(.borderedProminent)
+            .disabled(justSent)
         }
         .padding(.vertical, 4)
     }

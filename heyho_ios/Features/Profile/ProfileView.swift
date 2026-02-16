@@ -3,6 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject var authState: AuthState
     @State private var displayName = ""
+    @State private var originalDisplayName = ""
     @State private var isEditingName = false
     @State private var showAddFriend = false
     @State private var errorMessage: String?
@@ -14,14 +15,22 @@ struct ProfileView: View {
                     if isEditingName {
                         TextField("表示名", text: $displayName)
                             .textFieldStyle(.roundedBorder)
-                        Button("保存") {
-                            saveDisplayName()
+                        HStack {
+                            Button("保存") {
+                                saveDisplayName()
+                            }
+                            .disabled(displayName.trimmingCharacters(in: .whitespaces).isEmpty)
+                            Button("キャンセル") {
+                                displayName = originalDisplayName
+                                isEditingName = false
+                            }
                         }
                     } else {
                         HStack {
                             Text(displayName.isEmpty ? "—" : displayName)
                             Spacer()
                             Button("変更") {
+                                originalDisplayName = displayName
                                 isEditingName = true
                             }
                         }
@@ -45,11 +54,7 @@ struct ProfileView: View {
             .sheet(isPresented: $showAddFriend) {
                 AddFriendView()
             }
-            .alert("エラー", isPresented: .constant(errorMessage != nil)) {
-                Button("OK") { errorMessage = nil }
-            } message: {
-                if let msg = errorMessage { Text(msg) }
-            }
+            .errorAlert($errorMessage)
         }
     }
 
