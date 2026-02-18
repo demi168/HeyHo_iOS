@@ -91,11 +91,9 @@ struct FriendsView: View {
                 try await FirestoreService.shared.sendHeyHo(fromUserId: uid, toUserId: friendId)
                 await MainActor.run { lastSentFriendId = friendId }
                 await loadRowStates()
-                await MainActor.run {
-                    Task {
-                        try? await Task.sleep(for: .seconds(1))
-                        lastSentFriendId = nil
-                    }
+                Task {
+                    try? await Task.sleep(for: .seconds(1))
+                    await MainActor.run { lastSentFriendId = nil }
                 }
             } catch {
                 await MainActor.run {
