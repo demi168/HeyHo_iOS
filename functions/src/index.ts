@@ -28,7 +28,8 @@ export const onHeyHoCreated = functions.firestore
     const fromUserDoc = await admin.firestore().collection("users").doc(fromUserId).get();
     const fromName = (fromUserDoc.data()?.displayName as string) || "Someone";
 
-    const messageText = messageType === "hey" ? "Hey" : "Ho";
+    const messageText =
+      messageType === "hey" ? "Hey" : messageType === "letsGo" ? "Let's Go" : "Ho";
 
     try {
       await admin.messaging().send({

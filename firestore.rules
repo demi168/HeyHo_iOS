@@ -17,7 +17,7 @@ service cloud.firestore {
     }
     match /heyhos/{heyhoId} {
       allow create: if isSignedIn() && request.resource.data.fromUserId == request.auth.uid;
-      allow read: if isSignedIn() && resource.data.toUserId == request.auth.uid;
+      allow read: if isSignedIn() && (resource.data.toUserId == request.auth.uid || resource.data.fromUserId == request.auth.uid);
       allow delete: if false;
       allow update: if false;
     }

@@ -1,6 +1,14 @@
 import Foundation
 import FirebaseFirestore
 
+/// 友だちリストの1行が「未返信待ち / Hey / Let's Go / Ho」のどれかを表す
+enum FriendRowState {
+    case waitingForHo   // 自分が Hey 送付済み・相手の Ho 待ち → Hayed, disabled
+    case sendHey
+    case sendLetsGo
+    case sendHo
+}
+
 final class FirestoreService {
     static let shared = FirestoreService()
     private let db = Firestore.firestore()
@@ -163,6 +171,49 @@ final class FirestoreService {
 
     // MARK: - HeyHos
 
+    /// 2人の間の最後の1件のメッセージを取得する（行状態の判定用）
+    func getLastHeyHo(me: String, friendId: String) async throws -> HeyHo? {
+        let snapshot = try await db.collection("heyhos")
+            .whereField("fromUserId", in: [me, friendId])
+            .whereField("toUserId", in: [me, friendId])
+            .order(by: "createdAt", descending: true)
+            .limit(to: 1)
+            .getDocuments()
+        return snapshot.documents.first.flatMap { try? $0.data(as: HeyHo.self) }
+    }
+
+    /// 各友だちについて「未返信(Hayed) / Hey / Let's Go / Ho」の行状態を返す
+    func getFriendRowStates(userId: String, friendIds: [String]) async throws -> [String: FriendRowState] {
+        try await withThrowingTaskGroup(of: (String, FriendRowState).self) { group in
+            for friendId in friendIds {
+                group.addTask { [self] in
+                    guard let last = try await self.getLastHeyHo(me: userId, friendId: friendId) else {
+                        return (friendId, .sendHey)
+                    }
+                    // 相手 → 自分
+                    if last.fromUserId == friendId && last.toUserId == userId {
+                        switch last.messageType {
+                        case .hey: return (friendId, .sendHo)
+                        case .ho: return (friendId, .sendLetsGo)
+                        case .letsGo: return (friendId, .sendHey)
+                        }
+                    } else {
+                        // 自分 → 相手
+                        switch last.messageType {
+                        case .hey: return (friendId, .waitingForHo)
+                        case .ho, .letsGo: return (friendId, .sendHey)
+                        }
+                    }
+                }
+            }
+            var result: [String: FriendRowState] = [:]
+            for try await (friendId, state) in group {
+                result[friendId] = state
+            }
+            return result
+        }
+    }
+
     /// 最後のメッセージを取得して、次に送るべきメッセージタイプを決定
     private func getNextMessageType(fromUserId: String, toUserId: String) async throws -> MessageType {
         // 2人の間の最後のメッセージを取得
@@ -181,18 +232,19 @@ final class FirestoreService {
 
         // 最後のメッセージが相手から自分への場合
         if lastHeyHo.fromUserId == toUserId && lastHeyHo.toUserId == fromUserId {
-            // 相手が「Hey」を送ってきた → 「Ho」で返す
-            if lastHeyHo.messageType == .hey {
-                return .ho
-            }
-            // 相手が「Ho」を送ってきた → 「Hey」で返す
-            else {
-                return .hey
+            switch lastHeyHo.messageType {
+            case .hey: return .ho           // 相手が Hey → 自分は Ho で返す
+            case .ho: return .letsGo       // 相手が Ho → 自分は Let's Go で1ラウンド完了
+            case .letsGo: return .hey      // 相手が Let's Go → 次ラウンドで Hey
             }
         }
 
-        // 最後のメッセージが自分から相手への場合 → 新しいラリーとして「Hey」で開始
-        return .hey
+        // 最後のメッセージが自分から相手への場合
+        switch lastHeyHo.messageType {
+        case .hey: return .hey             // 自分が Hey 送付済み → 相手の Ho 待ち（送信時は通常来ない）
+        case .ho: return .hey              // 自分が Ho 送付済み → 次は Hey
+        case .letsGo: return .hey          // 自分が Let's Go 送付済み → 次ラウンドで Hey
+        }
     }
 
     func sendHeyHo(fromUserId: String, toUserId: String) async throws {
