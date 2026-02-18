@@ -11,6 +11,7 @@ private let debugDummyFriends: [AppUser] = [
 struct FriendsView: View {
     @EnvironmentObject var authState: AuthState
     @State private var friends: [AppUser] = []
+    @State private var rowStates: [String: FriendRowState] = [:]
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var lastSentFriendId: String?
@@ -31,6 +32,7 @@ struct FriendsView: View {
                     List(friends) { friend in
                         FriendRow(
                             friend: friend,
+                            state: rowStates[friend.id ?? ""] ?? .sendHey,
                             justSent: lastSentFriendId == friend.id
                         ) {
                             sendHeyHo(to: friend)
@@ -64,8 +66,21 @@ struct FriendsView: View {
             list.append(contentsOf: debugDummyFriends)
             #endif
             friends = list
+            await loadRowStates()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    private func loadRowStates() async {
+        guard let uid = authState.currentUserId else { return }
+        let ids = friends.compactMap(\.id)
+        guard !ids.isEmpty else { return }
+        do {
+            let states = try await FirestoreService.shared.getFriendRowStates(userId: uid, friendIds: ids)
+            await MainActor.run { rowStates = states }
+        } catch {
+            // 行状態が取れなくても一覧は表示する
         }
     }
 
@@ -74,9 +89,9 @@ struct FriendsView: View {
         Task {
             do {
                 try await FirestoreService.shared.sendHeyHo(fromUserId: uid, toUserId: friendId)
+                await MainActor.run { lastSentFriendId = friendId }
+                await loadRowStates()
                 await MainActor.run {
-                    lastSentFriendId = friendId
-                    // 1秒後にリセット
                     Task {
                         try? await Task.sleep(for: .seconds(1))
                         lastSentFriendId = nil
@@ -93,20 +108,40 @@ struct FriendsView: View {
 
 struct FriendRow: View {
     let friend: AppUser
+    let state: FriendRowState
     let justSent: Bool
     let onSend: () -> Void
+
+    private var buttonLabel: String {
+        if justSent { return "送信済み ✓" }
+        switch state {
+        case .waitingForHo: return "Hayed"
+        case .sendHey: return "Hey"
+        case .sendLetsGo: return "Let's Go"
+        case .sendHo: return "Ho"
+        }
+    }
+
+    private var isDisabled: Bool {
+        justSent || state == .waitingForHo
+    }
+
+    private var isHighlighted: Bool {
+        state == .waitingForHo
+    }
 
     var body: some View {
         HStack {
             Text(friend.displayName)
                 .font(.body)
             Spacer()
-            Button(justSent ? "送信済み ✓" : "Hey") {
+            Button(buttonLabel) {
                 onSend()
             }
             .buttonStyle(.borderedProminent)
-            .disabled(justSent)
+            .disabled(isDisabled)
         }
         .padding(.vertical, 4)
+        .listRowBackground(isHighlighted ? Color.orange.opacity(0.15) : nil)
     }
 }
