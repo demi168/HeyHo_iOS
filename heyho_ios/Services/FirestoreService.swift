@@ -90,7 +90,7 @@ final class FirestoreService {
 
     private func claimInviteCode(code: String, userId: String, userRef: DocumentReference) async throws {
         let codeRef = db.collection("inviteCodes").document(code)
-        try await db.runTransaction { transaction, errorPointer in
+        _ = try await db.runTransaction { transaction, errorPointer in
             do {
                 let codeDoc = try transaction.getDocument(codeRef)
                 if codeDoc.exists {
@@ -172,14 +172,29 @@ final class FirestoreService {
     // MARK: - HeyHos
 
     /// 2人の間の最後の1件のメッセージを取得する（行状態の判定用）
+    /// in: を2フィールドに使うと Firestore のルール評価が拒否するため、
+    /// 送信方向ごとに別クエリを並列実行して最新の1件を返す
     func getLastHeyHo(me: String, friendId: String) async throws -> HeyHo? {
-        let snapshot = try await db.collection("heyhos")
-            .whereField("fromUserId", in: [me, friendId])
-            .whereField("toUserId", in: [me, friendId])
+        async let sentSnap = db.collection("heyhos")
+            .whereField("fromUserId", isEqualTo: me)
+            .whereField("toUserId", isEqualTo: friendId)
             .order(by: "createdAt", descending: true)
             .limit(to: 1)
             .getDocuments()
-        return snapshot.documents.first.flatMap { try? $0.data(as: HeyHo.self) }
+        async let receivedSnap = db.collection("heyhos")
+            .whereField("fromUserId", isEqualTo: friendId)
+            .whereField("toUserId", isEqualTo: me)
+            .order(by: "createdAt", descending: true)
+            .limit(to: 1)
+            .getDocuments()
+        let (sent, received) = try await (sentSnap, receivedSnap)
+        let s = sent.documents.first.flatMap { try? $0.data(as: HeyHo.self) }
+        let r = received.documents.first.flatMap { try? $0.data(as: HeyHo.self) }
+        switch (s, r) {
+        case (nil, _): return r
+        case (_, nil): return s
+        case (let s?, let r?): return s.createdAt > r.createdAt ? s : r
+        }
     }
 
     /// 各友だちについて「未返信(Hayed) / Hey / Let's Go / Ho」の行状態を返す
@@ -216,35 +231,19 @@ final class FirestoreService {
 
     /// 最後のメッセージを取得して、次に送るべきメッセージタイプを決定
     private func getNextMessageType(fromUserId: String, toUserId: String) async throws -> MessageType {
-        // 2人の間の最後のメッセージを取得
-        let snapshot = try await db.collection("heyhos")
-            .whereField("fromUserId", in: [fromUserId, toUserId])
-            .whereField("toUserId", in: [fromUserId, toUserId])
-            .order(by: "createdAt", descending: true)
-            .limit(to: 1)
-            .getDocuments()
-
-        guard let lastMessage = snapshot.documents.first,
-              let lastHeyHo = try? lastMessage.data(as: HeyHo.self) else {
-            // メッセージがない場合は「Hey」で開始
+        guard let last = try await getLastHeyHo(me: fromUserId, friendId: toUserId) else {
             return .hey
         }
-
-        // 最後のメッセージが相手から自分への場合
-        if lastHeyHo.fromUserId == toUserId && lastHeyHo.toUserId == fromUserId {
-            switch lastHeyHo.messageType {
-            case .hey: return .ho           // 相手が Hey → 自分は Ho で返す
-            case .ho: return .letsGo       // 相手が Ho → 自分は Let's Go で1ラウンド完了
-            case .letsGo: return .hey      // 相手が Let's Go → 次ラウンドで Hey
+        // 相手 → 自分
+        if last.fromUserId == toUserId {
+            switch last.messageType {
+            case .hey: return .ho
+            case .ho: return .letsGo
+            case .letsGo: return .hey
             }
         }
-
-        // 最後のメッセージが自分から相手への場合
-        switch lastHeyHo.messageType {
-        case .hey: return .hey             // 自分が Hey 送付済み → 相手の Ho 待ち（送信時は通常来ない）
-        case .ho: return .hey              // 自分が Ho 送付済み → 次は Hey
-        case .letsGo: return .hey          // 自分が Let's Go 送付済み → 次ラウンドで Hey
-        }
+        // 自分 → 相手
+        return .hey
     }
 
     func sendHeyHo(fromUserId: String, toUserId: String) async throws {
