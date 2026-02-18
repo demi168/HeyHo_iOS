@@ -1,11 +1,16 @@
 import Foundation
 import FirebaseFirestore
 
-struct Yo: Identifiable, Codable {
+enum MessageType: String, Codable {
+    case hey = "hey"
+    case ho = "ho"
+}
+
+struct HeyHo: Identifiable, Codable {
     @DocumentID var id: String?
     var fromUserId: String
     var toUserId: String
-    var messageType: String // "hey" or "ho"
+    var messageType: MessageType
     var createdAt: Date
 
     enum CodingKeys: String, CodingKey {
@@ -16,7 +21,7 @@ struct Yo: Identifiable, Codable {
         case createdAt = "createdAt"
     }
 
-    init(id: String? = nil, fromUserId: String, toUserId: String, messageType: String = "hey", createdAt: Date = Date()) {
+    init(id: String? = nil, fromUserId: String, toUserId: String, messageType: MessageType = .hey, createdAt: Date = Date()) {
         self.id = id
         self.fromUserId = fromUserId
         self.toUserId = toUserId

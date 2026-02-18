@@ -3,24 +3,24 @@ import FirebaseFirestore
 
 struct InboxView: View {
     @EnvironmentObject var authState: AuthState
-    @State private var yos: [Yo] = []
+    @State private var heyHos: [HeyHo] = []
     @State private var senderNames: [String: String] = [:]
     @State private var listener: ListenerRegistration?
 
     var body: some View {
         NavigationStack {
             Group {
-                if yos.isEmpty {
+                if heyHos.isEmpty {
                     ContentUnavailableView(
                         "メッセージはまだ届いていません",
                         systemImage: "tray",
                         description: Text("友だちが Hey を送るとここに表示されます")
                     )
                 } else {
-                    List(yos) { yo in
+                    List(heyHos) { heyHo in
                         InboxRow(
-                            yo: yo,
-                            fromName: senderNames[yo.fromUserId] ?? yo.fromUserId
+                            heyHo: heyHo,
+                            fromName: senderNames[heyHo.fromUserId] ?? heyHo.fromUserId
                         )
                     }
                 }
@@ -38,14 +38,14 @@ struct InboxView: View {
 
     private func startListening() {
         guard let uid = authState.currentUserId else { return }
-        listener = FirestoreService.shared.inboxListener(userId: uid) { [self] newYos in
-            yos = newYos
+        listener = FirestoreService.shared.inboxListener(userId: uid) { [self] newHeyHos in
+            heyHos = newHeyHos
             Task { await loadSenderNames() }
         }
     }
 
     private func loadSenderNames() async {
-        let ids = Array(Set(yos.map(\.fromUserId)))
+        let ids = Array(Set(heyHos.map(\.fromUserId)))
         guard !ids.isEmpty else { return }
 
         do {
@@ -63,7 +63,7 @@ struct InboxView: View {
 }
 
 struct InboxRow: View {
-    let yo: Yo
+    let heyHo: HeyHo
     let fromName: String
 
     var body: some View {
@@ -71,14 +71,14 @@ struct InboxRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(fromName)
                     .font(.headline)
-                Text(yo.createdAt, style: .relative)
+                Text(heyHo.createdAt, style: .relative)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Text(yo.messageType == "hey" ? "Hey" : "Ho")
+            Text(heyHo.messageType == .hey ? "Hey" : "Ho")
                 .font(.title2.bold())
-                .foregroundStyle(yo.messageType == "hey" ? .blue : .orange)
+                .foregroundStyle(heyHo.messageType == .hey ? .blue : .orange)
         }
         .padding(.vertical, 8)
     }

@@ -25,10 +25,26 @@ struct SignInView: View {
             }
 
             if !isFirstTimeSetup {
-                SignInWithAppleButtonView(
-                    onRequest: { _ in },
-                    onCompletion: handleAppleSignInResult
-                )
+                VStack(spacing: 16) {
+                    SignInWithAppleButtonView(
+                        onRequest: { _ in },
+                        onCompletion: handleAppleSignInResult
+                    )
+
+                    #if DEBUG
+                    // 開発用：ダミーサインイン
+                    Button {
+                        signInWithDummy()
+                    } label: {
+                        Text("開発用：ダミーサインイン")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    }
+                    .buttonStyle(.bordered)
+                    .padding(.horizontal, 40)
+                    #endif
+                }
             }
 
             if let msg = errorMessage {
@@ -105,4 +121,23 @@ struct SignInView: View {
             }
         }
     }
+
+    #if DEBUG
+    private func signInWithDummy() {
+        errorMessage = nil
+        Task {
+            do {
+                try await authState.signInAnonymously()
+                await MainActor.run {
+                    isFirstTimeSetup = true
+                    displayName = "テストユーザー"
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+    #endif
 }

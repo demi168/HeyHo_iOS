@@ -7,6 +7,9 @@ struct ProfileView: View {
     @State private var isEditingName = false
     @State private var showAddFriend = false
     @State private var errorMessage: String?
+    @State private var inviteCode: String?
+    @State private var isLoadingInviteCode = false
+    @State private var inviteCodeCopied = false
 
     var body: some View {
         NavigationStack {
@@ -36,6 +39,29 @@ struct ProfileView: View {
                         }
                     }
                 }
+                Section("マイ招待コード") {
+                    if isLoadingInviteCode {
+                        HStack {
+                            ProgressView()
+                            Text("読み込み中...")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if let code = inviteCode {
+                        HStack {
+                            Text(code)
+                                .font(.title2.monospacedDigit().weight(.bold))
+                            Spacer()
+                            Button(inviteCodeCopied ? "コピーしました" : "コピー") {
+                                UIPasteboard.general.string = code
+                                inviteCodeCopied = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    inviteCodeCopied = false
+                                }
+                            }
+                            .disabled(inviteCodeCopied)
+                        }
+                    }
+                }
                 Section {
                     Button("友だちを追加") {
                         showAddFriend = true
@@ -50,11 +76,26 @@ struct ProfileView: View {
             .navigationTitle("プロフィール")
             .onAppear {
                 loadDisplayName()
+                loadInviteCode()
             }
             .sheet(isPresented: $showAddFriend) {
                 AddFriendView()
             }
             .errorAlert($errorMessage)
+        }
+    }
+
+    private func loadInviteCode() {
+        guard let uid = authState.currentUserId else { return }
+        isLoadingInviteCode = true
+        Task {
+            defer { isLoadingInviteCode = false }
+            do {
+                let code = try await FirestoreService.shared.ensureInviteCode(userId: uid)
+                inviteCode = code
+            } catch {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 
