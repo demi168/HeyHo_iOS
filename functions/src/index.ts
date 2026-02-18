@@ -4,18 +4,18 @@ import * as admin from "firebase-admin";
 admin.initializeApp();
 
 /**
- * When a document is created in `yos`, send an FCM notification to the recipient.
+ * When a document is created in `heyhos`, send an FCM notification to the recipient.
  * The client only writes to Firestore; this function sends the push.
  */
-export const onYoCreated = functions.firestore
-  .document("yos/{yoId}")
+export const onHeyHoCreated = functions.firestore
+  .document("heyhos/{heyhoId}")
   .onCreate(async (snap, context) => {
-    const yo = snap.data();
-    const toUserId = yo.toUserId as string;
-    const fromUserId = yo.fromUserId as string;
-    const messageType = (yo.messageType as string) || "hey";
+    const heyHo = snap.data();
+    const toUserId = heyHo.toUserId as string;
+    const fromUserId = heyHo.fromUserId as string;
+    const messageType = (heyHo.messageType as string) || "hey";
 
-    console.log(`メッセージ作成 (${messageType}): ${fromUserId} -> ${toUserId} (ID: ${context.params.yoId})`);
+    console.log(`メッセージ作成 (${messageType}): ${fromUserId} -> ${toUserId} (ID: ${context.params.heyhoId})`);
 
     const userDoc = await admin.firestore().collection("users").doc(toUserId).get();
     const fcmToken = userDoc.data()?.fcmToken as string | undefined;
@@ -38,10 +38,10 @@ export const onYoCreated = functions.firestore
           body: `${fromName}から${messageText}が届きました`,
         },
         data: {
-          type: "yo",
+          type: "heyho",
           messageType,
           fromUserId,
-          yoId: context.params.yoId,
+          heyhoId: context.params.heyhoId,
         },
       });
       console.log(`FCM通知を送信しました (${messageType}): ${toUserId}`);

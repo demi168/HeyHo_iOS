@@ -1,5 +1,13 @@
 import SwiftUI
 
+#if DEBUG
+private let debugDummyFriends: [AppUser] = [
+    AppUser(id: "dummy_1", displayName: "ダミー 太郎", createdAt: Date(), fcmToken: nil, inviteCode: nil),
+    AppUser(id: "dummy_2", displayName: "ダミー 花子", createdAt: Date(), fcmToken: nil, inviteCode: nil),
+    AppUser(id: "dummy_3", displayName: "ダミー 次郎", createdAt: Date(), fcmToken: nil, inviteCode: nil),
+]
+#endif
+
 struct FriendsView: View {
     @EnvironmentObject var authState: AuthState
     @State private var friends: [AppUser] = []
@@ -25,12 +33,21 @@ struct FriendsView: View {
                             friend: friend,
                             justSent: lastSentFriendId == friend.id
                         ) {
-                            sendYo(to: friend)
+                            sendHeyHo(to: friend)
                         }
                     }
                 }
             }
             .navigationTitle("友だち")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        ProfileView()
+                    } label: {
+                        Image(systemName: "person.fill")
+                    }
+                }
+            }
             .refreshable { await loadFriends() }
             .onAppear { Task { await loadFriends() } }
             .errorAlert($errorMessage)
@@ -42,17 +59,21 @@ struct FriendsView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            friends = try await FirestoreService.shared.friends(userId: uid)
+            var list = try await FirestoreService.shared.friends(userId: uid)
+            #if DEBUG
+            list.append(contentsOf: debugDummyFriends)
+            #endif
+            friends = list
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
-    private func sendYo(to friend: AppUser) {
+    private func sendHeyHo(to friend: AppUser) {
         guard let uid = authState.currentUserId, let friendId = friend.id else { return }
         Task {
             do {
-                try await FirestoreService.shared.sendYo(fromUserId: uid, toUserId: friendId)
+                try await FirestoreService.shared.sendHeyHo(fromUserId: uid, toUserId: friendId)
                 await MainActor.run {
                     lastSentFriendId = friendId
                     // 1秒後にリセット
@@ -73,7 +94,7 @@ struct FriendsView: View {
 struct FriendRow: View {
     let friend: AppUser
     let justSent: Bool
-    let onSendYo: () -> Void
+    let onSend: () -> Void
 
     var body: some View {
         HStack {
@@ -81,7 +102,7 @@ struct FriendRow: View {
                 .font(.body)
             Spacer()
             Button(justSent ? "送信済み ✓" : "Hey") {
-                onSendYo()
+                onSend()
             }
             .buttonStyle(.borderedProminent)
             .disabled(justSent)

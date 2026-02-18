@@ -16,7 +16,7 @@
 		B0010005 /* AppleSignInHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010005 /* AppleSignInHelper.swift */; };
 		B0010006 /* SignInWithAppleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010006 /* SignInWithAppleButton.swift */; };
 		B0010007 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010007 /* User.swift */; };
-		B0010008 /* Yo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010008 /* Yo.swift */; };
+		B0010008 /* HeyHo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010008 /* HeyHo.swift */; };
 		B0010009 /* FirestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010009 /* FirestoreService.swift */; };
 		B0010010 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010010 /* MainTabView.swift */; };
 		B0010011 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010011 /* FriendsView.swift */; };
@@ -38,7 +38,7 @@
 		F0010005 /* AppleSignInHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInHelper.swift; sourceTree = "<group>"; };
 		F0010006 /* SignInWithAppleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithAppleButton.swift; sourceTree = "<group>"; };
 		F0010007 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
-		F0010008 /* Yo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Yo.swift; sourceTree = "<group>"; };
+		F0010008 /* HeyHo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHo.swift; sourceTree = "<group>"; };
 		F0010009 /* FirestoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
 		F0010010 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F0010011 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
@@ -130,7 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				F0010007 /* User.swift */,
-				F0010008 /* Yo.swift */,
+				F0010008 /* HeyHo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -260,7 +260,7 @@
 				B0010005 /* AppleSignInHelper.swift in Sources */,
 				B0010006 /* SignInWithAppleButton.swift in Sources */,
 				B0010007 /* User.swift in Sources */,
-				B0010008 /* Yo.swift in Sources */,
+				B0010008 /* HeyHo.swift in Sources */,
 				B0010009 /* FirestoreService.swift in Sources */,
 				B0010010 /* MainTabView.swift in Sources */,
 				B0010011 /* FriendsView.swift in Sources */,

@@ -7,11 +7,27 @@ struct AddFriendView: View {
     @State private var isSearching = false
     @State private var errorMessage: String?
     @State private var searchTask: Task<Void, Never>?
+    @State private var inviteCodeInput = ""
+    @State private var isAddingByCode = false
     @EnvironmentObject var authState: AuthState
 
     var body: some View {
         NavigationStack {
             List {
+                Section("招待コードを入力") {
+                    HStack {
+                        TextField("6桁のコード", text: $inviteCodeInput)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .font(.title2.monospacedDigit().weight(.semibold))
+                        Button("追加") {
+                            addFriendByCode()
+                        }
+                        .disabled(inviteCodeInput.count != 6 || isAddingByCode)
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
                 Section {
                     TextField("表示名で検索", text: $searchText)
                         .textFieldStyle(.roundedBorder)
@@ -86,6 +102,31 @@ struct AddFriendView: View {
                 await MainActor.run { dismiss() }
             } catch {
                 errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func addFriendByCode() {
+        let code = inviteCodeInput.trimmingCharacters(in: .whitespaces)
+        guard code.count == 6, let myId = authState.currentUserId else { return }
+        isAddingByCode = true
+        Task {
+            defer { isAddingByCode = false }
+            do {
+                guard let friendId = try await FirestoreService.shared.getUserIdByInviteCode(code) else {
+                    errorMessage = "コードが見つかりません"
+                    return
+                }
+                if friendId == myId {
+                    errorMessage = "自分のコードです"
+                    return
+                }
+                try await FirestoreService.shared.addFriend(userId: myId, friendId: friendId)
+                inviteCodeInput = ""
+                dismiss()
+            } catch {
+                let msg = (error as NSError).userInfo[NSLocalizedDescriptionKey] as? String ?? error.localizedDescription
+                errorMessage = msg == "既に友達です" ? "すでに友だちです" : msg
             }
         }
     }

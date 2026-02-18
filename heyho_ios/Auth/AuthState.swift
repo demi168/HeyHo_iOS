@@ -64,4 +64,9 @@ final class AuthState: ObservableObject {
     func signOut() throws {
         try Auth.auth().signOut()
     }
+
+    /// 開発用：匿名サインイン
+    func signInAnonymously() async throws {
+        _ = try await Auth.auth().signInAnonymously()
+    }
 }

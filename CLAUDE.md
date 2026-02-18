@@ -8,6 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - エラーメッセージの説明も日本語で行う
 - ドキュメントも日本語で生成する
 
+## 機能追加時のワークフロー
+- 新機能の追加や仕様変更を進める前に、**GitHub Issue 化するかどうかユーザーに確認する**。
+
 ## Project Overview
 
 HeyHo is a minimal iOS app (iOS 16+) for sending "Hey" and "Ho" messages to friends with one tap. When you send "Hey" to a friend, they can reply with "Ho", creating a rally conversation. Built with SwiftUI and Firebase.
@@ -64,9 +67,13 @@ The app follows a feature-based organization:
 users/{userId}
   - displayName: string
   - fcmToken: string?
+  - inviteCode: string? (6桁の招待コード)
   - createdAt: timestamp
   - friends/{friendId}
       - addedAt: timestamp
+
+inviteCodes/{code}
+  - userId: string (招待コードの所有者)
 
 yos/{yoId}
   - fromUserId: string
