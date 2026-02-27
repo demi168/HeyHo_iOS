@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		77509FDC2F51F66800E4C7AF /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 77509FDB2F51F66800E4C7AF /* AppIcon.icon */; };
 		77B29A542F42E52E00B18CFB /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B29A532F42E52E00B18CFB /* ViewModifiers.swift */; };
 		77B29A592F42FBA700B18CFB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 77B29A582F42FBA700B18CFB /* FirebaseFirestore */; };
 		B0010001 /* HeyHoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* HeyHoApp.swift */; };
@@ -27,9 +28,11 @@
 		B0010016 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = P0010001 /* FirebaseAuth */; };
 		B0010018 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = P0010003 /* FirebaseMessaging */; };
 		B001001A /* PushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010018 /* PushService.swift */; };
+		B0010020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F0010020 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		77509FDB2F51F66800E4C7AF /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		77B29A532F42E52E00B18CFB /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
 		F0010002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -49,6 +52,7 @@
 		F0010016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F0010017 /* heyho_ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = heyho_ios.entitlements; sourceTree = "<group>"; };
 		F0010018 /* PushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushService.swift; sourceTree = "<group>"; };
+		F0010020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -92,6 +96,8 @@
 				G0010006 /* Models */,
 				G0010007 /* Services */,
 				G0010008 /* Features */,
+				F0010020 /* Assets.xcassets */,
+				77509FDB2F51F66800E4C7AF /* AppIcon.icon */,
 				F0010016 /* Info.plist */,
 				F0010017 /* heyho_ios.entitlements */,
 			);
@@ -242,7 +248,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77509FDC2F51F66800E4C7AF /* AppIcon.icon in Resources */,
 				B0010015 /* GoogleService-Info.plist in Resources */,
+				B0010020 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,7 +410,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.HeyHoiOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.demiflare168.HeyHo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -433,7 +441,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.HeyHoiOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.demiflare168.HeyHo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;

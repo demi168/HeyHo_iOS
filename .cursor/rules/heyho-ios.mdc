@@ -1,0 +1,43 @@
+---
+description: HeyHo iOS プロジェクトの実装規約とワークフロー
+globs: heyho_ios/**/*.swift,functions/**/*.ts,firestore.rules
+alwaysApply: true
+---
+
+# HeyHo iOS プロジェクトルール
+
+## 言語・コミュニケーション
+- 会話・コメント・ドキュメントは日本語。UI 文言も日本語。
+
+## ワークフロー
+- 新機能追加・仕様変更の前に、**GitHub Issue 化するかユーザーに確認する**。
+
+## 構成・命名
+- **ディレクトリ**: App/, Auth/, Models/, Services/, Features/{Feature}/, Utilities/
+- **View**: `XxxView.swift`（例: FriendsView）
+- **行コンポーネント**: `XxxRow`（例: FriendRow）
+- **Service**: `XxxService`、シングルトン `.shared`
+- **Model**: `AppXxx` またはドメイン名（AppUser, HeyHo）
+- **Firestore コレクション**: 複数形・camelCase（users, heyhos, inviteCodes）
+
+## Swift / SwiftUI
+- **状態**: AuthState は `@EnvironmentObject`。画面ローカルは `@State`。
+- **エラー**: `@State private var errorMessage: String?` + `.errorAlert($errorMessage)`
+- **非同期**: `async/await`、View からは `Task { }`。UI 更新は `MainActor.run`。`defer` で isLoading などをリセット。
+- **空状態**: `ContentUnavailableView`。ローディングは `ProgressView`。一覧は `.refreshable`
+- **DEBUG**: `#if DEBUG ... #endif` で開発用コードを囲む
+
+## Firestore
+- **Model**: `Codable`, `@DocumentID var id: String?`, `CodingKeys` でフィールド名明示
+- **操作**: すべて `FirestoreService.shared` 経由。`async throws`、エラーは呼び出し元で処理
+- **ルール**: 新コレクション追加時は必ず `firestore.rules` を更新。read で双方が関与するデータは `toUserId == auth.uid || fromUserId == auth.uid` などを検討
+- **Functions**: トリガーは `functions/src/index.ts`。メッセージ種別ごとに通知文言を分岐
+
+## UI
+- **ナビ**: `NavigationStack`、モーダルは `.sheet`、遷移は `NavigationLink`
+- **フォーム**: `TextField` は `.roundedBorder`。ボタンは `.borderedProminent` または `.bordered`。`disabled` で二重送信防止
+- **エラー**: `errorMessage = error.localizedDescription` または日本語メッセージ
+
+## デプロイ
+- Firestore: `npx firebase-tools deploy --only firestore:rules`
+- Functions: `cd functions && npm run deploy`
