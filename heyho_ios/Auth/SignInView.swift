@@ -8,72 +8,101 @@ struct SignInView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            Text("HeyHo")
-                .font(.system(size: 64, weight: .bold))
-            Text("1タップでつながる")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-            Spacer()
+        ZStack {
+            // 背景: Figma #FF2D55
+            Color(red: 1.0, green: 0.176, blue: 0.333)
+                .ignoresSafeArea()
 
             if isFirstTimeSetup {
-                TextField("表示名", text: $displayName)
-                    .textFieldStyle(.roundedBorder)
-                    .padding(.horizontal, 40)
-                    .autocapitalization(.none)
+                firstTimeSetupContent
+            } else {
+                signInContent
             }
+        }
+        .onAppear { errorMessage = nil }
+    }
 
-            if !isFirstTimeSetup {
-                VStack(spacing: 16) {
-                    SignInWithAppleButtonView(
-                        onRequest: { _ in },
-                        onCompletion: handleAppleSignInResult
-                    )
+    // MARK: - サインイン画面
 
-                    #if DEBUG
-                    // 開発用：ダミーサインイン
-                    Button {
-                        signInWithDummy()
-                    } label: {
-                        Text("開発用：ダミーサインイン")
-                            .fontWeight(.semibold)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    }
-                    .buttonStyle(.bordered)
-                    .padding(.horizontal, 40)
-                    #endif
-                }
-            }
+    private var signInContent: some View {
+        VStack(spacing: 0) {
+            Spacer()
 
+            logoSection
+
+            Spacer()
+
+            bottomAction
+                .padding(.bottom, 56)
+        }
+    }
+
+    private var logoSection: some View {
+        VStack(spacing: 0) {
+            // HeyHo ロゴ
+            Image("SignInLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 327, height: 305)
+
+        }
+    }
+
+    private var bottomAction: some View {
+        VStack(spacing: 16) {
             if let msg = errorMessage {
                 Text(msg)
                     .font(.caption)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(.white.opacity(0.85))
                     .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
             }
 
-            if isFirstTimeSetup {
-                Button {
-                    completeSignIn()
-                } label: {
-                    Text("はじめる")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                }
-                .buttonStyle(.borderedProminent)
-                .padding(.horizontal, 40)
-                .disabled(displayName.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
+            SignInWithAppleButtonView(
+                onRequest: { _ in },
+                onCompletion: handleAppleSignInResult
+            )
 
-            Spacer()
-        }
-        .onAppear {
-            errorMessage = nil
+            #if DEBUG
+            Button { signInWithDummy() } label: {
+                Text("開発用：ダミーサインイン")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .foregroundStyle(.white)
+            }
+            .buttonStyle(.bordered)
+            .padding(.horizontal, 24)
+            #endif
         }
     }
+
+    // MARK: - 初回セットアップ
+
+    private var firstTimeSetupContent: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            Text("表示名を設定")
+                .font(.title.bold())
+                .foregroundStyle(.white)
+            TextField("表示名", text: $displayName)
+                .textFieldStyle(.roundedBorder)
+                .padding(.horizontal, 40)
+                .autocapitalization(.none)
+            Button { completeSignIn() } label: {
+                Text("はじめる")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.horizontal, 40)
+            .disabled(displayName.trimmingCharacters(in: .whitespaces).isEmpty)
+            Spacer()
+        }
+    }
+
+    // MARK: - ロジック
 
     private func handleAppleSignInResult(_ result: Result<(ASAuthorizationAppleIDCredential, String), Error>) {
         errorMessage = nil
@@ -116,9 +145,7 @@ struct SignInView: View {
         do {
             try await authState.updateDisplayName(name)
         } catch {
-            await MainActor.run {
-                errorMessage = error.localizedDescription
-            }
+            await MainActor.run { errorMessage = error.localizedDescription }
         }
     }
 
@@ -133,9 +160,7 @@ struct SignInView: View {
                     displayName = "テストユーザー"
                 }
             } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                }
+                await MainActor.run { errorMessage = error.localizedDescription }
             }
         }
     }

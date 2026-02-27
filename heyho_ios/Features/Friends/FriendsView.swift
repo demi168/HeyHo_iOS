@@ -1,5 +1,13 @@
 import SwiftUI
 
+/// 友だちリストの1行が「未返信待ち / Hey / Let's Go / Ho」のどれかを表す
+enum FriendRowState {
+    case waitingForHo   // 自分が Hey 送付済み・相手の Ho 待ち → Hayed, disabled
+    case sendHey
+    case sendLetsGo
+    case sendHo
+}
+
 #if DEBUG
 private let debugDummyFriends: [AppUser] = [
     AppUser(id: "dummy_1", displayName: "ダミー 太郎", createdAt: Date(), fcmToken: nil, inviteCode: nil),
@@ -76,12 +84,8 @@ struct FriendsView: View {
         guard let uid = authState.currentUserId else { return }
         let ids = friends.compactMap(\.id)
         guard !ids.isEmpty else { return }
-        do {
-            let states = try await FirestoreService.shared.getFriendRowStates(userId: uid, friendIds: ids)
-            await MainActor.run { rowStates = states }
-        } catch {
-            // 行状態が取れなくても一覧は表示する
-        }
+        let states = await FirestoreService.shared.getFriendRowStates(userId: uid, friendIds: ids)
+        await MainActor.run { rowStates = states }
     }
 
     private func sendHeyHo(to friend: AppUser) {

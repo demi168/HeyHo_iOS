@@ -6,6 +6,7 @@ struct InboxView: View {
     @State private var heyHos: [HeyHo] = []
     @State private var senderNames: [String: String] = [:]
     @State private var listener: ListenerRegistration?
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -33,6 +34,7 @@ struct InboxView: View {
                 listener?.remove()
                 listener = nil
             }
+            .errorAlert($errorMessage)
         }
     }
 
@@ -57,7 +59,9 @@ struct InboxView: View {
                 senderNames = names
             }
         } catch {
-            print("送信者名の取得に失敗: \(error.localizedDescription)")
+            await MainActor.run {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 }
@@ -66,19 +70,35 @@ struct InboxRow: View {
     let heyHo: HeyHo
     let fromName: String
 
+    private var messageLabel: String {
+        switch heyHo.messageType {
+        case .hey: return "Hey"
+        case .ho: return "Ho"
+        case .letsGo: return "Let's Go"
+        }
+    }
+
+    private var messageColor: Color {
+        switch heyHo.messageType {
+        case .hey: return .blue
+        case .ho: return .orange
+        case .letsGo: return .green
+        }
+    }
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(fromName)
                     .font(.headline)
-                Text(heyHo.createdAt, style: .relative)
+                Text(heyHo.createdAt ?? Date(), style: .relative)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Text(heyHo.messageType == .hey ? "Hey" : "Ho")
+            Text(messageLabel)
                 .font(.title2.bold())
-                .foregroundStyle(heyHo.messageType == .hey ? .blue : .orange)
+                .foregroundStyle(messageColor)
         }
         .padding(.vertical, 8)
     }

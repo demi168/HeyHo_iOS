@@ -1,14 +1,6 @@
 import Foundation
 import FirebaseFirestore
 
-/// 友だちリストの1行が「未返信待ち / Hey / Let's Go / Ho」のどれかを表す
-enum FriendRowState {
-    case waitingForHo   // 自分が Hey 送付済み・相手の Ho 待ち → Hayed, disabled
-    case sendHey
-    case sendLetsGo
-    case sendHo
-}
-
 final class FirestoreService {
     static let shared = FirestoreService()
     private let db = Firestore.firestore()
@@ -122,25 +114,28 @@ final class FirestoreService {
     // MARK: - Friends (subcollection: users/{userId}/friends/{friendId})
 
     func addFriend(userId: String, friendId: String) async throws {
-        // 既に友達かチェック
-        let existingFriend = try? await db.collection("users")
-            .document(userId)
-            .collection("friends")
-            .document(friendId)
-            .getDocument()
-
-        if existingFriend?.exists == true {
-            throw NSError(domain: "FirestoreService", code: FirestoreService.ErrorCode.alreadyFriends.rawValue, userInfo: [
-                NSLocalizedDescriptionKey: "既に友達です"
-            ])
-        }
-
-        let batch = db.batch()
         let myRef = db.collection("users").document(userId).collection("friends").document(friendId)
         let otherRef = db.collection("users").document(friendId).collection("friends").document(userId)
-        batch.setData(["addedAt": FieldValue.serverTimestamp()], forDocument: myRef)
-        batch.setData(["addedAt": FieldValue.serverTimestamp()], forDocument: otherRef)
-        try await batch.commit()
+        // トランザクションで重複追加を防ぐ
+        _ = try await db.runTransaction { transaction, errorPointer in
+            do {
+                let existingDoc = try transaction.getDocument(myRef)
+                if existingDoc.exists {
+                    errorPointer?.pointee = NSError(
+                        domain: "FirestoreService",
+                        code: FirestoreService.ErrorCode.alreadyFriends.rawValue,
+                        userInfo: [NSLocalizedDescriptionKey: "既に友達です"]
+                    )
+                    return nil
+                }
+                transaction.setData(["addedAt": FieldValue.serverTimestamp()], forDocument: myRef)
+                transaction.setData(["addedAt": FieldValue.serverTimestamp()], forDocument: otherRef)
+                return nil
+            } catch {
+                errorPointer?.pointee = error as NSError
+                return nil
+            }
+        }
     }
 
     func friendIds(userId: String) async throws -> [String] {
@@ -151,10 +146,8 @@ final class FirestoreService {
     func friends(userId: String) async throws -> [AppUser] {
         let ids = try await friendIds(userId: userId)
         guard !ids.isEmpty else { return [] }
-        let snapshot = try await db.collection("users").whereField(FieldPath.documentID(), in: ids).getDocuments()
-        return snapshot.documents.compactMap { doc in
-            try? doc.data(as: AppUser.self)
-        }
+        // getUsers はバッチ処理済み（in クエリ10件上限に対応）
+        return try await getUsers(userIds: ids)
     }
 
     func searchUsers(byDisplayNamePrefix prefix: String, limit: Int = 20) async throws -> [AppUser] {
@@ -193,16 +186,20 @@ final class FirestoreService {
         switch (s, r) {
         case (nil, _): return r
         case (_, nil): return s
-        case (let s?, let r?): return s.createdAt > r.createdAt ? s : r
+        case (let s?, let r?):
+            let sc = s.createdAt ?? .distantPast
+            let rc = r.createdAt ?? .distantPast
+            return sc > rc ? s : r
         }
     }
 
     /// 各友だちについて「未返信(Hayed) / Hey / Let's Go / Ho」の行状態を返す
-    func getFriendRowStates(userId: String, friendIds: [String]) async throws -> [String: FriendRowState] {
-        try await withThrowingTaskGroup(of: (String, FriendRowState).self) { group in
+    func getFriendRowStates(userId: String, friendIds: [String]) async -> [String: FriendRowState] {
+        await withTaskGroup(of: (String, FriendRowState).self) { group in
             for friendId in friendIds {
                 group.addTask { [self] in
-                    guard let last = try await self.getLastHeyHo(me: userId, friendId: friendId) else {
+                    // 1人分のクエリ失敗は .sendHey にフォールバックし、他の行に影響させない
+                    guard let last = try? await self.getLastHeyHo(me: userId, friendId: friendId) else {
                         return (friendId, .sendHey)
                     }
                     // 相手 → 自分
@@ -222,7 +219,7 @@ final class FirestoreService {
                 }
             }
             var result: [String: FriendRowState] = [:]
-            for try await (friendId, state) in group {
+            for await (friendId, state) in group {
                 result[friendId] = state
             }
             return result

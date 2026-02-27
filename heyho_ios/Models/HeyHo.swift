@@ -12,7 +12,7 @@ struct HeyHo: Identifiable, Codable {
     var fromUserId: String
     var toUserId: String
     var messageType: MessageType
-    var createdAt: Date
+    var createdAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -22,7 +22,7 @@ struct HeyHo: Identifiable, Codable {
         case createdAt = "createdAt"
     }
 
-    init(id: String? = nil, fromUserId: String, toUserId: String, messageType: MessageType = .hey, createdAt: Date = Date()) {
+    init(id: String? = nil, fromUserId: String, toUserId: String, messageType: MessageType = .hey, createdAt: Date? = nil) {
         self.id = id
         self.fromUserId = fromUserId
         self.toUserId = toUserId

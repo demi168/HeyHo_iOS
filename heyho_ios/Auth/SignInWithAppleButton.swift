@@ -7,8 +7,8 @@ struct SignInWithAppleButtonView: View {
 
     var body: some View {
         SignInWithAppleButtonViewRepresentable(onRequest: onRequest, onCompletion: onCompletion)
-            .frame(height: 50)
-            .padding(.horizontal, 40)
+            .frame(height: 56)
+            .padding(.horizontal, 24)
     }
 }
 
@@ -18,7 +18,7 @@ private struct SignInWithAppleButtonViewRepresentable: UIViewRepresentable {
 
     func makeUIView(context: Context) -> ASAuthorizationAppleIDButton {
         let button = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
-        button.cornerRadius = 8
+        button.cornerRadius = 60
         button.addTarget(context.coordinator, action: #selector(Coordinator.tapped), for: .touchUpInside)
         return button
     }

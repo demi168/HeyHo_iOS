@@ -54,8 +54,9 @@ struct ProfileView: View {
                             Button(inviteCodeCopied ? "コピーしました" : "コピー") {
                                 UIPasteboard.general.string = code
                                 inviteCodeCopied = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    inviteCodeCopied = false
+                                Task {
+                                    try? await Task.sleep(for: .seconds(2))
+                                    await MainActor.run { inviteCodeCopied = false }
                                 }
                             }
                             .disabled(inviteCodeCopied)
