@@ -6,6 +6,7 @@ struct HeyHoApp: App {
     init() {
         FirebaseApp.configure()
         PushService.shared.configure()
+        StoreService.shared.configure()
     }
 
     var body: some Scene {

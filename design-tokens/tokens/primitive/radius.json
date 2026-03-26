@@ -1,0 +1,15 @@
+{
+  "radius": {
+    "primitive": {
+      "$type": "dimension",
+      "none": { "$value": "0" },
+      "xs": { "$value": "2" },
+      "sm": { "$value": "4" },
+      "md": { "$value": "8" },
+      "lg": { "$value": "12" },
+      "xl": { "$value": "16" },
+      "2xl": { "$value": "24" },
+      "full": { "$value": "9999" }
+    }
+  }
+}

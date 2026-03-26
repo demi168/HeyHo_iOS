@@ -1,0 +1,17 @@
+{
+  "name": "design-tokens",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "node config.mjs",
+    "clean": "rm -rf build/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "style-dictionary": "^5.3.3"
+  }
+}

@@ -7,8 +7,8 @@ struct SignInWithAppleButtonView: View {
 
     var body: some View {
         SignInWithAppleButtonViewRepresentable(onRequest: onRequest, onCompletion: onCompletion)
-            .frame(height: 56)
-            .padding(.horizontal, 24)
+            .frame(height: AppSize.buttonHeight)
+            .padding(.horizontal, AppSpacing.pageHorizontal)
     }
 }
 
