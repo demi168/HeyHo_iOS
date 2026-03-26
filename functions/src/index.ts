@@ -1,11 +1,11 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import {buildNotification} from "./notificationTemplates";
 
 admin.initializeApp();
 
 /**
- * When a document is created in `heyhos`, send an FCM notification to the recipient.
- * The client only writes to Firestore; this function sends the push.
+ * heyhos ドキュメント作成時、受信者に FCM 通知を送信する。
  */
 export const onHeyHoCreated = functions.firestore
   .document("heyhos/{heyhoId}")
@@ -17,8 +17,11 @@ export const onHeyHoCreated = functions.firestore
 
     console.log(`メッセージ作成 (${messageType}): ${fromUserId} -> ${toUserId} (ID: ${context.params.heyhoId})`);
 
-    const userDoc = await admin.firestore().collection("users").doc(toUserId).get();
-    const fcmToken = userDoc.data()?.fcmToken as string | undefined;
+    // fcmToken は private サブドキュメントから取得
+    const privateDoc = await admin.firestore()
+      .collection("users").doc(toUserId)
+      .collection("private").doc("data").get();
+    const fcmToken = privateDoc.data()?.fcmToken as string | undefined;
 
     if (!fcmToken) {
       console.log(`ユーザー ${toUserId} のFCMトークンが見つかりません`);
@@ -27,17 +30,12 @@ export const onHeyHoCreated = functions.firestore
 
     const fromUserDoc = await admin.firestore().collection("users").doc(fromUserId).get();
     const fromName = (fromUserDoc.data()?.displayName as string) || "Someone";
-
-    const messageText =
-      messageType === "hey" ? "Hey" : messageType === "letsGo" ? "Let's Go" : "Ho";
+    const notification = buildNotification(messageType, fromName);
 
     try {
       await admin.messaging().send({
         token: fcmToken,
-        notification: {
-          title: messageText,
-          body: `${fromName}から${messageText}が届きました`,
-        },
+        notification,
         data: {
           type: "heyho",
           messageType,
@@ -49,4 +47,29 @@ export const onHeyHoCreated = functions.firestore
     } catch (error) {
       console.error(`FCM送信エラー (${toUserId}):`, error);
     }
+  });
+
+/**
+ * 友だち追加時、相手側の friends ドキュメントを自動作成する。
+ * クライアントは自分側のみ書き込み、このトリガーが相互関係を完成させる。
+ */
+export const onFriendAdded = functions.firestore
+  .document("users/{userId}/friends/{friendId}")
+  .onCreate(async (snap, context) => {
+    const {userId, friendId} = context.params;
+
+    const reciprocalRef = admin.firestore()
+      .collection("users").doc(friendId)
+      .collection("friends").doc(userId);
+
+    const existing = await reciprocalRef.get();
+    if (existing.exists) {
+      console.log(`相互フレンド既存: ${friendId} -> ${userId}`);
+      return;
+    }
+
+    await reciprocalRef.set({
+      addedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    console.log(`相互フレンド作成: ${friendId} -> ${userId}`);
   });

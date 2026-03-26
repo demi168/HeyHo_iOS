@@ -7,16 +7,26 @@ final class FirestoreService {
 
     private init() {}
 
+    /// private サブドキュメントへの参照ヘルパー
+    private func privateRef(userId: String) -> DocumentReference {
+        db.collection("users").document(userId).collection("private").document("data")
+    }
+
     // MARK: - Users
 
-    func createOrUpdateUser(userId: String, displayName: String, fcmToken: String?) async throws {
+    /// 新規ユーザーを作成する（createdAt はここでのみセット）
+    func createUser(userId: String, displayName: String) async throws {
         let ref = db.collection("users").document(userId)
-        let data: [String: Any] = [
+        try await ref.setData([
             "displayName": displayName,
-            "createdAt": FieldValue.serverTimestamp(),
-            "fcmToken": fcmToken as Any
-        ]
-        try await ref.setData(data, merge: true)
+            "createdAt": FieldValue.serverTimestamp()
+        ])
+    }
+
+    /// 表示名を更新する（createdAt は上書きしない）
+    func updateDisplayName(userId: String, displayName: String) async throws {
+        let ref = db.collection("users").document(userId)
+        try await ref.setData(["displayName": displayName], merge: true)
     }
 
     func getUser(userId: String) async throws -> AppUser? {
@@ -26,34 +36,39 @@ final class FirestoreService {
 
     func getUsers(userIds: [String]) async throws -> [AppUser] {
         guard !userIds.isEmpty else { return [] }
-        // Firestoreの`in`クエリは最大10件まで
-        let batchSize = 10
-        var allUsers: [AppUser] = []
-
-        for i in stride(from: 0, to: userIds.count, by: batchSize) {
-            let end = min(i + batchSize, userIds.count)
-            let batch = Array(userIds[i..<end])
-            let snapshot = try await db.collection("users")
-                .whereField(FieldPath.documentID(), in: batch)
-                .getDocuments()
-            let users = snapshot.documents.compactMap { try? $0.data(as: AppUser.self) }
-            allUsers.append(contentsOf: users)
+        // 個別getで取得（listではなくget権限のみで動作する）
+        return try await withThrowingTaskGroup(of: AppUser?.self) { group in
+            for uid in userIds {
+                group.addTask { [self] in
+                    try? await self.getUser(userId: uid)
+                }
+            }
+            var users: [AppUser] = []
+            for try await user in group {
+                if let user { users.append(user) }
+            }
+            return users
         }
-
-        return allUsers
     }
 
+    /// FCM トークンを private サブドキュメントに保存する
     func updateFCMToken(userId: String, token: String?) async throws {
-        try await db.collection("users").document(userId).setData(["fcmToken": token as Any], merge: true)
+        try await privateRef(userId: userId).setData(["fcmToken": token as Any], merge: true)
+    }
+
+    /// アイコンカラーを更新する（hex文字列、例: "FF6B6B"）
+    func updateIconColor(userId: String, colorHex: String) async throws {
+        try await db.collection("users").document(userId).setData(["iconColor": colorHex], merge: true)
     }
 
     // MARK: - Invite Code
 
     /// ユーザーの招待コードを取得する。未発行なら発行して返す。
+    /// inviteCode は private サブドキュメントに保存する。
     func ensureInviteCode(userId: String) async throws -> String {
-        let userRef = db.collection("users").document(userId)
-        let userDoc = try await userRef.getDocument()
-        if let data = userDoc.data(),
+        let privRef = privateRef(userId: userId)
+        let privDoc = try await privRef.getDocument()
+        if let data = privDoc.data(),
            let code = data["inviteCode"] as? String,
            !code.isEmpty {
             return code
@@ -63,7 +78,7 @@ final class FirestoreService {
         for _ in 0..<maxRetries {
             let code = Self.generateInviteCode()
             do {
-                try await claimInviteCode(code: code, userId: userId, userRef: userRef)
+                try await claimInviteCode(code: code, userId: userId)
                 return code
             } catch {
                 let err = error as NSError
@@ -76,12 +91,15 @@ final class FirestoreService {
         throw NSError(domain: "FirestoreService", code: FirestoreService.ErrorCode.failedToGenerateCode.rawValue, userInfo: [NSLocalizedDescriptionKey: "招待コードの生成に失敗しました"])
     }
 
+    /// 英数字8桁の招待コードを生成する（紛らわしい文字 O/0/I/1 を除外）
     private static func generateInviteCode() -> String {
-        (0..<6).map { _ in String(Int.random(in: 0...9)) }.joined()
+        let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+        return (0..<8).map { _ in String(chars.randomElement()!) }.joined()
     }
 
-    private func claimInviteCode(code: String, userId: String, userRef: DocumentReference) async throws {
+    private func claimInviteCode(code: String, userId: String) async throws {
         let codeRef = db.collection("inviteCodes").document(code)
+        let privRef = privateRef(userId: userId)
         _ = try await db.runTransaction { transaction, errorPointer in
             do {
                 let codeDoc = try transaction.getDocument(codeRef)
@@ -90,7 +108,7 @@ final class FirestoreService {
                     return nil
                 }
                 transaction.setData(["userId": userId], forDocument: codeRef)
-                transaction.setData(["inviteCode": code], forDocument: userRef, merge: true)
+                transaction.setData(["inviteCode": code], forDocument: privRef, merge: true)
                 return nil
             } catch {
                 errorPointer?.pointee = error as NSError
@@ -113,29 +131,18 @@ final class FirestoreService {
 
     // MARK: - Friends (subcollection: users/{userId}/friends/{friendId})
 
+    /// 自分側の friends ドキュメントのみ作成する。相手側は Cloud Function (onFriendAdded) が自動作成する。
     func addFriend(userId: String, friendId: String) async throws {
         let myRef = db.collection("users").document(userId).collection("friends").document(friendId)
-        let otherRef = db.collection("users").document(friendId).collection("friends").document(userId)
-        // トランザクションで重複追加を防ぐ
-        _ = try await db.runTransaction { transaction, errorPointer in
-            do {
-                let existingDoc = try transaction.getDocument(myRef)
-                if existingDoc.exists {
-                    errorPointer?.pointee = NSError(
-                        domain: "FirestoreService",
-                        code: FirestoreService.ErrorCode.alreadyFriends.rawValue,
-                        userInfo: [NSLocalizedDescriptionKey: "既に友達です"]
-                    )
-                    return nil
-                }
-                transaction.setData(["addedAt": FieldValue.serverTimestamp()], forDocument: myRef)
-                transaction.setData(["addedAt": FieldValue.serverTimestamp()], forDocument: otherRef)
-                return nil
-            } catch {
-                errorPointer?.pointee = error as NSError
-                return nil
-            }
+        let existing = try await myRef.getDocument()
+        if existing.exists {
+            throw NSError(
+                domain: "FirestoreService",
+                code: FirestoreService.ErrorCode.alreadyFriends.rawValue,
+                userInfo: [NSLocalizedDescriptionKey: "既に友達です"]
+            )
         }
+        try await myRef.setData(["addedAt": FieldValue.serverTimestamp()])
     }
 
     func friendIds(userId: String) async throws -> [String] {
@@ -148,18 +155,6 @@ final class FirestoreService {
         guard !ids.isEmpty else { return [] }
         // getUsers はバッチ処理済み（in クエリ10件上限に対応）
         return try await getUsers(userIds: ids)
-    }
-
-    func searchUsers(byDisplayNamePrefix prefix: String, limit: Int = 20) async throws -> [AppUser] {
-        guard !prefix.isEmpty else { return [] }
-        let snapshot = try await db.collection("users")
-            .whereField("displayName", isGreaterThanOrEqualTo: prefix)
-            .whereField("displayName", isLessThan: prefix + "\u{f8ff}")
-            .limit(to: limit)
-            .getDocuments()
-        return snapshot.documents.compactMap { doc in
-            try? doc.data(as: AppUser.self)
-        }
     }
 
     // MARK: - HeyHos
@@ -193,7 +188,7 @@ final class FirestoreService {
         }
     }
 
-    /// 各友だちについて「未返信(Hayed) / Hey / Let's Go / Ho」の行状態を返す
+    /// 各友だちについて「Hey / Ho / Let's Go」の行状態を返す
     func getFriendRowStates(userId: String, friendIds: [String]) async -> [String: FriendRowState] {
         await withTaskGroup(of: (String, FriendRowState).self) { group in
             for friendId in friendIds {
@@ -202,7 +197,7 @@ final class FirestoreService {
                     guard let last = try? await self.getLastHeyHo(me: userId, friendId: friendId) else {
                         return (friendId, .sendHey)
                     }
-                    // 相手 → 自分
+                    // 相手 → 自分: 相手のメッセージに応じた返信を決定
                     if last.fromUserId == friendId && last.toUserId == userId {
                         switch last.messageType {
                         case .hey: return (friendId, .sendHo)
@@ -210,11 +205,8 @@ final class FirestoreService {
                         case .letsGo: return (friendId, .sendHey)
                         }
                     } else {
-                        // 自分 → 相手
-                        switch last.messageType {
-                        case .hey: return (friendId, .waitingForHo)
-                        case .ho, .letsGo: return (friendId, .sendHey)
-                        }
+                        // 自分 → 相手: 何度でもHeyを送れる
+                        return (friendId, .sendHey)
                     }
                 }
             }
@@ -254,20 +246,4 @@ final class FirestoreService {
         ])
     }
 
-    func inboxListener(userId: String, onUpdate: @escaping ([HeyHo]) -> Void) -> ListenerRegistration {
-        db.collection("heyhos")
-            .whereField("toUserId", isEqualTo: userId)
-            .order(by: "createdAt", descending: true)
-            .limit(to: 100)
-            .addSnapshotListener { snapshot, error in
-                guard let documents = snapshot?.documents else {
-                    if error != nil { onUpdate([]) }
-                    return
-                }
-                let heyHos = documents.compactMap { doc -> HeyHo? in
-                    try? doc.data(as: HeyHo.self)
-                }
-                onUpdate(heyHos)
-            }
-    }
 }

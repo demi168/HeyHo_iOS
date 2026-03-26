@@ -21,18 +21,30 @@
 		B0010009 /* FirestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010009 /* FirestoreService.swift */; };
 		B0010010 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010010 /* MainTabView.swift */; };
 		B0010011 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010011 /* FriendsView.swift */; };
-		B0010012 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010012 /* InboxView.swift */; };
-		B0010013 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010013 /* ProfileView.swift */; };
-		B0010014 /* AddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010014 /* AddFriendView.swift */; };
 		B0010015 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F0010015 /* GoogleService-Info.plist */; };
 		B0010016 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = P0010001 /* FirebaseAuth */; };
 		B0010018 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = P0010003 /* FirebaseMessaging */; };
 		B001001A /* PushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010018 /* PushService.swift */; };
 		B0010020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F0010020 /* Assets.xcassets */; };
+		B0010021 /* MyPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010021 /* MyPageView.swift */; };
+		B0010022 /* HeyBoyIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010022 /* HeyBoyIconView.swift */; };
+		B0010023 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010023 /* EditProfileView.swift */; };
+		B0010040 /* HeyHoAnimationOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010040 /* HeyHoAnimationOverlay.swift */; };
+		B0010041 /* FeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010041 /* FeedbackService.swift */; };
+		B0010050 /* PremiumConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010050 /* PremiumConfig.swift */; };
+		B0010051 /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010051 /* StoreService.swift */; };
+		B0010052 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010052 /* PaywallView.swift */; };
+		B0010053 /* AnimatedGradientFill.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010053 /* AnimatedGradientFill.swift */; };
+		B0010060 /* AppColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010060 /* AppColor.swift */; };
+		B0010061 /* AppSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010061 /* AppSpacing.swift */; };
+		B0010062 /* AppSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010062 /* AppSize.swift */; };
+		B0010063 /* AppTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010063 /* AppTypography.swift */; };
+		B0010070 /* IconColorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010070 /* IconColorValue.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		77509FDB2F51F66800E4C7AF /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		779D85F32F6E0C5000EB3BCA /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = Configuration.storekit; path = heyho_ios/Configuration.storekit; sourceTree = "<group>"; };
 		77B29A532F42E52E00B18CFB /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
 		F0010002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -45,14 +57,25 @@
 		F0010009 /* FirestoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
 		F0010010 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F0010011 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
-		F0010012 /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
-		F0010013 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		F0010014 /* AddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendView.swift; sourceTree = "<group>"; };
 		F0010015 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F0010016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F0010017 /* heyho_ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = heyho_ios.entitlements; sourceTree = "<group>"; };
 		F0010018 /* PushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushService.swift; sourceTree = "<group>"; };
 		F0010020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F0010021 /* MyPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageView.swift; sourceTree = "<group>"; };
+		F0010022 /* HeyBoyIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyBoyIconView.swift; sourceTree = "<group>"; };
+		F0010023 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
+		F0010040 /* HeyHoAnimationOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoAnimationOverlay.swift; sourceTree = "<group>"; };
+		F0010041 /* FeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackService.swift; sourceTree = "<group>"; };
+		F0010050 /* PremiumConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumConfig.swift; sourceTree = "<group>"; };
+		F0010051 /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
+		F0010052 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		F0010053 /* AnimatedGradientFill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGradientFill.swift; sourceTree = "<group>"; };
+		F0010060 /* AppColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColor.swift; sourceTree = "<group>"; };
+		F0010061 /* AppSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSpacing.swift; sourceTree = "<group>"; };
+		F0010062 /* AppSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSize.swift; sourceTree = "<group>"; };
+		F0010063 /* AppTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTypography.swift; sourceTree = "<group>"; };
+		F0010070 /* IconColorValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorValue.swift; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -80,7 +103,9 @@
 		G0010001 = {
 			isa = PBXGroup;
 			children = (
+				779D85F32F6E0C5000EB3BCA /* Configuration.storekit */,
 				77B29A532F42E52E00B18CFB /* ViewModifiers.swift */,
+				F0010022 /* HeyBoyIconView.swift */,
 				G0010002 /* heyho_ios */,
 				G0010003 /* Products */,
 				F0010015 /* GoogleService-Info.plist */,
@@ -96,6 +121,7 @@
 				G0010006 /* Models */,
 				G0010007 /* Services */,
 				G0010008 /* Features */,
+				G0010013 /* DesignTokens */,
 				F0010020 /* Assets.xcassets */,
 				77509FDB2F51F66800E4C7AF /* AppIcon.icon */,
 				F0010016 /* Info.plist */,
@@ -137,6 +163,8 @@
 			children = (
 				F0010007 /* User.swift */,
 				F0010008 /* HeyHo.swift */,
+				F0010050 /* PremiumConfig.swift */,
+				F0010070 /* IconColorValue.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -146,6 +174,8 @@
 			children = (
 				F0010009 /* FirestoreService.swift */,
 				F0010018 /* PushService.swift */,
+				F0010041 /* FeedbackService.swift */,
+				F0010051 /* StoreService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -155,8 +185,8 @@
 			children = (
 				F0010010 /* MainTabView.swift */,
 				G0010009 /* Friends */,
-				G0010010 /* Inbox */,
-				G0010011 /* Profile */,
+				G0010012 /* MyPage */,
+				G0010014 /* Premium */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -165,25 +195,38 @@
 			isa = PBXGroup;
 			children = (
 				F0010011 /* FriendsView.swift */,
+				F0010040 /* HeyHoAnimationOverlay.swift */,
 			);
 			path = Friends;
 			sourceTree = "<group>";
 		};
-		G0010010 /* Inbox */ = {
+		G0010012 /* MyPage */ = {
 			isa = PBXGroup;
 			children = (
-				F0010012 /* InboxView.swift */,
+				F0010021 /* MyPageView.swift */,
+				F0010023 /* EditProfileView.swift */,
 			);
-			path = Inbox;
+			path = MyPage;
 			sourceTree = "<group>";
 		};
-		G0010011 /* Profile */ = {
+		G0010013 /* DesignTokens */ = {
 			isa = PBXGroup;
 			children = (
-				F0010013 /* ProfileView.swift */,
-				F0010014 /* AddFriendView.swift */,
+				F0010060 /* AppColor.swift */,
+				F0010061 /* AppSpacing.swift */,
+				F0010062 /* AppSize.swift */,
+				F0010063 /* AppTypography.swift */,
 			);
-			path = Profile;
+			path = DesignTokens;
+			sourceTree = "<group>";
+		};
+		G0010014 /* Premium */ = {
+			isa = PBXGroup;
+			children = (
+				F0010052 /* PaywallView.swift */,
+				F0010053 /* AnimatedGradientFill.swift */,
+			);
+			path = Premium;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -273,10 +316,21 @@
 				B0010010 /* MainTabView.swift in Sources */,
 				B0010011 /* FriendsView.swift in Sources */,
 				77B29A542F42E52E00B18CFB /* ViewModifiers.swift in Sources */,
-				B0010012 /* InboxView.swift in Sources */,
-				B0010013 /* ProfileView.swift in Sources */,
-				B0010014 /* AddFriendView.swift in Sources */,
+				B0010022 /* HeyBoyIconView.swift in Sources */,
 				B001001A /* PushService.swift in Sources */,
+				B0010021 /* MyPageView.swift in Sources */,
+				B0010023 /* EditProfileView.swift in Sources */,
+				B0010060 /* AppColor.swift in Sources */,
+				B0010061 /* AppSpacing.swift in Sources */,
+				B0010062 /* AppSize.swift in Sources */,
+				B0010063 /* AppTypography.swift in Sources */,
+				B0010040 /* HeyHoAnimationOverlay.swift in Sources */,
+				B0010041 /* FeedbackService.swift in Sources */,
+				B0010050 /* PremiumConfig.swift in Sources */,
+				B0010051 /* StoreService.swift in Sources */,
+				B0010052 /* PaywallView.swift in Sources */,
+				B0010053 /* AnimatedGradientFill.swift in Sources */,
+				B0010070 /* IconColorValue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,7 +453,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = A54Z53J43Y;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = heyho_ios/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HeyHo;
@@ -415,6 +469,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -430,7 +485,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = A54Z53J43Y;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = heyho_ios/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HeyHo;

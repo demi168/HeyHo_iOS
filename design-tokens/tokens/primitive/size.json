@@ -1,0 +1,22 @@
+{
+  "size": {
+    "primitive": {
+      "$type": "dimension",
+      "icon": {
+        "sm": { "$value": "36" },
+        "md": { "$value": "48" },
+        "lg": { "$value": "96" }
+      },
+      "button": {
+        "sm": { "$value": "36" },
+        "md": { "$value": "40" },
+        "lg": { "$value": "56" }
+      },
+      "border": {
+        "thin": { "$value": "1" },
+        "medium": { "$value": "2" },
+        "thick": { "$value": "4" }
+      }
+    }
+  }
+}

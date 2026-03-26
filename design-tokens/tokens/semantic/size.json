@@ -1,0 +1,20 @@
+{
+  "size": {
+    "semantic": {
+      "$type": "dimension",
+      "icon": {
+        "default": { "$value": "{size.primitive.icon.md}" },
+        "large": { "$value": "{size.primitive.icon.lg}" }
+      },
+      "button": {
+        "height": { "$value": "{size.primitive.button.lg}" },
+        "icon": { "$value": "{size.primitive.button.md}" }
+      },
+      "border": {
+        "default": { "$value": "{size.primitive.border.thin}" },
+        "strong": { "$value": "{size.primitive.border.thick}" },
+        "underline": { "$value": "{size.primitive.border.medium}" }
+      }
+    }
+  }
+}

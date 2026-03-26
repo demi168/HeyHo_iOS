@@ -1,0 +1,87 @@
+{
+  "source": ["tokens/**/*.json"],
+  "platforms": {
+    "ios-swift": {
+      "transformGroup": "ios-swift",
+      "buildPath": "build/ios-swift/",
+      "files": [
+        {
+          "destination": "HeyHoColor.swift",
+          "format": "ios-swift/enum.swift",
+          "options": {
+            "className": "HeyHoColor",
+            "accessControl": "internal"
+          },
+          "filter": {
+            "$type": "color"
+          }
+        },
+        {
+          "destination": "HeyHoSpacing.swift",
+          "format": "ios-swift/enum.swift",
+          "options": {
+            "className": "HeyHoSpacing",
+            "accessControl": "internal"
+          },
+          "filter": {
+            "attributes": {
+              "category": "spacing"
+            }
+          }
+        },
+        {
+          "destination": "HeyHoFontSize.swift",
+          "format": "ios-swift/enum.swift",
+          "options": {
+            "className": "HeyHoFontSize",
+            "accessControl": "internal"
+          },
+          "filter": {
+            "attributes": {
+              "category": "font-size"
+            }
+          }
+        },
+        {
+          "destination": "HeyHoBorder.swift",
+          "format": "ios-swift/enum.swift",
+          "options": {
+            "className": "HeyHoBorder",
+            "accessControl": "internal"
+          },
+          "filter": {
+            "attributes": {
+              "category": "border"
+            }
+          }
+        },
+        {
+          "destination": "HeyHoIconSize.swift",
+          "format": "ios-swift/enum.swift",
+          "options": {
+            "className": "HeyHoIconSize",
+            "accessControl": "internal"
+          },
+          "filter": {
+            "attributes": {
+              "category": "icon-size"
+            }
+          }
+        },
+        {
+          "destination": "HeyHoSize.swift",
+          "format": "ios-swift/enum.swift",
+          "options": {
+            "className": "HeyHoSize",
+            "accessControl": "internal"
+          },
+          "filter": {
+            "attributes": {
+              "category": "size"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

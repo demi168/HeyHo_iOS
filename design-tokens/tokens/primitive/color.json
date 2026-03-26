@@ -1,0 +1,49 @@
+{
+  "color": {
+    "primitive": {
+      "$type": "color",
+      "Red": { "$value": "#FF383C" },
+      "Green": { "$value": "#34C759" },
+      "Orange": { "$value": "#FF8D28" },
+      "Yellow": { "$value": "#FFCC00" },
+      "Blue": { "$value": "#0088FF" },
+      "Purple": { "$value": "#CB30E0" },
+      "Pink": { "$value": "#FF2D55" },
+      "Brown": { "$value": "#AC7F5E" },
+      "Mint": { "$value": "#00C8B3" },
+      "Teal": { "$value": "#00C3D0" },
+      "Cyan": { "$value": "#00C0E8" },
+      "Indigo": { "$value": "#6155F5" },
+      "Violet": { "$value": "#AF52DE" },
+      "Lavender": { "$value": "#E5E6FA" },
+      "icon-preset": {
+        "cyan": { "$value": "{color.primitive.Cyan}" },
+        "pink": { "$value": "{color.primitive.Pink}" },
+        "brown": { "$value": "{color.primitive.Brown}" },
+        "purple": { "$value": "{color.primitive.Purple}" },
+        "green": { "$value": "{color.primitive.Green}" },
+        "orange": { "$value": "{color.primitive.Orange}" },
+        "blue": { "$value": "{color.primitive.Blue}" },
+        "red": { "$value": "{color.primitive.Red}" },
+        "yellow": { "$value": "{color.primitive.Yellow}" },
+        "teal": { "$value": "{color.primitive.Teal}" },
+        "indigo": { "$value": "{color.primitive.Indigo}" },
+        "violet": { "$value": "{color.primitive.Violet}" }
+      },
+      "gray": {
+        "0": { "$value": "#FFFFFF" },
+        "50": { "$value": "#F9FAFB" },
+        "100": { "$value": "#F3F4F6" },
+        "200": { "$value": "#E5E7EB" },
+        "300": { "$value": "#D1D5DB" },
+        "400": { "$value": "#9CA3AF" },
+        "500": { "$value": "#6B7280" },
+        "600": { "$value": "#4B5563" },
+        "700": { "$value": "#374151" },
+        "800": { "$value": "#1F2937" },
+        "900": { "$value": "#111827" },
+        "1000": { "$value": "#000000" }
+      }
+    }
+  }
+}

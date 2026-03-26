@@ -1,0 +1,13 @@
+{
+  "spacing": {
+    "semantic": {
+      "$type": "dimension",
+      "page-horizontal": { "$value": "{spacing.primitive.300}" },
+      "page-vertical": { "$value": "{spacing.primitive.200}" },
+      "section-gap": { "$value": "{spacing.primitive.400}" },
+      "item-gap": { "$value": "{spacing.primitive.150}" },
+      "inline-gap": { "$value": "{spacing.primitive.100}" },
+      "compact-gap": { "$value": "{spacing.primitive.050}" }
+    }
+  }
+}

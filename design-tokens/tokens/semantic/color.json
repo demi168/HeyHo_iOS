@@ -1,0 +1,35 @@
+{
+  "color": {
+    "semantic": {
+      "$type": "color",
+      "background": {
+        "primary": { "$value": "{color.primitive.Green}" },
+        "secondary": { "$value": "{color.primitive.gray.0}" },
+        "sign-in": { "$value": "{color.primitive.Pink}" }
+      },
+      "text": {
+        "primary": { "$value": "{color.primitive.gray.1000}" },
+        "secondary": { "$value": "{color.primitive.gray.400}" },
+        "inverse": { "$value": "{color.primitive.gray.0}" },
+        "destructive": { "$value": "{color.primitive.Red}" }
+      },
+      "border": {
+        "default": { "$value": "{color.primitive.gray.200}" },
+        "strong": { "$value": "{color.primitive.gray.1000}" }
+      },
+      "icon": {
+        "default": { "$value": "{color.primitive.gray.1000}" },
+        "inverse": { "$value": "{color.primitive.gray.0}" }
+      },
+      "message": {
+        "hey": { "$value": "{color.primitive.Blue}" },
+        "ho": { "$value": "{color.primitive.Orange}" },
+        "lets-go": { "$value": "{color.primitive.Green}" }
+      },
+      "interactive": {
+        "primary": { "$value": "{color.primitive.Blue}" },
+        "destructive": { "$value": "{color.primitive.Red}" }
+      }
+    }
+  }
+}

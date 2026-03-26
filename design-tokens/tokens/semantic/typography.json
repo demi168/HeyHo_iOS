@@ -1,0 +1,15 @@
+{
+  "typography": {
+    "semantic": {
+      "size": {
+        "$type": "dimension",
+        "display": { "$value": "{typography.primitive.size.700}" },
+        "title": { "$value": "{typography.primitive.size.600}" },
+        "heading": { "$value": "{typography.primitive.size.500}" },
+        "body": { "$value": "{typography.primitive.size.300}" },
+        "label": { "$value": "{typography.primitive.size.200}" },
+        "caption": { "$value": "{typography.primitive.size.100}" }
+      }
+    }
+  }
+}

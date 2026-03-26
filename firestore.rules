@@ -8,22 +8,38 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
     match /users/{userId} {
-      allow read: if isSignedIn();
+      // 公開プロフィール: getのみ許可、list（コレクション列挙）を拒否
+      allow get: if isSignedIn();
+      allow list: if false;
       allow create, update: if isOwner(userId);
       allow delete: if isOwner(userId);
+
+      // 機密情報（fcmToken, inviteCode）: 本人のみアクセス可
+      match /private/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+
       match /friends/{friendId} {
-        allow read, write: if isOwner(userId) || isOwner(friendId);
+        // 読み取りは双方向、書き込みは自分側のみ（相手側は Cloud Function が作成）
+        allow read: if isOwner(userId) || isOwner(friendId);
+        allow create: if isOwner(userId);
+        allow update, delete: if false;
       }
     }
     match /heyhos/{heyhoId} {
-      allow create: if isSignedIn() && request.resource.data.fromUserId == request.auth.uid;
+      // SEC-003: 送信者は自分であり、かつ受信者が友だちであること
+      allow create: if isSignedIn()
+        && request.resource.data.fromUserId == request.auth.uid
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)/friends/$(request.resource.data.toUserId));
       allow read: if isSignedIn() && (resource.data.toUserId == request.auth.uid || resource.data.fromUserId == request.auth.uid);
       allow delete: if false;
       allow update: if false;
     }
 
     match /inviteCodes/{code} {
-      allow read: if isSignedIn();
+      // SEC-002: getのみ許可、list（コレクション列挙）を拒否
+      allow get: if isSignedIn();
+      allow list: if false;
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if false;
     }
