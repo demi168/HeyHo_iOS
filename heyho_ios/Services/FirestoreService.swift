@@ -145,6 +145,12 @@ final class FirestoreService {
         try await myRef.setData(["addedAt": FieldValue.serverTimestamp()])
     }
 
+    /// 自分側の friends ドキュメントを削除する。相手側は残る（相手が自分で削除する必要がある）。
+    func removeFriend(userId: String, friendId: String) async throws {
+        let myRef = db.collection("users").document(userId).collection("friends").document(friendId)
+        try await myRef.delete()
+    }
+
     func friendIds(userId: String) async throws -> [String] {
         let snapshot = try await db.collection("users").document(userId).collection("friends").getDocuments()
         return snapshot.documents.map(\.documentID)

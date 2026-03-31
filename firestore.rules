@@ -22,8 +22,8 @@ service cloud.firestore {
       match /friends/{friendId} {
         // 読み取りは双方向、書き込みは自分側のみ（相手側は Cloud Function が作成）
         allow read: if isOwner(userId) || isOwner(friendId);
-        allow create: if isOwner(userId);
-        allow update, delete: if false;
+        allow create, delete: if isOwner(userId);
+        allow update: if false;
       }
     }
     match /heyhos/{heyhoId} {

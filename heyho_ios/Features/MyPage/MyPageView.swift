@@ -26,6 +26,7 @@ extension Color {
 
 private struct CapsuleButton: View {
     let title: String
+    var maxWidth: CGFloat? = nil
     let action: () -> Void
 
     var body: some View {
@@ -33,6 +34,7 @@ private struct CapsuleButton: View {
             Text(title)
                 .font(.system(size: AppTypography.label, weight: .bold))
                 .foregroundColor(AppColor.textPrimary)
+                .frame(maxWidth: maxWidth)
                 .padding(.horizontal, AppSpacing.pageVertical)
                 .padding(.vertical, AppSpacing.inlineGap)
                 .overlay(
@@ -80,6 +82,9 @@ struct MyPageView: View {
     @State private var errorMessage: String?
     @State private var showEditProfile = false
     @State private var showPaywall = false
+    @State private var showSignOutConfirmation = false
+    @State private var showDeleteConfirmation = false
+    @State private var isDeletingAccount = false
     @FocusState private var isFriendCodeFocused: Bool
 
     /// 招待コードの有効な長さ（旧6桁と新8桁の両方を許容）
@@ -145,7 +150,7 @@ struct MyPageView: View {
                                 .minimumScaleFactor(0.7)
                             Spacer()
                             // edit profile ボタン
-                            CapsuleButton(title: "edit profile") {
+                            CapsuleButton(title: "edit profile", maxWidth: .infinity) {
                                 showEditProfile = true
                             }
                         }
@@ -168,7 +173,7 @@ struct MyPageView: View {
                                 )
                             }
                             Spacer()
-                            CapsuleButton(title: "share") {
+                            CapsuleButton(title: "share", maxWidth: AppSize.capsuleButtonWidth) {
                                 shareInviteCode()
                             }
                         }
@@ -193,7 +198,7 @@ struct MyPageView: View {
                                     .frame(height: AppSize.borderStrong)
                             }
                             Spacer(minLength: AppSpacing.pageVertical)
-                            CapsuleButton(title: "add") {
+                            CapsuleButton(title: "add", maxWidth: AppSize.capsuleButtonWidth) {
                                 addFriendByCode()
                             }
                             .disabled(!isFriendCodeValid || isAddingFriend)
@@ -252,10 +257,15 @@ struct MyPageView: View {
                         }
 
                         Button(action: { deleteAccount() }) {
-                            Text("DELETE ACCOUNT")
-                                .font(.system(size: AppTypography.body, weight: .black))
-                                .foregroundColor(AppColor.textDestructive)
+                            if isDeletingAccount {
+                                ProgressView()
+                            } else {
+                                Text("DELETE ACCOUNT")
+                                    .font(.system(size: AppTypography.body, weight: .black))
+                                    .foregroundColor(AppColor.textDestructive)
+                            }
                         }
+                        .disabled(isDeletingAccount)
                     }
                     .padding(.top, AppSpacing.inlineGap)
                 }
@@ -282,6 +292,18 @@ struct MyPageView: View {
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeService)
+        }
+        .alert("サインアウト", isPresented: $showSignOutConfirmation) {
+            Button("サインアウト", role: .destructive) { performSignOut() }
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("サインアウトしますか？")
+        }
+        .alert("アカウント削除", isPresented: $showDeleteConfirmation) {
+            Button("削除する", role: .destructive) { performDeleteAccount() }
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("アカウントを削除すると、すべてのデータが完全に削除されます。この操作は取り消せません。")
         }
     }
 
@@ -314,14 +336,7 @@ struct MyPageView: View {
 
     private func shareInviteCode() {
         guard let code = inviteCode else { return }
-        let activityVC = UIActivityViewController(
-            activityItems: [code],
-            applicationActivities: nil
-        )
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let root = windowScene.windows.first?.rootViewController {
-            root.present(activityVC, animated: true)
-        }
+        ShareService.shareInviteCode(code)
     }
 
     private func addFriendByCode() {
@@ -354,6 +369,10 @@ struct MyPageView: View {
     }
 
     private func signOut() {
+        showSignOutConfirmation = true
+    }
+
+    private func performSignOut() {
         do {
             try authState.signOut()
         } catch {
@@ -366,6 +385,20 @@ struct MyPageView: View {
     }
 
     private func deleteAccount() {
-        // TODO: アカウント削除の確認ダイアログと処理を実装
+        showDeleteConfirmation = true
+    }
+
+    private func performDeleteAccount() {
+        isDeletingAccount = true
+        Task {
+            do {
+                try await authState.deleteAccount()
+            } catch {
+                await MainActor.run {
+                    isDeletingAccount = false
+                    errorMessage = error.localizedDescription
+                }
+            }
+        }
     }
 }

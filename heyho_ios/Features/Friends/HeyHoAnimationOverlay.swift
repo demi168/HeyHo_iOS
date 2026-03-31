@@ -4,15 +4,15 @@ import SwiftUI
 enum HeyHoAnimationState: Equatable {
     case idle
     /// 自分が送信（右下からフレームイン）
-    case sending(message: MessageType, iconColor: IconColorValue)
+    case sending(message: MessageType, iconColor: IconColorValue, name: String)
     /// 相手から受信（左上からフレームイン）
-    case receiving(message: MessageType, iconColor: IconColorValue)
+    case receiving(message: MessageType, iconColor: IconColorValue, name: String)
 
     static func == (lhs: HeyHoAnimationState, rhs: HeyHoAnimationState) -> Bool {
         switch (lhs, rhs) {
         case (.idle, .idle): return true
-        case (.sending(let lm, _), .sending(let rm, _)): return lm == rm
-        case (.receiving(let lm, _), .receiving(let rm, _)): return lm == rm
+        case (.sending(let lm, _, _), .sending(let rm, _, _)): return lm == rm
+        case (.receiving(let lm, _, _), .receiving(let rm, _, _)): return lm == rm
         default: return false
         }
     }
@@ -24,7 +24,16 @@ enum HeyHoAnimationState: Equatable {
 
     var iconColor: IconColorValue? {
         switch self {
-        case .sending(_, let c), .receiving(_, let c): return c
+        case .sending(_, let c, _), .receiving(_, let c, _): return c
+        case .idle: return nil
+        }
+    }
+
+    /// 「To: 〇〇」または「From: 〇〇」のラベル
+    var nameLabel: String? {
+        switch self {
+        case .sending(_, _, let name): return "To: \(name)"
+        case .receiving(_, _, let name): return "From: \(name)"
         case .idle: return nil
         }
     }
@@ -33,7 +42,7 @@ enum HeyHoAnimationState: Equatable {
     var messageImageName: String? {
         let messageType: MessageType
         switch self {
-        case .sending(let m, _), .receiving(let m, _): messageType = m
+        case .sending(let m, _, _), .receiving(let m, _, _): messageType = m
         case .idle: return nil
         }
         switch messageType {
@@ -89,16 +98,25 @@ struct HeyHoAnimationOverlay: View {
                     )
                 }
 
-                if let imageName = animationState.messageImageName {
-                    Image(imageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: screenW * 0.7)
-                        .rotationEffect(.degrees(isSending ? -8 : 5))
-                        .scaleEffect(messageVisible ? 1.0 : 0.75)
-                        .opacity(messageVisible ? 1.0 : 0.0)
-                        .offset(y: -screenH * 0.08 + messageOffset)
+                // To: / From: ラベル + メッセージ（左揃え）
+                VStack(alignment: .leading, spacing: 0) {
+                    if let label = animationState.nameLabel {
+                        Text(label)
+                            .font(.system(size: AppTypography.heading, weight: .black))
+                            .foregroundColor(.white)
+                            .rotationEffect(.degrees(-15))
+                    }
+
+                    if let imageName = animationState.messageImageName {
+                        Image(imageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: screenW * 0.72)
+                    }
                 }
+                .scaleEffect(messageVisible ? 1.0 : 0.75)
+                .opacity(messageVisible ? 1.0 : 0.0)
+                .offset(y: -screenH * 0.12 + messageOffset)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -107,9 +125,9 @@ struct HeyHoAnimationOverlay: View {
             if newState != .idle {
                 runAnimation(isSending: newState.isSending)
                 // サウンド＆ハプティクス
-                if case .sending(let m, _) = newState {
+                if case .sending(let m, _, _) = newState {
                     FeedbackService.shared.playFeedback(for: m, isSending: true)
-                } else if case .receiving(let m, _) = newState {
+                } else if case .receiving(let m, _, _) = newState {
                     FeedbackService.shared.playFeedback(for: m, isSending: false)
                 }
             }
@@ -129,7 +147,7 @@ struct HeyHoAnimationOverlay: View {
         }
         //メッセージ表示
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.21) {
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.5)) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
                 messageVisible = true
             }
         }
@@ -165,35 +183,35 @@ struct HeyHoAnimationPreview: View {
             VStack(spacing: 20) {
                 Text("アニメーションテスト")
                     .foregroundColor(.white)
-                    .font(.headline)
+                    .font(.system(size: AppTypography.heading, weight: .black))
 
                 Button("Hey を送る") {
-                    animationState = .sending(message: .hey, iconColor: .solid(hex: "FFCC00"))
+                    animationState = .sending(message: .hey, iconColor: .solid(hex: "FFCC00"), name: "Yurinchy")
                 }
                 .buttonStyle(.borderedProminent)
 
                 Button("Ho を送る") {
-                    animationState = .sending(message: .ho, iconColor: .solid(hex: "FFCC00"))
+                    animationState = .sending(message: .ho, iconColor: .solid(hex: "FFCC00"), name: "Yurinchy")
                 }
                 .buttonStyle(.borderedProminent)
 
                 Button("Let's Go を送る") {
-                    animationState = .sending(message: .letsGo, iconColor: .gradient(presetId: "sunset"))
+                    animationState = .sending(message: .letsGo, iconColor: .gradient(presetId: "sunset"), name: "Yurinchy")
                 }
                 .buttonStyle(.borderedProminent)
 
                 Button("Hey を受け取る") {
-                    animationState = .receiving(message: .hey, iconColor: .solid(hex: "00C0E8"))
+                    animationState = .receiving(message: .hey, iconColor: .solid(hex: "00C0E8"), name: "namename")
                 }
                 .buttonStyle(.borderedProminent)
 
                 Button("Ho を受け取る") {
-                    animationState = .receiving(message: .ho, iconColor: .solid(hex: "00C0E8"))
+                    animationState = .receiving(message: .ho, iconColor: .solid(hex: "00C0E8"), name: "namename")
                 }
                 .buttonStyle(.borderedProminent)
 
                 Button("Let's Go を受け取る") {
-                    animationState = .receiving(message: .letsGo, iconColor: .gradient(presetId: "neon"))
+                    animationState = .receiving(message: .letsGo, iconColor: .gradient(presetId: "neon"), name: "namename")
                 }
                 .buttonStyle(.borderedProminent)
             }

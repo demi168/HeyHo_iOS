@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseAuth
+import AuthenticationServices
 
 @MainActor
 final class AuthState: ObservableObject {
@@ -96,6 +97,45 @@ final class AuthState: ObservableObject {
 
     func signOut() throws {
         try Auth.auth().signOut()
+    }
+
+    /// アカウントを削除する（Apple トークン revoke + Firebase Auth 削除）
+    /// Cloud Function onUserDeleted が Firestore データを自動クリーンアップする
+    func deleteAccount() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "AuthState", code: -1,
+                          userInfo: [NSLocalizedDescriptionKey: "ユーザーが見つかりません"])
+        }
+
+        let hasAppleProvider = user.providerData.contains { $0.providerID == "apple.com" }
+
+        if hasAppleProvider {
+            // Apple 再認証 → トークン revoke
+            let nonce = randomNonce()
+            let helper = AppleReauthHelper()
+            let authorization = try await helper.perform(nonce: nonce)
+
+            guard let appleCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let idTokenData = appleCredential.identityToken,
+                  let idToken = String(data: idTokenData, encoding: .utf8) else {
+                throw NSError(domain: "AuthState", code: -2,
+                              userInfo: [NSLocalizedDescriptionKey: "Apple認証情報の取得に失敗しました"])
+            }
+
+            // Firebase 再認証
+            let oauthCredential = OAuthProvider.appleCredential(
+                withIDToken: idToken, rawNonce: nonce, fullName: nil)
+            try await user.reauthenticate(with: oauthCredential)
+
+            // Apple トークン revoke
+            if let authCodeData = appleCredential.authorizationCode,
+               let authCode = String(data: authCodeData, encoding: .utf8) {
+                try await Auth.auth().revokeToken(withAuthorizationCode: authCode)
+            }
+        }
+
+        // Firebase Auth ユーザー削除 → onUserDeleted トリガー発火
+        try await user.delete()
     }
 
     #if DEBUG

@@ -8,4 +8,5 @@ enum AppSize {
     static let buttonHeight = CGFloat(56.00)
     static let iconDefault = CGFloat(48.00)
     static let iconLarge = CGFloat(96.00)
+    static let capsuleButtonWidth = CGFloat(80.00)
 }
