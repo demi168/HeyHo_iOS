@@ -15,6 +15,7 @@ struct EditProfileView: View {
     @State private var errorMessage: String?
     @State private var nameValidationError: String?
     @State private var showPaywall = false
+    @FocusState private var isNameFocused: Bool
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.itemGap), count: 6)
 
@@ -112,6 +113,7 @@ struct EditProfileView: View {
                                 .foregroundColor(AppColor.textPrimary)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
+                                .focused($isNameFocused)
                                 .onChange(of: displayName) { _ in validateName() }
                             Rectangle()
                                 .fill(nameValidationError != nil
@@ -129,36 +131,42 @@ struct EditProfileView: View {
                     .padding(.horizontal, AppSpacing.pageHorizontal)
 
                     // カラーパレット（ソリッド12色、6×2）
-                    LazyVGrid(columns: columns, spacing: AppSpacing.itemGap) {
-                        ForEach(Array(AppColor.iconPresets.enumerated()), id: \.element.hex) { index, preset in
-                            let isLocked = index >= PremiumConfig.freeColorCount && !storeService.isPremium
-                            Button(action: {
-                                if isLocked {
-                                    showPaywall = true
-                                } else {
-                                    selectedColorValue = .solid(hex: preset.hex)
+                    VStack(alignment: .leading, spacing: AppSpacing.inlineGap) {
+                        Text("MY FAV COLOR")
+                            .font(.system(size: AppTypography.label, weight: .bold))
+                            .foregroundColor(AppColor.textSecondary)
+
+                        LazyVGrid(columns: columns, spacing: AppSpacing.itemGap) {
+                            ForEach(Array(AppColor.iconPresets.enumerated()), id: \.element.hex) { index, preset in
+                                let isLocked = index >= PremiumConfig.freeColorCount && !storeService.isPremium
+                                Button(action: {
+                                    if isLocked {
+                                        showPaywall = true
+                                    } else {
+                                        selectedColorValue = .solid(hex: preset.hex)
+                                    }
+                                }) {
+                                    Circle()
+                                        .fill(Color(hex: preset.hex) ?? .gray)
+                                        .frame(width: AppSize.iconDefault, height: AppSize.iconDefault)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(
+                                                    Color.gray.opacity(0.5),
+                                                    lineWidth: isSolidSelected(preset.hex) ? 3 : 0
+                                                )
+                                                .frame(width: AppSize.buttonHeight, height: AppSize.buttonHeight)
+                                        )
+                                        .overlay(
+                                            isLocked ? Image(systemName: "lock.fill")
+                                                .font(.system(size: AppTypography.caption))
+                                                .foregroundColor(.white.opacity(0.9))
+                                            : nil
+                                        )
+                                        .opacity(isLocked ? 0.5 : 1)
                                 }
-                            }) {
-                                Circle()
-                                    .fill(Color(hex: preset.hex) ?? .gray)
-                                    .frame(width: AppSize.iconDefault, height: AppSize.iconDefault)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(
-                                                Color.gray.opacity(0.5),
-                                                lineWidth: isSolidSelected(preset.hex) ? 3 : 0
-                                            )
-                                            .frame(width: AppSize.buttonHeight, height: AppSize.buttonHeight)
-                                    )
-                                    .overlay(
-                                        isLocked ? Image(systemName: "lock.fill")
-                                            .font(.system(size: AppTypography.caption))
-                                            .foregroundColor(.white.opacity(0.9))
-                                        : nil
-                                    )
-                                    .opacity(isLocked ? 0.5 : 1)
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, AppSpacing.pageHorizontal)
@@ -231,6 +239,7 @@ struct EditProfileView: View {
         .interactiveDismissDisabled(isInitialSetup)
         .onAppear {
             if !isInitialSetup { loadUser() }
+            isNameFocused = true
         }
         .errorAlert($errorMessage)
         .sheet(isPresented: $showPaywall) {

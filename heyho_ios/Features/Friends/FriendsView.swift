@@ -31,6 +31,7 @@ struct FriendsView: View {
     @State private var showPaywall = false
     @State private var myIconColorValue: IconColorValue = .solid(hex: "FFD700")
     @State private var animationState: HeyHoAnimationState = .idle
+    @State private var friendToDelete: AppUser?
 
     var body: some View {
         ZStack {
@@ -45,6 +46,7 @@ struct FriendsView: View {
                 showMyPageForAddFriend: $showMyPageForAddFriend,
                 resolvedIconColor: resolvedIconColor(for:),
                 onSend: sendHeyHo(to:),
+                onDelete: { friend in friendToDelete = friend },
                 onRefresh: { await loadFriends() }
             )
 
@@ -53,6 +55,19 @@ struct FriendsView: View {
         .onAppear {
             guard !hasLoadedOnce else { return }
             Task { await loadFriends(); await loadMyColor() }
+        }
+        .alert("友だちを削除", isPresented: Binding(
+            get: { friendToDelete != nil },
+            set: { if !$0 { friendToDelete = nil } }
+        )) {
+            Button("削除", role: .destructive) {
+                if let friend = friendToDelete { deleteFriend(friend) }
+            }
+            Button("キャンセル", role: .cancel) { friendToDelete = nil }
+        } message: {
+            if let friend = friendToDelete {
+                Text("\(friend.displayName) を友だちから削除しますか？")
+            }
         }
         .errorAlert($errorMessage)
         .sheet(isPresented: $showPaywall) {
@@ -105,6 +120,21 @@ struct FriendsView: View {
         await MainActor.run { rowStates = states }
     }
 
+    private func deleteFriend(_ friend: AppUser) {
+        guard let uid = authState.currentUserId, let friendId = friend.id else { return }
+        Task {
+            do {
+                try await FirestoreService.shared.removeFriend(userId: uid, friendId: friendId)
+                await MainActor.run {
+                    friends.removeAll { $0.id == friendId }
+                    rowStates.removeValue(forKey: friendId)
+                }
+            } catch {
+                await MainActor.run { errorMessage = error.localizedDescription }
+            }
+        }
+    }
+
     private func sendHeyHo(to friend: AppUser) {
         guard let uid = authState.currentUserId, let friendId = friend.id else { return }
 
@@ -116,13 +146,14 @@ struct FriendsView: View {
         }
 
         // 送信タイプに応じたアニメーション
+        let name = friend.displayName
         switch state {
         case .sendHo:
-            animationState = .sending(message: .ho, iconColor: myIconColorValue)
+            animationState = .sending(message: .ho, iconColor: myIconColorValue, name: name)
         case .sendLetsGo:
-            animationState = .sending(message: .letsGo, iconColor: myIconColorValue)
+            animationState = .sending(message: .letsGo, iconColor: myIconColorValue, name: name)
         default:
-            animationState = .sending(message: .hey, iconColor: myIconColorValue)
+            animationState = .sending(message: .hey, iconColor: myIconColorValue, name: name)
         }
 
         Task {
@@ -142,11 +173,11 @@ struct FriendsView: View {
                 switch state {
                 case .sendHey:
                     await MainActor.run {
-                        animationState = .receiving(message: .ho, iconColor: friendIconColor)
+                        animationState = .receiving(message: .ho, iconColor: friendIconColor, name: name)
                     }
                 case .sendHo:
                     await MainActor.run {
-                        animationState = .receiving(message: .letsGo, iconColor: friendIconColor)
+                        animationState = .receiving(message: .letsGo, iconColor: friendIconColor, name: name)
                     }
                 default:
                     break
@@ -172,6 +203,7 @@ struct FriendsBodyView: View {
     @Binding var showMyPageForAddFriend: Bool
     let resolvedIconColor: (AppUser) -> IconColorValue
     let onSend: (AppUser) -> Void
+    let onDelete: (AppUser) -> Void
     let onRefresh: () async -> Void
 
     var body: some View {
@@ -204,6 +236,13 @@ struct FriendsBodyView: View {
                                     avatarIconColor: resolvedIconColor(friend),
                                     isPremium: isPremium
                                 ) { onSend(friend) }
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        onDelete(friend)
+                                    } label: {
+                                        Label("友だちを削除", systemImage: "trash")
+                                    }
+                                }
                             }
 
                             // Add Friends ボタン
@@ -336,6 +375,7 @@ private let previewRowStates: [String: FriendRowState] = [
         showMyPageForAddFriend: .constant(false),
         resolvedIconColor: { IconColorValue(firestoreString: $0.iconColor) },
         onSend: { _ in },
+        onDelete: { _ in },
         onRefresh: {}
     )
 }
@@ -352,6 +392,7 @@ private let previewRowStates: [String: FriendRowState] = [
         showMyPageForAddFriend: .constant(false),
         resolvedIconColor: { _ in .solid(hex: "FFD700") },
         onSend: { _ in },
+        onDelete: { _ in },
         onRefresh: {}
     )
 }
@@ -368,6 +409,7 @@ private let previewRowStates: [String: FriendRowState] = [
         showMyPageForAddFriend: .constant(false),
         resolvedIconColor: { _ in .solid(hex: "FFD700") },
         onSend: { _ in },
+        onDelete: { _ in },
         onRefresh: {}
     )
 }

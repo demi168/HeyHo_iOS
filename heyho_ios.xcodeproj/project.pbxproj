@@ -40,6 +40,7 @@
 		B0010062 /* AppSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010062 /* AppSize.swift */; };
 		B0010063 /* AppTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010063 /* AppTypography.swift */; };
 		B0010070 /* IconColorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010070 /* IconColorValue.swift */; };
+		B0010080 /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010080 /* ShareService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,6 +77,7 @@
 		F0010062 /* AppSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSize.swift; sourceTree = "<group>"; };
 		F0010063 /* AppTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTypography.swift; sourceTree = "<group>"; };
 		F0010070 /* IconColorValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorValue.swift; sourceTree = "<group>"; };
+		F0010080 /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -176,6 +178,7 @@
 				F0010018 /* PushService.swift */,
 				F0010041 /* FeedbackService.swift */,
 				F0010051 /* StoreService.swift */,
+				F0010080 /* ShareService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -331,6 +334,7 @@
 				B0010052 /* PaywallView.swift in Sources */,
 				B0010053 /* AnimatedGradientFill.swift in Sources */,
 				B0010070 /* IconColorValue.swift in Sources */,
+				B0010080 /* ShareService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -453,7 +457,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = A54Z53J43Y;
+				DEVELOPMENT_TEAM = GJNKPF7KCD;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = heyho_ios/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HeyHo;
@@ -485,7 +489,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = A54Z53J43Y;
+				DEVELOPMENT_TEAM = GJNKPF7KCD;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = heyho_ios/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HeyHo;
