@@ -97,6 +97,25 @@ export const onFriendRemoved = functions.firestore
   });
 
 /**
+ * ドキュメント参照の配列を500件ずつバッチ削除する。
+ * Firestore のバッチ上限（500操作）を超えないように分割する。
+ */
+async function batchDelete(
+  db: admin.firestore.Firestore,
+  refs: admin.firestore.DocumentReference[]
+): Promise<void> {
+  const BATCH_LIMIT = 500;
+  for (let i = 0; i < refs.length; i += BATCH_LIMIT) {
+    const chunk = refs.slice(i, i + BATCH_LIMIT);
+    const batch = db.batch();
+    for (const ref of chunk) {
+      batch.delete(ref);
+    }
+    await batch.commit();
+  }
+}
+
+/**
  * Firebase Auth ユーザー削除時、関連する Firestore データをすべて削除する。
  */
 export const onUserDeleted = functions.auth.user().onDelete(async (user) => {
@@ -110,26 +129,22 @@ export const onUserDeleted = functions.auth.user().onDelete(async (user) => {
     .collection("friends").get();
   const friendIds = friendsSnap.docs.map((doc) => doc.id);
 
-  const batch1 = db.batch();
+  const friendRefs: admin.firestore.DocumentReference[] = [];
   for (const friendId of friendIds) {
-    batch1.delete(
+    friendRefs.push(
       db.collection("users").doc(friendId).collection("friends").doc(uid)
     );
   }
   for (const doc of friendsSnap.docs) {
-    batch1.delete(doc.ref);
+    friendRefs.push(doc.ref);
   }
-  await batch1.commit();
+  await batchDelete(db, friendRefs);
 
   // 2. inviteCodes から自分のコードを削除
   const inviteSnap = await db
     .collection("inviteCodes")
     .where("userId", "==", uid).get();
-  const batch2 = db.batch();
-  for (const doc of inviteSnap.docs) {
-    batch2.delete(doc.ref);
-  }
-  await batch2.commit();
+  await batchDelete(db, inviteSnap.docs.map((doc) => doc.ref));
 
   // 3. heyhos から自分が関わるメッセージを削除
   const sentSnap = await db
@@ -138,21 +153,14 @@ export const onUserDeleted = functions.auth.user().onDelete(async (user) => {
   const receivedSnap = await db
     .collection("heyhos")
     .where("toUserId", "==", uid).get();
-  const batch3 = db.batch();
-  for (const doc of [...sentSnap.docs, ...receivedSnap.docs]) {
-    batch3.delete(doc.ref);
-  }
-  await batch3.commit();
+  const heyhoRefs = [...sentSnap.docs, ...receivedSnap.docs].map((doc) => doc.ref);
+  await batchDelete(db, heyhoRefs);
 
   // 4. private サブドキュメント削除
   const privateSnap = await db
     .collection("users").doc(uid)
     .collection("private").get();
-  const batch4 = db.batch();
-  for (const doc of privateSnap.docs) {
-    batch4.delete(doc.ref);
-  }
-  await batch4.commit();
+  await batchDelete(db, privateSnap.docs.map((doc) => doc.ref));
 
   // 5. users ドキュメント本体を削除
   await db.collection("users").doc(uid).delete();

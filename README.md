@@ -57,6 +57,23 @@
 4. 相手はプッシュ通知と受信タブで確認し、「Ho」で返答
 5. 「Hey」→「Ho」→「Hey」→「Ho」とラリーが続く
 
+## テスト用ダミーアカウントの作成
+
+友だち追加機能をテストするために、Firestore に直接ダミーアカウントを作成できます。
+
+1. **Firebase Console** → **Firestore Database** を開く
+2. `users` コレクションにドキュメントを追加:
+   - ドキュメントID: 任意の文字列（例: `dummy001`）
+   - `displayName` (string): `"TestUser"`
+   - `iconColor` (string): `"FFCC00"`
+   - `inviteCode` (string): 任意の8文字英数（例: `"ABCD1234"`）
+   - `createdAt` (timestamp): 現在時刻
+3. `inviteCodes` コレクションにドキュメントを追加:
+   - ドキュメントID: 上で設定した招待コード（例: `ABCD1234`）
+   - `userId` (string): `"dummy001"`
+
+実機アプリから招待コードを入力すれば、ダミーアカウントと友だちになれます。
+
 ## 注意
 
 - **GoogleService-Info.plist** はプレースホルダーのため、Firebase Console から取得した実ファイルに差し替えてください。

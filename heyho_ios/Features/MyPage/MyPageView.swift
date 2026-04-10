@@ -73,6 +73,8 @@ struct MyPageView: View {
 
     /// true の場合、表示時に友だちコード入力欄にフォーカスする
     var focusAddFriend: Bool = false
+    /// 友達追加成功時のコールバック（追加された友達のIDを渡す）
+    var onFriendAdded: ((String) -> Void)?
 
     @State private var currentUser: AppUser?
     @State private var inviteCode: String?
@@ -87,10 +89,21 @@ struct MyPageView: View {
     @State private var isDeletingAccount = false
     @FocusState private var isFriendCodeFocused: Bool
 
-    /// 招待コードの有効な長さ（旧6桁と新8桁の両方を許容）
+    /// 招待コードバリデーション（英数のみ8文字）
     private var isFriendCodeValid: Bool {
-        let len = friendCodeInput.trimmingCharacters(in: .whitespaces).count
-        return len == 6 || len == 8
+        let code = friendCodeInput.trimmingCharacters(in: .whitespaces)
+        return code.count == 8 && code.range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
+    }
+
+    /// 招待コードのバリデーションエラー（空欄時は非表示）
+    private var friendCodeValidationError: String? {
+        let code = friendCodeInput.trimmingCharacters(in: .whitespaces)
+        if code.isEmpty { return nil }
+        if code.range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) == nil {
+            return "英数字のみ使用できます"
+        }
+        if code.count < 8 { return "8文字で入力してください" }
+        return nil
     }
 
     var body: some View {
@@ -187,15 +200,27 @@ struct MyPageView: View {
 
                         HStack(alignment: .bottom) {
                             VStack(spacing: AppSpacing.compactGap) {
-                                TextField("FRIEND'S CODE", text: $friendCodeInput)
+                                TextField("FRIEND'S CODE", text: $friendCodeInput,
+                                         prompt: Text("FRIEND'S CODE")
+                                            .foregroundColor(AppColor.textTertiary))
                                     .font(.system(size: AppTypography.title, weight: .black))
                                     .textInputAutocapitalization(.characters)
                                     .autocorrectionDisabled()
                                     .foregroundColor(AppColor.textPrimary)
                                     .focused($isFriendCodeFocused)
+                                    .onChange(of: friendCodeInput) { newValue in
+                                        // 英数字のみ・8文字制限・大文字変換
+                                        let filtered = String(newValue.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }.prefix(8)).uppercased()
+                                        if filtered != newValue { friendCodeInput = filtered }
+                                    }
                                 Rectangle()
-                                    .fill(AppColor.borderStrong)
+                                    .fill(friendCodeValidationError != nil ? Color.red : AppColor.borderStrong)
                                     .frame(height: AppSize.borderStrong)
+                                if let error = friendCodeValidationError {
+                                    Text(error)
+                                        .font(.system(size: AppTypography.caption, weight: .medium))
+                                        .foregroundColor(.red)
+                                }
                             }
                             Spacer(minLength: AppSpacing.pageVertical)
                             CapsuleButton(title: "add", maxWidth: AppSize.capsuleButtonWidth) {
@@ -238,14 +263,20 @@ struct MyPageView: View {
                                 .foregroundColor(AppColor.textPrimary)
                         }
 
-                        Button(action: { openURL("https://example.com/privacy") }) {
+                        Button(action: { openURL(AppURL.privacy) }) {
                             Text("PRIVACY POLICY")
                                 .font(.system(size: AppTypography.body, weight: .black))
                                 .foregroundColor(AppColor.textPrimary)
                         }
 
-                        Button(action: { openURL("https://example.com/terms") }) {
+                        Button(action: { openURL(AppURL.terms) }) {
                             Text("TERMS")
+                                .font(.system(size: AppTypography.body, weight: .black))
+                                .foregroundColor(AppColor.textPrimary)
+                        }
+
+                        Button(action: { openURL(AppURL.commercial) }) {
+                            Text("特定商取引法に基づく表記")
                                 .font(.system(size: AppTypography.body, weight: .black))
                                 .foregroundColor(AppColor.textPrimary)
                         }
@@ -273,6 +304,22 @@ struct MyPageView: View {
                 .padding(.bottom, 40)
             }
         }
+        .overlay {
+            if isAddingFriend {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .overlay {
+                        VStack(spacing: AppSpacing.inlineGap) {
+                            ProgressView()
+                                .tint(.white)
+                            Text("SEARCHING...")
+                                .font(.system(size: AppTypography.label, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                    }
+            }
+        }
+        .allowsHitTesting(!isAddingFriend)
         .background(AppColor.backgroundSecondary)
         .onAppear {
             loadUser()
@@ -344,27 +391,35 @@ struct MyPageView: View {
         guard isFriendCodeValid, let myId = authState.currentUserId else { return }
         isAddingFriend = true
         Task {
-            defer { Task { await MainActor.run { isAddingFriend = false } } }
             do {
                 guard let friendId = try await FirestoreService.shared.getUserIdByInviteCode(code) else {
-                    await MainActor.run { errorMessage = "コードが見つかりません" }
+                    await MainActor.run { isAddingFriend = false; errorMessage = "コードが見つかりません" }
                     return
                 }
                 if friendId == myId {
-                    await MainActor.run { errorMessage = "自分のコードです" }
+                    await MainActor.run { isAddingFriend = false; errorMessage = "自分のコードです" }
                     return
                 }
                 try await FirestoreService.shared.addFriend(userId: myId, friendId: friendId)
-                await MainActor.run { friendCodeInput = "" }
+                // 成功: haptic + コールバック + 自動dismiss
+                await MainActor.run {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    friendCodeInput = ""
+                    isAddingFriend = false
+                    onFriendAdded?(friendId)
+                    dismiss()
+                }
             } catch {
                 let msg = (error as NSError).userInfo[NSLocalizedDescriptionKey] as? String ?? error.localizedDescription
-                await MainActor.run { errorMessage = msg == "既に友達です" ? "すでに友だちです" : msg }
+                await MainActor.run {
+                    isAddingFriend = false
+                    errorMessage = msg == "既に友達です" ? "すでに友だちです" : msg
+                }
             }
         }
     }
 
-    private func openURL(_ urlString: String) {
-        guard let url = URL(string: urlString) else { return }
+    private func openURL(_ url: URL) {
         UIApplication.shared.open(url)
     }
 
