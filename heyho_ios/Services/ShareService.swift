@@ -1,11 +1,24 @@
 import LinkPresentation
 import UIKit
 
+// MARK: - アプリ外部URL
+
+enum AppURL {
+    /// Firebase Hosting のベースURL
+    private static let hostingBase = "https://heyhoapp-d02f4.web.app"
+
+    static let privacy = URL(string: "\(hostingBase)/privacy.html")!
+    static let terms = URL(string: "\(hostingBase)/terms.html")!
+    static let commercial = URL(string: "\(hostingBase)/commercial.html")!
+
+    // TODO: リリース時に実際のApp Store IDに差し替え
+    static let appStore = URL(string: "https://apps.apple.com/app/heyho/id0000000000")!
+}
+
 // MARK: - 定数
 
 enum ShareConstants {
-    // TODO: リリース時に実際のApp Store IDに差し替え
-    static let appStoreURL = URL(string: "https://apps.apple.com/app/heyho/id0000000000")!
+    static let appStoreURL = AppURL.appStore
 
     static let shareTitle = "HeyHoに招待されました"
 

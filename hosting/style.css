@@ -1,0 +1,205 @@
+/* HeyHo 共通スタイル */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #fafafa;
+    padding: 2rem 1rem;
+}
+
+.top-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+/* ヘッダー */
+h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+}
+
+.updated {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+/* セクション見出し */
+h2 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 0.25rem;
+}
+
+h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+/* テキスト */
+p, li {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+ul, ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* テーブル */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.95rem;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background: #f0f0f0;
+    font-weight: 700;
+    width: 30%;
+    white-space: nowrap;
+}
+
+/* リンク */
+a {
+    color: #1a1a1a;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+a:hover {
+    color: #555;
+}
+
+/* 補足テキスト */
+.note {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 1.5rem;
+}
+
+small {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* フッター */
+.footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.footer nav a {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* トップページ */
+.top-container {
+    text-align: center;
+    max-width: 400px;
+}
+
+.top-container h1 {
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+}
+
+.tagline {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.top-container nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.top-container nav a {
+    display: block;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #1a1a1a;
+    border-radius: 999px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.top-container nav a:hover {
+    background: #1a1a1a;
+    color: #fafafa;
+}
+
+/* 特商法 定義リスト */
+.tokusho-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tokusho-list > li {
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.tokusho-list > li:first-child {
+    padding-top: 0;
+}
+
+.tokusho-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #888;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.tokusho-value {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 0;
+}
+
+.tokusho-value small {
+    display: block;
+    margin-top: 0.25rem;
+}

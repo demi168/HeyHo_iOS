@@ -32,6 +32,7 @@ struct FriendsView: View {
     @State private var myIconColorValue: IconColorValue = .solid(hex: "FFD700")
     @State private var animationState: HeyHoAnimationState = .idle
     @State private var friendToDelete: AppUser?
+    @State private var newlyAddedFriendId: String?
 
     var body: some View {
         ZStack {
@@ -74,14 +75,24 @@ struct FriendsView: View {
             PaywallView().environmentObject(storeService)
         }
         .fullScreenCover(isPresented: $showMyPage, onDismiss: {
-            Task { await loadFriends(); await loadMyColor() }
+            Task {
+                await loadFriends()
+                await loadMyColor()
+            }
         }) {
-            MyPageView().environmentObject(authState)
+            MyPageView(onFriendAdded: { friendId in
+                newlyAddedFriendId = friendId
+            }).environmentObject(authState)
         }
         .fullScreenCover(isPresented: $showMyPageForAddFriend, onDismiss: {
-            Task { await loadFriends(); await loadMyColor() }
+            Task {
+                await loadFriends()
+                await loadMyColor()
+            }
         }) {
-            MyPageView(focusAddFriend: true).environmentObject(authState)
+            MyPageView(focusAddFriend: true, onFriendAdded: { friendId in
+                newlyAddedFriendId = friendId
+            }).environmentObject(authState)
         }
     }
 
@@ -105,6 +116,13 @@ struct FriendsView: View {
             #if DEBUG
             list.append(contentsOf: debugDummyFriends)
             #endif
+            // 新しく追加された友だちを先頭に配置
+            if let newId = newlyAddedFriendId,
+               let idx = list.firstIndex(where: { $0.id == newId }) {
+                let newFriend = list.remove(at: idx)
+                list.insert(newFriend, at: 0)
+                newlyAddedFriendId = nil
+            }
             friends = list
             await loadRowStates()
         } catch {

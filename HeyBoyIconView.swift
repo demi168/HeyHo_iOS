@@ -21,6 +21,8 @@ struct HeyBoyIconView: View {
     var showPremiumBadge: Bool = false
     /// AngularGradient の中心点（UnitPoint）
     var gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32)
+    /// カラー変更アニメーション中かどうか（外部バインディング）
+    @Binding var isColorChanging: Bool
 
     private static let eyesPatterns: [String] = [
         "HeyBoyEyes_default",
@@ -32,35 +34,41 @@ struct HeyBoyIconView: View {
 
     @State private var currentEyes: String = "HeyBoyEyes_default"
     @State private var eyesTimer: Timer?
+    @State private var displayedColorValue: IconColorValue
     @State private var displayedColor: Color
     @State private var slideOffset: CGFloat = 0
     @State private var hasAppearedWithColor = false
 
     // MARK: - 後方互換イニシャライザ（Color）
 
-    init(bodyColor: Color, size: CGFloat = 48, animated: Bool = true, showBackground: Bool = true, showPremiumBadge: Bool = false, gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32)) {
-        self.iconColorValue = .solid(hex: bodyColor.toHex() ?? "defaultIconYellow")
+    init(bodyColor: Color, size: CGFloat = 48, animated: Bool = true, showBackground: Bool = true, showPremiumBadge: Bool = false, gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32), isColorChanging: Binding<Bool> = .constant(false)) {
+        let colorValue = IconColorValue.solid(hex: bodyColor.toHex() ?? AppColor.defaultIconHex)
+        self.iconColorValue = colorValue
         self.size = size
         self.animated = animated
         self.showBackground = showBackground
         self.showPremiumBadge = showPremiumBadge
         self.gradientCenter = gradientCenter
+        self._isColorChanging = isColorChanging
+        self._displayedColorValue = State(initialValue: colorValue)
         self._displayedColor = State(initialValue: bodyColor)
     }
 
     // MARK: - IconColorValue イニシャライザ
 
-    init(iconColorValue: IconColorValue, size: CGFloat = 48, animated: Bool = true, showBackground: Bool = true, showPremiumBadge: Bool = false, gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32)) {
+    init(iconColorValue: IconColorValue, size: CGFloat = 48, animated: Bool = true, showBackground: Bool = true, showPremiumBadge: Bool = false, gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32), isColorChanging: Binding<Bool> = .constant(false)) {
         self.iconColorValue = iconColorValue
         self.size = size
         self.animated = animated
         self.showBackground = showBackground
         self.showPremiumBadge = showPremiumBadge
         self.gradientCenter = gradientCenter
+        self._isColorChanging = isColorChanging
+        self._displayedColorValue = State(initialValue: iconColorValue)
         switch iconColorValue {
         case .solid(let hex):
-            self._displayedColor = State(initialValue: Color(hex: hex) ?? AppColor.defaultIconYellow)
-        case .gradient:
+            self._displayedColor = State(initialValue: Color(hex: hex) ?? AppColor.defaultIconColor)
+        case .gradient, .customGradient:
             self._displayedColor = State(initialValue: .clear)
         }
     }
@@ -127,23 +135,20 @@ struct HeyBoyIconView: View {
 
     @ViewBuilder
     private var bodyView: some View {
-        switch iconColorValue {
-        case .solid:
+        if case .solid = displayedColorValue {
             Image("HeyBoyBody_default")
                 .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
                 .foregroundColor(displayedColor)
-        case .gradient(let presetId):
-            if let preset = AppColor.gradientPresets.first(where: { $0.id == presetId }) {
-                AnimatedGradientFill(preset: preset, animated: animated, center: gradientCenter)
-                    .mask(
-                        Image("HeyBoyBody_default")
-                            .renderingMode(.template)
-                            .resizable()
-                            .scaledToFit()
-                    )
-            }
+        } else if let preset = displayedColorValue.gradientPreset {
+            AnimatedGradientFill(preset: preset, animated: animated, center: gradientCenter)
+                .mask(
+                    Image("HeyBoyBody_default")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                )
         }
     }
 
@@ -177,34 +182,51 @@ struct HeyBoyIconView: View {
     // MARK: - カラー変更ハンドリング
 
     private func handleColorValueChange(_ newValue: IconColorValue) {
-        switch newValue {
-        case .solid(let hex):
-            let newColor = Color(hex: hex) ?? AppColor.defaultIconYellow
-            if hasAppearedWithColor {
-                animateColorChange(to: newColor)
-            } else {
-                displayedColor = newColor
-                hasAppearedWithColor = true
+        // アニメーション中は変更を無視
+        guard !isColorChanging else { return }
+
+        guard hasAppearedWithColor else {
+            // 初回表示時はアニメーションなし
+            displayedColorValue = newValue
+            if case .solid(let hex) = newValue {
+                displayedColor = Color(hex: hex) ?? AppColor.defaultIconColor
             }
-        case .gradient:
             hasAppearedWithColor = true
+            return
+        }
+        // カラー変更時は常にスライドアニメーション
+        animateTransition {
+            displayedColorValue = newValue
+            if case .solid(let hex) = newValue {
+                displayedColor = Color(hex: hex) ?? AppColor.defaultIconColor
+            }
         }
     }
 
-    /// bodyColor が変わったとき: body+目を右下へスライドアウト → 新色で右下からスライドイン
-    private func animateColorChange(to newColor: Color) {
-        guard newColor != displayedColor else { return }
-        let travel = size * 0.6
+    /// スライドアウト → 値を更新 → スライドインのアニメーション
+    private func animateTransition(apply: @escaping () -> Void) {
+        // 完全にフレーム外へ出る距離（クリップ円の外側まで）
+        let travel = size * 1.0
 
-        withAnimation(.easeIn(duration: 0.2)) {
+        isColorChanging = true
+
+        // フレームアウト
+        withAnimation(.easeIn(duration: 0.22)) {
             slideOffset = travel
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            displayedColor = newColor
+        // フレームアウト完了後にカラー変更
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
+            apply()
 
-            withAnimation(.easeOut(duration: 0.2)) {
+            // フレームイン
+            withAnimation(.easeOut(duration: 0.25)) {
                 slideOffset = 0
+            }
+
+            // フレームイン完了後にロック解除
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.27) {
+                isColorChanging = false
             }
         }
     }
@@ -227,10 +249,10 @@ private extension View {
 
 #Preview("ソリッド") {
     HStack(spacing: AppSpacing.itemGap) {
-        HeyBoyIconView(bodyColor: AppColor.defaultIconCyan, size: AppSize.iconDefault)
-        HeyBoyIconView(bodyColor: Color(red: 1.0, green: 0.176, blue: 0.333), size: AppSize.iconDefault)
-        HeyBoyIconView(bodyColor: Color(red: 0.796, green: 0.188, blue: 0.878), size: AppSize.iconDefault)
-        HeyBoyIconView(bodyColor: Color(red: 1.0, green: 0.553, blue: 0.157), size: AppSize.iconDefault)
+        HeyBoyIconView(bodyColor: AppColor.defaultIconColor, size: AppSize.iconDefault)
+        HeyBoyIconView(bodyColor: Color(hex: "FF2D55")!, size: AppSize.iconDefault)
+        HeyBoyIconView(bodyColor: Color(hex: "CB30E0")!, size: AppSize.iconDefault)
+        HeyBoyIconView(bodyColor: Color(hex: "FF8D28")!, size: AppSize.iconDefault)
     }
     .padding()
     .background(AppColor.backgroundPrimary)
@@ -253,7 +275,7 @@ private struct GradientCenterPreview: View {
     @State private var centerY: Double = 0.5
     @State private var selectedPreset: String = "sunset"
 
-    private let presets = AppColor.gradientPresets
+    private let presets = AppColor.premiumGradientPresets
 
     var body: some View {
         VStack(spacing: 16) {
