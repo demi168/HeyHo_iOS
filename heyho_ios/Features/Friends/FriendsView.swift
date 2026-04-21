@@ -12,6 +12,9 @@ private let debugDummyFriends: [AppUser] = [
     AppUser(id: "dummy_1", displayName: "ダミー太郎"),
     AppUser(id: "dummy_2", displayName: "ダミー花子"),
     AppUser(id: "dummy_3", displayName: "ダミー次郎"),
+    AppUser(id: "dummy_4", displayName: "ダミー三郎"),
+    AppUser(id: "dummy_5", displayName: "ダミー梅子"),
+    AppUser(id: "dummy_6", displayName: "ダミー四郎"),
 ]
 #endif
 
@@ -53,21 +56,23 @@ struct FriendsView: View {
 
             HeyHoAnimationOverlay(animationState: $animationState)
         }
+        .irisLoading(isLoading: $isLoading)
         .onAppear {
             guard !hasLoadedOnce else { return }
-            Task { await loadFriends(); await loadMyColor() }
+            loadMyColor()
+            Task { await loadFriends() }
         }
-        .alert("友だちを削除", isPresented: Binding(
+        .alert("Delete Friend", isPresented: Binding(
             get: { friendToDelete != nil },
             set: { if !$0 { friendToDelete = nil } }
         )) {
-            Button("削除", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 if let friend = friendToDelete { deleteFriend(friend) }
             }
-            Button("キャンセル", role: .cancel) { friendToDelete = nil }
+            Button("Cancel", role: .cancel) { friendToDelete = nil }
         } message: {
             if let friend = friendToDelete {
-                Text("\(friend.displayName) を友だちから削除しますか？")
+                Text("Delete \(friend.displayName) from friends?")
             }
         }
         .errorAlert($errorMessage)
@@ -76,8 +81,9 @@ struct FriendsView: View {
         }
         .fullScreenCover(isPresented: $showMyPage, onDismiss: {
             Task {
+                await authState.refreshCurrentUser()
+                loadMyColor()
                 await loadFriends()
-                await loadMyColor()
             }
         }) {
             MyPageView(onFriendAdded: { friendId in
@@ -86,8 +92,9 @@ struct FriendsView: View {
         }
         .fullScreenCover(isPresented: $showMyPageForAddFriend, onDismiss: {
             Task {
+                await authState.refreshCurrentUser()
+                loadMyColor()
                 await loadFriends()
-                await loadMyColor()
             }
         }) {
             MyPageView(focusAddFriend: true, onFriendAdded: { friendId in
@@ -100,10 +107,9 @@ struct FriendsView: View {
         IconColorValue(firestoreString: friend.iconColor)
     }
 
-    private func loadMyColor() async {
-        guard let uid = authState.currentUserId else { return }
-        if let user = try? await FirestoreService.shared.getUser(userId: uid) {
-            await MainActor.run { myIconColorValue = IconColorValue(firestoreString: user.iconColor) }
+    private func loadMyColor() {
+        if let user = authState.currentUser {
+            myIconColorValue = IconColorValue(firestoreString: user.iconColor)
         }
     }
 
@@ -123,8 +129,9 @@ struct FriendsView: View {
                 list.insert(newFriend, at: 0)
                 newlyAddedFriendId = nil
             }
+            // 友だちリストを先に表示し、rowStates はバックグラウンドで取得
             friends = list
-            await loadRowStates()
+            Task { await loadRowStates() }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -224,28 +231,31 @@ struct FriendsBodyView: View {
     let onDelete: (AppUser) -> Void
     let onRefresh: () async -> Void
 
+    /// ヘッダーの高さ（すりガラス領域 + 下余白）
+    private var headerTotalHeight: CGFloat {
+        AppSize.iconLarge + AppSpacing.spLarge
+    }
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             AppColor.backgroundPrimary.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                headerView.padding(.horizontal, AppSpacing.pageHorizontal)
-
                 if isLoading {
                     Spacer()
                     ProgressView().tint(.white)
                     Spacer()
                 } else if friends.isEmpty {
                     Spacer()
-                    Text("友だちがいません")
+                    Text("No friends yet")
                         .foregroundColor(AppColor.textInverse).font(.headline)
-                    Text("プロフィールから友だちを追加してください")
+                    Text("Add friends from your profile")
                         .foregroundColor(AppColor.textInverse.opacity(0.8)).font(.subheadline)
-                        .multilineTextAlignment(.center).padding(.top, AppSpacing.inlineGap)
+                        .multilineTextAlignment(.center).padding(.top, AppSpacing.spSmall)
                     Spacer()
                 } else {
                     ScrollView {
-                        VStack(spacing: AppSpacing.itemGap) {
+                        VStack(spacing: AppSpacing.spMedium) {
                             ForEach(friends) { friend in
                                 FriendRow(
                                     friend: friend,
@@ -258,33 +268,86 @@ struct FriendsBodyView: View {
                                     Button(role: .destructive) {
                                         onDelete(friend)
                                     } label: {
-                                        Label("友だちを削除", systemImage: "trash")
+                                        Label("Delete Friend", systemImage: "trash")
                                     }
                                 }
                             }
-
-                            // Add Friends ボタン
-                            Button(action: { showMyPageForAddFriend = true }) {
-                                HStack {
-                                    Spacer()
-                                    Image(systemName: "plus")
-                                        .font(.system(size: AppTypography.display, weight: .black))
-                                    Text("ADD FRIENDS")
-                                        .font(.system(size: AppTypography.display, weight: .black))
-                                    Spacer()
-                                }
-                                .foregroundColor(Color.white)
-                                .padding(.vertical, AppSpacing.pageVertical)
-                                .frame(minHeight: 80)
-                                .background(Capsule().fill(Color.black))
-                            }
-                            .buttonStyle(.plain)
                         }
-                        .padding(.horizontal, AppSpacing.pageHorizontal)
-                        .padding(.bottom, AppSpacing.pageVertical)
+                        .padding(.horizontal, AppSpacing.spXlarge)
+                        // ヘッダー分の上余白 + フッター分の下余白
+                        .padding(.top, headerTotalHeight)
+                        .padding(.bottom, 80 + AppSpacing.spLarge * 2)
                     }
                     .refreshable { await onRefresh() }
                 }
+            }
+
+            // すりガラスヘッダー（最前面に固定・下方向にフェードアウト）
+            VStack(spacing: 0) {
+                headerView
+                    .padding(.horizontal, AppSpacing.spXlarge)
+                    .padding(.bottom, AppSpacing.spLarge)
+            }
+            .frame(maxWidth: .infinity)
+            .background(
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    //.opacity(0.4)
+                    .ignoresSafeArea(edges: .top)
+                    .mask(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .black, location: 0.0),
+                                .init(color: .clear, location: 1.0),
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .ignoresSafeArea(edges: .top)
+                    )
+            )
+
+            // すりガラスフッター（最前面に固定・上方向にフェードアウト）
+            VStack(spacing: 0) {
+                Spacer()
+                VStack(spacing: 0) {
+                    Button(action: { showMyPageForAddFriend = true }) {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "plus")
+                                .font(.system(size: AppTypography.heading, weight: .black))
+                            Text("ADD FRIENDS")
+                                .font(.system(size: AppTypography.heading, weight: .black))
+                            Spacer()
+                        }
+                        .foregroundColor(Color.white)
+                        .padding(.vertical, AppSpacing.spLarge)
+                        .frame(minHeight: 60)
+                        .background(Capsule().fill(Color.black))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, AppSpacing.spXlarge)
+                    .padding(.bottom, AppSpacing.spLarge)
+                    .padding(.top, AppSpacing.spLarge)
+                }
+                .frame(maxWidth: .infinity)
+                .background(
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        //.opacity(0.8)
+                        .ignoresSafeArea(edges: .bottom)
+                        .mask(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .clear, location: 0.0),
+                                    .init(color: .black, location: 1.0),
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .ignoresSafeArea(edges: .bottom)
+                        )
+                )
             }
         }
     }
@@ -305,7 +368,7 @@ struct FriendsBodyView: View {
             }
         }
         .frame(height: AppSize.iconLarge)
-        .padding(.bottom, AppSpacing.pageVertical)
+        .padding(.bottom, AppSpacing.spLarge)
     }
 }
 
@@ -326,7 +389,7 @@ struct FriendRow: View {
 
     var body: some View {
         Button(action: { if !justSent { onSend() } }) {
-            HStack(spacing: AppSpacing.itemGap) {
+            HStack(spacing: AppSpacing.spMedium) {
                 HeyBoyIconView(iconColorValue: avatarIconColor, size: AppSize.iconDefault)
 
                 Text(friend.displayName)
@@ -344,9 +407,9 @@ struct FriendRow: View {
                         .foregroundColor(AppColor.textSecondary)
                 }
             }
-            .padding(.leading, AppSpacing.pageVertical)
-            .padding(.trailing, AppSpacing.pageHorizontal)
-            .padding(.vertical, AppSpacing.pageVertical)
+            .padding(.leading, AppSpacing.spLarge)
+            .padding(.trailing, AppSpacing.spXlarge)
+            .padding(.vertical, AppSpacing.spLarge)
             .frame(minHeight: 80)
             .background(
                 Capsule()
@@ -433,15 +496,15 @@ private let previewRowStates: [String: FriendRowState] = [
 }
 
 #Preview("FriendRow - 各ステート") {
-    VStack(spacing: AppSpacing.itemGap) {
+    VStack(spacing: AppSpacing.spMedium) {
         FriendRow(friend: previewFriends[0], state: .sendHey,    justSent: false, avatarIconColor: .solid(hex: "B47850")) {}
         FriendRow(friend: previewFriends[1], state: .sendHey,    justSent: false, avatarIconColor: .solid(hex: "A020F0")) {}
         FriendRow(friend: previewFriends[2], state: .sendHo,     justSent: false, avatarIconColor: .solid(hex: "0064FF")) {}
         FriendRow(friend: previewFriends[3], state: .sendLetsGo, justSent: false, avatarIconColor: .solid(hex: "FF3030")) {}
         FriendRow(friend: previewFriends[5], state: .sendHey,    justSent: false, avatarIconColor: .gradient(presetId: "sunset")) {}
     }
-    .padding(.horizontal, AppSpacing.pageHorizontal)
-    .padding(.vertical, AppSpacing.pageVertical)
+    .padding(.horizontal, AppSpacing.spXlarge)
+    .padding(.vertical, AppSpacing.spLarge)
     .frame(maxWidth: .infinity)
     .background(AppColor.backgroundPrimary)
 }
