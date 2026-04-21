@@ -9,6 +9,8 @@ final class AuthState: ObservableObject {
     @Published private(set) var currentUserId: String?
     /// プロフィール設定が完了しているか（displayNameが存在するか）
     @Published private(set) var isProfileSetupComplete = false
+    /// 認証チェック時に取得したユーザー情報のキャッシュ（二重取得防止用）
+    @Published private(set) var currentUser: AppUser?
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     init() {
@@ -18,10 +20,12 @@ final class AuthState: ObservableObject {
                 self?.currentUserId = user?.uid
                 if let uid = user?.uid {
                     PushService.shared.saveTokenToFirestoreIfNeeded()
-                    // プロフィール設定状態を確認
-                    let hasProfile = await self?.checkProfileSetup(userId: uid) ?? false
-                    self?.isProfileSetupComplete = hasProfile
+                    // プロフィール設定状態を確認し、ユーザー情報をキャッシュ
+                    let appUser = try? await FirestoreService.shared.getUser(userId: uid)
+                    self?.currentUser = appUser
+                    self?.isProfileSetupComplete = appUser.map { !$0.displayName.isEmpty } ?? false
                 } else {
+                    self?.currentUser = nil
                     self?.isProfileSetupComplete = false
                 }
                 self?.isLoading = false
@@ -81,18 +85,15 @@ final class AuthState: ObservableObject {
         )
     }
 
-    /// Firestoreのユーザードキュメントにプロフィールが設定済みか確認
-    private func checkProfileSetup(userId: String) async -> Bool {
-        guard let user = try? await FirestoreService.shared.getUser(userId: userId) else {
-            return false
-        }
-        // displayNameが空でなければ設定済みとみなす
-        return !user.displayName.isEmpty
-    }
-
     /// プロフィール設定完了をマーク（EditProfileView保存後に呼ぶ）
     func markProfileSetupComplete() {
         isProfileSetupComplete = true
+    }
+
+    /// キャッシュ済みユーザー情報を Firestore から再取得する
+    func refreshCurrentUser() async {
+        guard let uid = currentUserId else { return }
+        currentUser = try? await FirestoreService.shared.getUser(userId: uid)
     }
 
     func signOut() throws {
