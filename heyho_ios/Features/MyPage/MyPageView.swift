@@ -1,3 +1,5 @@
+import CoreImage.CIFilterBuiltins
+import SafariServices
 import SwiftUI
 
 // hex文字列 → Color（モジュール内で共有）
@@ -35,8 +37,8 @@ private struct CapsuleButton: View {
                 .font(.system(size: AppTypography.label, weight: .bold))
                 .foregroundColor(AppColor.textPrimary)
                 .frame(maxWidth: maxWidth)
-                .padding(.horizontal, AppSpacing.pageVertical)
-                .padding(.vertical, AppSpacing.inlineGap)
+                .padding(.horizontal, AppSpacing.spMedium)
+                .padding(.vertical, AppSpacing.spSmall)
                 .overlay(
                     Capsule()
                         .stroke(AppColor.borderStrong, lineWidth: AppSize.borderUnderline)
@@ -48,19 +50,36 @@ private struct CapsuleButton: View {
 
 // MARK: - 下線付きテキスト
 
-private struct UnderlinedText: View {
+private struct UnderlinedText<Trailing: View>: View {
     let text: String
     let font: Font
+    let trailing: Trailing
+
+    init(text: String, font: Font, @ViewBuilder trailing: () -> Trailing) {
+        self.text = text
+        self.font = font
+        self.trailing = trailing()
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.compactGap) {
-            Text(text)
-                .font(font)
-                .foregroundColor(AppColor.textPrimary)
+        VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
+            HStack(alignment: .center) {
+                Text(text)
+                    .font(font)
+                    .foregroundColor(AppColor.textPrimary)
+                Spacer()
+                trailing
+            }
             Rectangle()
                 .fill(AppColor.borderStrong)
                 .frame(height: AppSize.borderStrong)
         }
+    }
+}
+
+extension UnderlinedText where Trailing == EmptyView {
+    init(text: String, font: Font) {
+        self.init(text: text, font: font) { EmptyView() }
     }
 }
 
@@ -87,6 +106,8 @@ struct MyPageView: View {
     @State private var showSignOutConfirmation = false
     @State private var showDeleteConfirmation = false
     @State private var isDeletingAccount = false
+    @State private var showQRCode = false
+    @State private var safariURL: URL?
     @FocusState private var isFriendCodeFocused: Bool
 
     /// 招待コードバリデーション（英数のみ8文字）
@@ -100,207 +121,23 @@ struct MyPageView: View {
         let code = friendCodeInput.trimmingCharacters(in: .whitespaces)
         if code.isEmpty { return nil }
         if code.range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) == nil {
-            return "英数字のみ使用できます"
+            return String(localized: "Only alphanumeric characters allowed")
         }
-        if code.count < 8 { return "8文字で入力してください" }
+        if code.count < 8 { return String(localized: "Enter exactly 8 characters") }
         return nil
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // ヘッダー
-            ZStack {
-                Text("HELLO,HEY HO")
-                    .font(.system(size: AppTypography.body, weight: .bold))
-                    .foregroundColor(AppColor.textPrimary)
-
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: AppTypography.body, weight: .bold))
-                            .foregroundColor(AppColor.textPrimary)
-                            .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
-                            .background(Color(white: 0.9))
-                            .clipShape(Circle())
-                    }
-                    Spacer()
-                }
-            }
-            .padding(.horizontal, AppSpacing.pageHorizontal)
-            .padding(.top, AppSpacing.inlineGap)
-            .padding(.bottom, AppSpacing.pageVertical)
-
+            headerView
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.sectionGap) {
-                    // HeyBoyアイコン + MY NAME IS（横並び）
-                    HStack(alignment: .center, spacing: AppSpacing.itemGap) {
-                        if let user = currentUser {
-                            HeyBoyIconView(
-                                iconColorValue: IconColorValue(firestoreString: user.iconColor),
-                                size: AppSize.iconLarge,
-                                showPremiumBadge: storeService.isPremium
-                            )
-                        } else {
-                            // ユーザー読み込み前は黒円のみ表示
-                            Circle()
-                                .fill(Color.black)
-                                .frame(width: AppSize.iconLarge, height: AppSize.iconLarge)
-                        }
-
-                        VStack(alignment: .leading, spacing: AppSpacing.compactGap) {
-                            Text("MY NAME IS")
-                                .font(.system(size: AppTypography.label, weight: .bold))
-                                .foregroundColor(AppColor.textSecondary)
-
-                            Text(currentUser?.displayName ?? "——————")
-                                .font(.system(size: AppTypography.title, weight: .black))
-                                .foregroundColor(AppColor.textPrimary)
-                            
-                            Rectangle()
-                                .fill(AppColor.borderStrong)
-                                .frame(height: AppSize.borderStrong)
-                                .lineLimit(2)
-                                .minimumScaleFactor(0.7)
-                            Spacer()
-                            // edit profile ボタン
-                            CapsuleButton(title: "edit profile", maxWidth: .infinity) {
-                                showEditProfile = true
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-
-                    // MY CODE IS
-                    VStack(alignment: .leading, spacing: AppSpacing.inlineGap) {
-                        Text("MY CODE IS")
-                            .font(.system(size: AppTypography.label, weight: .bold))
-                            .foregroundColor(AppColor.textSecondary)
-
-                        HStack(alignment: .bottom) {
-                            if isLoadingInviteCode {
-                                ProgressView()
-                            } else {
-                                UnderlinedText(
-                                    text: inviteCode ?? "————————",
-                                    font: .system(size: AppTypography.title, weight: .black).monospaced()
-                                )
-                            }
-                            Spacer()
-                            CapsuleButton(title: "share", maxWidth: AppSize.capsuleButtonWidth) {
-                                shareInviteCode()
-                            }
-                        }
-                    }
-
-                    // ADD FRIENDS
-                    VStack(alignment: .leading, spacing: AppSpacing.inlineGap) {
-                        Text("ADD FRIENDS")
-                            .font(.system(size: AppTypography.label, weight: .bold))
-                            .foregroundColor(AppColor.textSecondary)
-
-                        HStack(alignment: .bottom) {
-                            VStack(spacing: AppSpacing.compactGap) {
-                                TextField("FRIEND'S CODE", text: $friendCodeInput,
-                                         prompt: Text("FRIEND'S CODE")
-                                            .foregroundColor(AppColor.textTertiary))
-                                    .font(.system(size: AppTypography.title, weight: .black))
-                                    .textInputAutocapitalization(.characters)
-                                    .autocorrectionDisabled()
-                                    .foregroundColor(AppColor.textPrimary)
-                                    .focused($isFriendCodeFocused)
-                                    .onChange(of: friendCodeInput) { newValue in
-                                        // 英数字のみ・8文字制限・大文字変換
-                                        let filtered = String(newValue.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }.prefix(8)).uppercased()
-                                        if filtered != newValue { friendCodeInput = filtered }
-                                    }
-                                Rectangle()
-                                    .fill(friendCodeValidationError != nil ? Color.red : AppColor.borderStrong)
-                                    .frame(height: AppSize.borderStrong)
-                                if let error = friendCodeValidationError {
-                                    Text(error)
-                                        .font(.system(size: AppTypography.caption, weight: .medium))
-                                        .foregroundColor(.red)
-                                }
-                            }
-                            Spacer(minLength: AppSpacing.pageVertical)
-                            CapsuleButton(title: "add", maxWidth: AppSize.capsuleButtonWidth) {
-                                addFriendByCode()
-                            }
-                            .disabled(!isFriendCodeValid || isAddingFriend)
-                            .opacity(!isFriendCodeValid || isAddingFriend ? 0.4 : 1)
-                        }
-                    }
-
-                    // プレミアム + リンク類
-                    VStack(alignment: .leading, spacing: AppSpacing.pageVertical) {
-                        if storeService.isPremium {
-                            HStack(spacing: AppSpacing.inlineGap) {
-                                Image(systemName: "checkmark.seal.fill")
-                                    .foregroundColor(AppColor.interactivePrimary)
-                                Text("PREMIUM")
-                                    .font(.system(size: AppTypography.body, weight: .black))
-                                    .foregroundColor(AppColor.interactivePrimary)
-                            }
-
-                            #if DEBUG
-                            Button(action: { storeService.debugRevokePremium() }) {
-                                Text("DEBUG: REVOKE PREMIUM")
-                                    .font(.system(size: AppTypography.body, weight: .black))
-                                    .foregroundColor(.orange)
-                            }
-                            #endif
-                        } else {
-                            Button(action: { showPaywall = true }) {
-                                Text("UPGRADE TO PREMIUM")
-                                    .font(.system(size: AppTypography.body, weight: .black))
-                                    .foregroundColor(AppColor.interactivePrimary)
-                            }
-                        }
-
-                        Button(action: { restorePurchases() }) {
-                            Text("RESTORE PURCHASES")
-                                .font(.system(size: AppTypography.body, weight: .black))
-                                .foregroundColor(AppColor.textPrimary)
-                        }
-
-                        Button(action: { openURL(AppURL.privacy) }) {
-                            Text("PRIVACY POLICY")
-                                .font(.system(size: AppTypography.body, weight: .black))
-                                .foregroundColor(AppColor.textPrimary)
-                        }
-
-                        Button(action: { openURL(AppURL.terms) }) {
-                            Text("TERMS")
-                                .font(.system(size: AppTypography.body, weight: .black))
-                                .foregroundColor(AppColor.textPrimary)
-                        }
-
-                        Button(action: { openURL(AppURL.commercial) }) {
-                            Text("特定商取引法に基づく表記")
-                                .font(.system(size: AppTypography.body, weight: .black))
-                                .foregroundColor(AppColor.textPrimary)
-                        }
-
-                        Button(action: { signOut() }) {
-                            Text("SIGN OUT")
-                                .font(.system(size: AppTypography.body, weight: .black))
-                                .foregroundColor(AppColor.textPrimary)
-                        }
-
-                        Button(action: { deleteAccount() }) {
-                            if isDeletingAccount {
-                                ProgressView()
-                            } else {
-                                Text("DELETE ACCOUNT")
-                                    .font(.system(size: AppTypography.body, weight: .black))
-                                    .foregroundColor(AppColor.textDestructive)
-                            }
-                        }
-                        .disabled(isDeletingAccount)
-                    }
-                    .padding(.top, AppSpacing.inlineGap)
+                VStack(alignment: .leading, spacing: AppSpacing.spXxlarge) {
+                    profileSection
+                    inviteCodeSection
+                    addFriendSection
+                    settingsSection.padding(.top, AppSpacing.spSmall)
                 }
-                .padding(.horizontal, AppSpacing.pageHorizontal)
+                .padding(.horizontal, AppSpacing.spXlarge)
                 .padding(.bottom, 40)
             }
         }
@@ -309,9 +146,8 @@ struct MyPageView: View {
                 Color.black.opacity(0.4)
                     .ignoresSafeArea()
                     .overlay {
-                        VStack(spacing: AppSpacing.inlineGap) {
-                            ProgressView()
-                                .tint(.white)
+                        VStack(spacing: AppSpacing.spSmall) {
+                            ProgressView().tint(.white)
                             Text("SEARCHING...")
                                 .font(.system(size: AppTypography.label, weight: .bold))
                                 .foregroundColor(.white)
@@ -325,7 +161,6 @@ struct MyPageView: View {
             loadUser()
             loadInviteCode()
             if focusAddFriend {
-                // キーボード表示のためにわずかに遅延させる
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     isFriendCodeFocused = true
                 }
@@ -337,20 +172,218 @@ struct MyPageView: View {
                 .environmentObject(authState)
                 .environmentObject(storeService)
         }
+        .sheet(isPresented: $showQRCode) {
+            if let code = inviteCode {
+                InviteQRCodeView(inviteCode: code).presentationDetents([.large])
+            }
+        }
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeService)
         }
-        .alert("サインアウト", isPresented: $showSignOutConfirmation) {
-            Button("サインアウト", role: .destructive) { performSignOut() }
-            Button("キャンセル", role: .cancel) {}
+        .alert("Sign Out", isPresented: $showSignOutConfirmation) {
+            Button("Sign Out", role: .destructive) { performSignOut() }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("サインアウトしますか？")
+            Text("Are you sure you want to sign out?")
         }
-        .alert("アカウント削除", isPresented: $showDeleteConfirmation) {
-            Button("削除する", role: .destructive) { performDeleteAccount() }
-            Button("キャンセル", role: .cancel) {}
+        .sheet(item: $safariURL) { url in
+            SafariView(url: url).ignoresSafeArea()
+        }
+        .alert("Delete Account", isPresented: $showDeleteConfirmation) {
+            Button("Delete", role: .destructive) { performDeleteAccount() }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("アカウントを削除すると、すべてのデータが完全に削除されます。この操作は取り消せません。")
+            Text("Deleting your account will permanently remove all data. This action cannot be undone.")
+        }
+    }
+
+    // MARK: - サブビュー
+
+    private var headerView: some View {
+        ZStack {
+            Text("HELLO,HEY HO")
+                .font(.system(size: AppTypography.body, weight: .bold))
+                .foregroundColor(AppColor.textPrimary)
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: AppTypography.body, weight: .bold))
+                        .foregroundColor(AppColor.textPrimary)
+                        .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
+                        .background(AppColor.buttonIconBackground)
+                        .clipShape(Circle())
+                }
+                Spacer()
+            }
+        }
+        .padding(.horizontal, AppSpacing.spXlarge)
+        .padding(.top, AppSpacing.spSmall)
+        .padding(.bottom, AppSpacing.spLarge)
+    }
+
+    private var profileSection: some View {
+        HStack(alignment: .center, spacing: AppSpacing.spLarge) {
+            if let user = currentUser {
+                HeyBoyIconView(
+                    iconColorValue: IconColorValue(firestoreString: user.iconColor),
+                    size: AppSize.iconLarge,
+                    showPremiumBadge: storeService.isPremium
+                )
+            } else {
+                Circle()
+                    .fill(Color.black)
+                    .frame(width: AppSize.iconLarge, height: AppSize.iconLarge)
+            }
+
+            VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
+                Text("MY NAME IS")
+                    .font(.system(size: AppTypography.label, weight: .bold))
+                    .foregroundColor(AppColor.textSecondary)
+                Text(currentUser?.displayName ?? "——————")
+                    .font(.system(size: AppTypography.title, weight: .black))
+                    .foregroundColor(AppColor.textPrimary)
+                Rectangle()
+                    .fill(AppColor.borderStrong)
+                    .frame(height: AppSize.borderStrong)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                Spacer()
+                CapsuleButton(title: "EDIT PROFILE", maxWidth: .infinity) {
+                    showEditProfile = true
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var inviteCodeSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
+            Text("MY CODE IS")
+                .font(.system(size: AppTypography.label, weight: .bold))
+                .foregroundColor(AppColor.textSecondary)
+            HStack(alignment: .center) {
+                if isLoadingInviteCode {
+                    ProgressView().frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    UnderlinedText(
+                        text: inviteCode ?? "————————",
+                        font: .system(size: AppTypography.title, weight: .black)
+                    ) {
+                        Button(action: { showQRCode = true }) {
+                            Image(systemName: "qrcode")
+                                .font(.system(size: AppTypography.heading, weight: .bold))
+                                .foregroundColor(AppColor.textPrimary)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(inviteCode == nil)
+                        .opacity(inviteCode == nil ? 0.4 : 1)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                CapsuleButton(title: "SHARE", maxWidth: AppSize.capsuleButtonWidth) {
+                    shareInviteCode()
+                }
+            }
+        }
+    }
+
+    private var addFriendSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
+            Text("ADD FRIENDS")
+                .font(.system(size: AppTypography.label, weight: .bold))
+                .foregroundColor(AppColor.textSecondary)
+            HStack(alignment: .center) {
+                VStack(spacing: AppSpacing.spXsmall) {
+                    TextField("FRIEND'S CODE", text: $friendCodeInput,
+                             prompt: Text("FRIEND'S CODE").foregroundColor(AppColor.textTertiary))
+                        .font(.system(size: AppTypography.title, weight: .black))
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                        .foregroundColor(AppColor.textPrimary)
+                        .focused($isFriendCodeFocused)
+                        .onChange(of: friendCodeInput) {
+                            let filtered = String(friendCodeInput.unicodeScalars
+                                .filter { CharacterSet.alphanumerics.contains($0) }
+                                .prefix(8)).uppercased()
+                            if filtered != friendCodeInput { friendCodeInput = filtered }
+                        }
+                    Rectangle()
+                        .fill(friendCodeValidationError != nil ? Color.red : AppColor.borderStrong)
+                        .frame(height: AppSize.borderStrong)
+                    if let error = friendCodeValidationError {
+                        Text(error)
+                            .font(.system(size: AppTypography.caption, weight: .medium))
+                            .foregroundColor(.red)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                CapsuleButton(title: "ADD", maxWidth: AppSize.capsuleButtonWidth) {
+                    addFriendByCode()
+                }
+                .disabled(!isFriendCodeValid || isAddingFriend)
+                .opacity(!isFriendCodeValid || isAddingFriend ? 0.4 : 1)
+            }
+        }
+    }
+
+    private var settingsSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.spXxlarge) {
+            if storeService.isPremium {
+                HStack(spacing: AppSpacing.spSmall) {
+                    Image(systemName: "checkmark.seal.fill").foregroundColor(AppColor.interactivePrimary)
+                    Text("PREMIUM")
+                        .font(.system(size: AppTypography.body, weight: .black))
+                        .foregroundColor(AppColor.interactivePrimary)
+                }
+                #if DEBUG
+                Button(action: { storeService.debugRevokePremium() }) {
+                    Text("DEBUG: REVOKE PREMIUM")
+                        .font(.system(size: AppTypography.body, weight: .black))
+                        .foregroundColor(.orange)
+                }
+                #endif
+            } else {
+                Button(action: { showPaywall = true }) {
+                    Text("LET'S GO PREMIUM")
+                        .font(.system(size: AppTypography.body, weight: .bold))
+                        .foregroundColor(AppColor.iconInverse)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, AppSpacing.spLarge)
+                        .background(AppColor.interactivePrimary)
+                        .clipShape(Capsule())
+                }
+            }
+
+            Button(action: { safariURL = AppURL.privacy }) {
+                Text("PRIVACY POLICY")
+                    .font(.system(size: AppTypography.body, weight: .black))
+                    .foregroundColor(AppColor.textPrimary)
+            }
+            Button(action: { safariURL = AppURL.terms }) {
+                Text("TERMS")
+                    .font(.system(size: AppTypography.body, weight: .black))
+                    .foregroundColor(AppColor.textPrimary)
+            }
+            Button(action: { safariURL = AppURL.commercial }) {
+                Text("LEGAL INFORMATION")
+                    .font(.system(size: AppTypography.body, weight: .black))
+                    .foregroundColor(AppColor.textPrimary)
+            }
+            Button(action: { signOut() }) {
+                Text("SIGN OUT")
+                    .font(.system(size: AppTypography.body, weight: .black))
+                    .foregroundColor(AppColor.textPrimary)
+            }
+            Button(action: { deleteAccount() }) {
+                if isDeletingAccount {
+                    ProgressView()
+                } else {
+                    Text("DELETE ACCOUNT")
+                        .font(.system(size: AppTypography.body, weight: .black))
+                        .foregroundColor(AppColor.textDestructive)
+                }
+            }
+            .disabled(isDeletingAccount)
         }
     }
 
@@ -393,11 +426,11 @@ struct MyPageView: View {
         Task {
             do {
                 guard let friendId = try await FirestoreService.shared.getUserIdByInviteCode(code) else {
-                    await MainActor.run { isAddingFriend = false; errorMessage = "コードが見つかりません" }
+                    await MainActor.run { isAddingFriend = false; errorMessage = String(localized: "Code not found") }
                     return
                 }
                 if friendId == myId {
-                    await MainActor.run { isAddingFriend = false; errorMessage = "自分のコードです" }
+                    await MainActor.run { isAddingFriend = false; errorMessage = String(localized: "This is your own code") }
                     return
                 }
                 try await FirestoreService.shared.addFriend(userId: myId, friendId: friendId)
@@ -410,17 +443,14 @@ struct MyPageView: View {
                     dismiss()
                 }
             } catch {
-                let msg = (error as NSError).userInfo[NSLocalizedDescriptionKey] as? String ?? error.localizedDescription
                 await MainActor.run {
                     isAddingFriend = false
-                    errorMessage = msg == "既に友達です" ? "すでに友だちです" : msg
+                    errorMessage = FirestoreService.isAlreadyFriendsError(error)
+                        ? String(localized: "Already friends")
+                        : error.localizedDescription
                 }
             }
         }
-    }
-
-    private func openURL(_ url: URL) {
-        UIApplication.shared.open(url)
     }
 
     private func signOut() {
@@ -455,5 +485,162 @@ struct MyPageView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - アプリ内ブラウザ
+
+extension URL: @retroactive Identifiable {
+    public var id: String { absoluteString }
+}
+
+private struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        SFSafariViewController(url: url)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
+}
+
+// MARK: - QRコード表示シート
+
+private struct InviteQRCodeView: View {
+    let inviteCode: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var cardImage: UIImage?
+
+    var body: some View {
+        VStack(spacing: AppSpacing.spLarge) {
+            // 閉じるボタン
+            HStack {
+                Spacer()
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: AppTypography.body, weight: .bold))
+                        .foregroundColor(AppColor.textPrimary)
+                        .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
+                        .background(AppColor.buttonIconBackground)
+                        .clipShape(Circle())
+                }
+            }
+            .padding(.horizontal, AppSpacing.spLarge)
+
+            Spacer()
+
+            // 4:5 シェアカード
+            shareCardContent
+                .onAppear { renderCardImage() }
+
+            Spacer()
+
+            // シェアボタン
+            Button(action: { shareCard() }) {
+                Text("SHARE")
+                    .font(.system(size: AppTypography.body, weight: .bold))
+                    .foregroundColor(AppColor.iconInverse)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppSpacing.spLarge)
+                    .background(AppColor.interactivePrimary)
+                    .clipShape(Capsule())
+            }
+            .padding(.horizontal, AppSpacing.spXlarge)
+        }
+        .padding(.vertical, AppSpacing.spLarge)
+    }
+
+    /// 4:5カードのコンテンツ
+    private var shareCardContent: some View {
+        VStack(spacing: AppSpacing.spXlarge) {
+            Spacer()
+
+            // QRコード
+            if let qrImage = generateQRCode() {
+                Image(uiImage: qrImage)
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 180, height: 180)
+            }
+
+            // 招待コード
+            VStack(spacing: AppSpacing.spXsmall) {
+                Text("MY CODE IS")
+                    .font(.system(size: AppTypography.label, weight: .bold))
+                    .foregroundColor(AppColor.textSecondary)
+                Text(inviteCode)
+                    .font(.system(size: AppTypography.title, weight: .black))
+                    .foregroundColor(AppColor.textPrimary)
+            }
+
+            Spacer()
+
+            // アプリロゴ
+            Image("AppLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 28)
+        }
+        .padding(AppSpacing.spXlarge)
+        .frame(width: 300, height: 375) // 4:5
+        .background(AppColor.backgroundSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: AppSpacing.spLarge))
+        .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+    }
+
+    /// カードをUIImageにレンダリング
+    @MainActor
+    private func renderCardImage() {
+        let renderer = ImageRenderer(content: shareCardContent)
+        renderer.scale = 3
+        cardImage = renderer.uiImage
+    }
+
+    /// カード画像をシェア
+    private func shareCard() {
+        renderCardImage()
+        guard let image = cardImage else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [image],
+            applicationActivities: nil
+        )
+
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let root = windowScene.windows.first?.rootViewController else { return }
+
+        var topVC = root
+        while let presented = topVC.presentedViewController {
+            topVC = presented
+        }
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = topVC.view
+            popover.sourceRect = CGRect(
+                x: topVC.view.bounds.midX,
+                y: topVC.view.bounds.midY,
+                width: 0, height: 0
+            )
+            popover.permittedArrowDirections = []
+        }
+
+        topVC.present(activityVC, animated: true)
+    }
+
+    /// 招待コード付きダウンロードリンクのQRコードを生成
+    private func generateQRCode() -> UIImage? {
+        let urlString = "\(AppURL.appStore.absoluteString)?code=\(inviteCode)"
+        let context = CIContext()
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(urlString.utf8)
+        filter.correctionLevel = "M"
+
+        guard let ciImage = filter.outputImage else { return nil }
+        // QRコードを鮮明にスケール
+        let scale = 200 / ciImage.extent.width
+        let scaled = ciImage.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        guard let cgImage = context.createCGImage(scaled, from: scaled.extent) else { return nil }
+        return UIImage(cgImage: cgImage)
     }
 }

@@ -8,7 +8,7 @@ struct PaywallView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer().frame(height: AppSpacing.inlineGap)
+            Spacer().frame(height: AppSpacing.spSmall)
 
             // ヘッダー
             ZStack {
@@ -28,26 +28,26 @@ struct PaywallView: View {
                     Spacer()
                 }
             }
-            .padding(.horizontal, AppSpacing.pageHorizontal)
-            .padding(.top, AppSpacing.inlineGap)
-            .padding(.bottom, AppSpacing.pageVertical)
+            .padding(.horizontal, AppSpacing.spXlarge)
+            .padding(.top, AppSpacing.spSmall)
+            .padding(.bottom, AppSpacing.spLarge)
 
             ScrollView {
-                VStack(spacing: AppSpacing.sectionGap) {
+                VStack(spacing: AppSpacing.spXxlarge) {
                     // HeyBoyアイコン
-                    HeyBoyIconView(bodyColor: .yellow, size: AppSize.iconLarge)
-                        .padding(.top, AppSpacing.pageVertical)
+                    HeyBoyIconView(bodyColor: AppColor.defaultIconColor, size: AppSize.iconLarge)
+                        .padding(.top, AppSpacing.spLarge)
 
                     // 機能説明
-                    VStack(alignment: .leading, spacing: AppSpacing.itemGap) {
-                        featureRow(icon: "bolt.fill", text: "LET'S GO が送れる")
-                        featureRow(icon: "paintpalette.fill", text: "アイコンカラー全12色 + グラデーション")
-                        featureRow(icon: "speaker.wave.2.fill", text: "カスタムサウンド")
+                    VStack(alignment: .leading, spacing: AppSpacing.spMedium) {
+                        featureRow(icon: "bolt.fill", text: String(localized: "Send LET'S GO"))
+                        featureRow(icon: "paintpalette.fill", text: String(localized: "All 12 icon colors + gradients"))
+                        featureRow(icon: "speaker.wave.2.fill", text: String(localized: "Custom sounds"))
                     }
-                    .padding(.horizontal, AppSpacing.pageHorizontal)
+                    .padding(.horizontal, AppSpacing.spXlarge)
 
                     // 価格 + 購入ボタン
-                    VStack(spacing: AppSpacing.itemGap) {
+                    VStack(spacing: AppSpacing.spMedium) {
                         if let product = storeService.products.first {
                             Text(product.displayPrice)
                                 .font(.system(size: AppTypography.display, weight: .black))
@@ -59,13 +59,13 @@ struct PaywallView: View {
                                 .font(.system(size: AppTypography.body, weight: .bold))
                                 .foregroundColor(AppColor.iconInverse)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, AppSpacing.pageVertical)
+                                .padding(.vertical, AppSpacing.spLarge)
                                 .background(AppColor.interactivePrimary)
                                 .clipShape(Capsule())
                         }
                         .disabled(isPurchasing || storeService.products.isEmpty)
                         .opacity(isPurchasing || storeService.products.isEmpty ? 0.6 : 1)
-                        .padding(.horizontal, AppSpacing.pageHorizontal)
+                        .padding(.horizontal, AppSpacing.spXlarge)
 
                         Button(action: { restorePurchases() }) {
                             Text("RESTORE PURCHASES")
@@ -74,7 +74,7 @@ struct PaywallView: View {
                         }
                         .disabled(isPurchasing)
                     }
-                    .padding(.top, AppSpacing.pageVertical)
+                    .padding(.top, AppSpacing.spLarge)
                 }
                 .padding(.bottom, 40)
             }
@@ -86,15 +86,15 @@ struct PaywallView: View {
             }
         }
         .errorAlert($storeService.purchaseError)
-        .onChange(of: storeService.isPremium) { newValue in
-            if newValue { dismiss() }
+        .onChange(of: storeService.isPremium) {
+            if storeService.isPremium { dismiss() }
         }
     }
 
     // MARK: - コンポーネント
 
     private func featureRow(icon: String, text: String) -> some View {
-        HStack(spacing: AppSpacing.itemGap) {
+        HStack(spacing: AppSpacing.spMedium) {
             Image(systemName: icon)
                 .font(.system(size: AppTypography.body))
                 .foregroundColor(AppColor.interactivePrimary)

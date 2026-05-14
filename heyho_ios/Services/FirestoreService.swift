@@ -134,6 +134,11 @@ final class FirestoreService {
         case failedToGenerateCode = -3
     }
 
+    static func isAlreadyFriendsError(_ error: Error) -> Bool {
+        let e = error as NSError
+        return e.domain == "FirestoreService" && e.code == ErrorCode.alreadyFriends.rawValue
+    }
+
     // MARK: - Friends (subcollection: users/{userId}/friends/{friendId})
 
     /// 自分側の friends ドキュメントのみ作成する。相手側は Cloud Function (onFriendAdded) が自動作成する。
