@@ -36,6 +36,9 @@ enum AppColor {
     static let messageHo     = hex("FF8D28")
     static let messageLetsGo = hex("34C759")
 
+    // MARK: - ボタン背景
+    static let buttonIconBackground = Color(white: 0.9)
+
     // MARK: - テキスト
     static let textPrimary     = hex("000000")
     static let textSecondary   = hex("9CA3AF")

@@ -14,16 +14,16 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("表示名") {
+                Section("Display Name") {
                     if isEditingName {
-                        TextField("表示名", text: $displayName)
+                        TextField("Display Name", text: $displayName)
                             .textFieldStyle(.roundedBorder)
                         HStack {
-                            Button("保存") {
+                            Button("Save") {
                                 saveDisplayName()
                             }
                             .disabled(displayName.trimmingCharacters(in: .whitespaces).isEmpty)
-                            Button("キャンセル") {
+                            Button("Cancel") {
                                 displayName = originalDisplayName
                                 isEditingName = false
                             }
@@ -32,18 +32,18 @@ struct ProfileView: View {
                         HStack {
                             Text(displayName.isEmpty ? "—" : displayName)
                             Spacer()
-                            Button("変更") {
+                            Button("Edit") {
                                 originalDisplayName = displayName
                                 isEditingName = true
                             }
                         }
                     }
                 }
-                Section("マイ招待コード") {
+                Section("My Invite Code") {
                     if isLoadingInviteCode {
                         HStack {
                             ProgressView()
-                            Text("読み込み中...")
+                            Text("Loading...")
                                 .foregroundStyle(.secondary)
                         }
                     } else if let code = inviteCode {
@@ -51,7 +51,7 @@ struct ProfileView: View {
                             Text(code)
                                 .font(.title2.monospacedDigit().weight(.bold))
                             Spacer()
-                            Button(inviteCodeCopied ? "コピーしました" : "コピー") {
+                            Button(inviteCodeCopied ? String(localized: "Copied") : String(localized: "Copy")) {
                                 UIPasteboard.general.string = code
                                 inviteCodeCopied = true
                                 Task {
@@ -64,17 +64,17 @@ struct ProfileView: View {
                     }
                 }
                 Section {
-                    Button("友だちを追加") {
+                    Button("Add Friend") {
                         showAddFriend = true
                     }
                 }
                 Section {
-                    Button("サインアウト", role: .destructive) {
+                    Button("Sign Out", role: .destructive) {
                         signOut()
                     }
                 }
             }
-            .navigationTitle("プロフィール")
+            .navigationTitle("Profile")
             .onAppear {
                 loadDisplayName()
                 loadInviteCode()
@@ -90,12 +90,17 @@ struct ProfileView: View {
         guard let uid = authState.currentUserId else { return }
         isLoadingInviteCode = true
         Task {
-            defer { isLoadingInviteCode = false }
             do {
                 let code = try await FirestoreService.shared.ensureInviteCode(userId: uid)
-                inviteCode = code
+                await MainActor.run {
+                    inviteCode = code
+                    isLoadingInviteCode = false
+                }
             } catch {
-                errorMessage = error.localizedDescription
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    isLoadingInviteCode = false
+                }
             }
         }
     }

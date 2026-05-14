@@ -18,7 +18,7 @@ struct EditProfileView: View {
     @State private var isColorAnimating = false
     @FocusState private var isNameFocused: Bool
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.itemGap), count: 6)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.spMedium), count: 6)
 
     /// 名前バリデーション: 英数半角のみ6〜22文字、記号不可
     private var isNameValid: Bool {
@@ -28,15 +28,15 @@ struct EditProfileView: View {
     /// バリデーション結果を返す（nil = 有効、String = エラーメッセージ）
     private static func validateDisplayName(_ input: String) -> String? {
         let name = input.trimmingCharacters(in: .whitespaces)
-        if name.isEmpty { return "名前を入力してください" }
+        if name.isEmpty { return String(localized: "Please enter your name") }
         if !name.allSatisfy({ isAllowedCharacter($0) }) {
-            return "英数字と絵文字のみ使用できます"
+            return String(localized: "Only alphanumeric characters and emoji allowed")
         }
         if name.range(of: "heyho", options: .caseInsensitive) != nil {
-            return "\"heyho\" を含む名前は使用できません"
+            return String(localized: "Names containing \"heyho\" are not allowed")
         }
-        if name.count < 6 { return "6文字以上で入力してください" }
-        if name.count > 16 { return "16文字以内で入力してください" }
+        if name.count < 6 { return String(localized: "Enter at least 6 characters") }
+        if name.count > 16 { return String(localized: "Enter 16 characters or less") }
         return nil
     }
 
@@ -148,213 +148,22 @@ struct EditProfileView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer().frame(height: AppSpacing.inlineGap)
-
-            // ヘッダー
-            ZStack {
-                Text(isInitialSetup ? "SET UP PROFILE" : "EDIT PROFILE")
-                    .font(.system(size: AppTypography.body, weight: .bold))
-                    .foregroundColor(AppColor.textPrimary)
-
-                HStack {
-                    // ×ボタン（初回セットアップ時は非表示）
-                    if !isInitialSetup {
-                        Button(action: { dismiss() }) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: AppTypography.body, weight: .bold))
-                                .foregroundColor(AppColor.iconInverse)
-                                .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
-                                .background(Color(white: 0.8))
-                                .clipShape(Circle())
-                        }
-                    }
-
-                    Spacer()
-
-                    // ✓保存ボタン
-                    Button(action: { save() }) {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(AppColor.iconInverse)
-                            .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
-                            .background(isNameValid
-                                ? AppColor.interactivePrimary
-                                : AppColor.interactivePrimary.opacity(0.4))
-                            .clipShape(Circle())
-                    }
-                    .disabled(isSaving || !isNameValid)
-                }
-            }
-            .padding(.horizontal, AppSpacing.pageHorizontal)
-            .padding(.top, AppSpacing.inlineGap)
-            .padding(.bottom, AppSpacing.pageVertical)
-
+            Spacer().frame(height: AppSpacing.spSmall)
+            headerView
             ScrollView {
-                VStack(spacing: AppSpacing.pageHorizontal) {
-                    // HeyBoyアイコン
+                VStack(spacing: AppSpacing.spXlarge) {
                     HeyBoyIconView(
                         iconColorValue: selectedColorValue,
                         size: AppSize.iconLarge,
                         showPremiumBadge: storeService.isPremium,
                         isColorChanging: $isColorAnimating
                     )
-                    .padding(.top, AppSpacing.pageVertical)
+                    .padding(.top, AppSpacing.spLarge)
 
-                    // MY NAME IS
-                    VStack(alignment: .leading, spacing: AppSpacing.inlineGap) {
-                        Text("MY NAME IS")
-                            .font(.system(size: AppTypography.label, weight: .bold))
-                            .foregroundColor(AppColor.textSecondary)
-
-                        VStack(spacing: AppSpacing.compactGap) {
-                            TextField("6-16 characters", text: $displayName,
-                                     prompt: Text("6-16 characters")
-                                        .foregroundColor(AppColor.textTertiary),
-                                     axis: .vertical)
-                                .font(.system(size: AppTypography.title, weight: .black))
-                                .foregroundColor(AppColor.textPrimary)
-                                .keyboardType(.default)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                                .focused($isNameFocused)
-                                .onChange(of: displayName) { _ in validateName() }
-                            Rectangle()
-                                .fill(nameValidationError != nil
-                                    ? Color.red
-                                    : AppColor.borderStrong)
-                                .frame(height: AppSize.borderStrong)
-
-                            if let error = nameValidationError {
-                                Text(error)
-                                    .font(.system(size: AppTypography.caption, weight: .medium))
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, AppSpacing.pageHorizontal)
-
-                    // カラーパレット（フリー6色 + プレミアム6色）
-                    VStack(alignment: .leading, spacing: AppSpacing.inlineGap) {
-                        Text("SOLID COLORS")
-                            .font(.system(size: AppTypography.label, weight: .bold))
-                            .foregroundColor(AppColor.textSecondary)
-
-                        let allPresets = AppColor.freeIconPresets + AppColor.premiumIconPresets
-                        let freeHexSet = Set(AppColor.freeIconPresets.map(\.hex))
-                        LazyVGrid(columns: columns, spacing: AppSpacing.itemGap) {
-                            ForEach(Array(allPresets.enumerated()), id: \.element.hex) { index, preset in
-                                let isLocked = !freeHexSet.contains(preset.hex) && !storeService.isPremium
-                                Button(action: {
-                                    if isLocked {
-                                        showPaywall = true
-                                    } else {
-                                        selectedColorValue = .solid(hex: preset.hex)
-                                    }
-                                }) {
-                                    Circle()
-                                        .fill(Color(hex: preset.hex) ?? .gray)
-                                        .frame(width: AppSize.iconDefault, height: AppSize.iconDefault)
-                                        .overlay(
-                                            Circle()
-                                                .stroke(
-                                                    Color.gray.opacity(0.5),
-                                                    lineWidth: isSolidSelected(preset.hex) ? 3 : 0
-                                                )
-                                                .frame(width: AppSize.buttonHeight, height: AppSize.buttonHeight)
-                                        )
-                                        .overlay(
-                                            isLocked ? Image(systemName: "lock.fill")
-                                                .font(.system(size: AppTypography.caption))
-                                                .foregroundColor(.white.opacity(0.9))
-                                            : nil
-                                        )
-                                        .opacity(isLocked ? 0.5 : 1)
-                                }
-                                .buttonStyle(.plain)
-
-                                // プレミアムカラーの最後にランダムボタン
-                                if index == allPresets.count - 1 {
-                                    randomSolidButton
-                                }
-                            }
-                        }
-                        .allowsHitTesting(!isColorAnimating)
-                    }
-                    .padding(.horizontal, AppSpacing.pageHorizontal)
-
-                    // グラデーションパレット（プレミアム専用、6パターン）
-                    VStack(alignment: .leading, spacing: AppSpacing.inlineGap) {
-                        Text("GRADIENTS")
-                            .font(.system(size: AppTypography.label, weight: .bold))
-                            .foregroundColor(AppColor.textSecondary)
-
-                        LazyVGrid(columns: columns, spacing: AppSpacing.itemGap) {
-                            ForEach(Array(AppColor.premiumGradientPresets.enumerated()), id: \.element.id) { index, preset in
-                                let isLocked = !storeService.isPremium
-                                Button(action: {
-                                    if isLocked {
-                                        showPaywall = true
-                                    } else {
-                                        selectedColorValue = .gradient(presetId: preset.id)
-                                    }
-                                }) {
-                                    let colors = preset.hexStops.compactMap { Color(hex: $0) }
-                                    Circle()
-                                        .fill(
-                                            AngularGradient(
-                                                colors: colors + [colors.first ?? .clear],
-                                                center: .center
-                                            )
-                                        )
-                                        .frame(width: AppSize.iconDefault, height: AppSize.iconDefault)
-                                        .overlay(
-                                            Circle()
-                                                .stroke(
-                                                    Color.gray.opacity(0.5),
-                                                    lineWidth: isGradientSelected(preset.id) ? 3 : 0
-                                                )
-                                                .frame(width: AppSize.buttonHeight, height: AppSize.buttonHeight)
-                                        )
-                                        .overlay(
-                                            isLocked ? Image(systemName: "lock.fill")
-                                                .font(.system(size: AppTypography.caption))
-                                                .foregroundColor(.white.opacity(0.9))
-                                            : nil
-                                        )
-                                        .opacity(isLocked ? 0.5 : 1)
-                                }
-                                .buttonStyle(.plain)
-
-                                // 5プリセットの後（6番目）にランダムボタン
-                                if index == AppColor.premiumGradientPresets.count - 1 {
-                                    randomGradientButton
-                                }
-                            }
-                        }
-                        .allowsHitTesting(!isColorAnimating)
-                    }
-                    .padding(.horizontal, AppSpacing.pageHorizontal)
-
-                    // プレミアム動線
-                    if !storeService.isPremium {
-                        VStack(spacing: AppSpacing.inlineGap) {
-                            Text("無限のカラーを手に入れよう。")
-                                .font(.system(size: AppTypography.label, weight: .medium))
-                                .foregroundColor(AppColor.textSecondary)
-
-                            Button(action: { showPaywall = true }) {
-                                Text("UNLOCK ALL COLORS")
-                                    .font(.system(size: AppTypography.body, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: AppSize.buttonHeight)
-                                    .background(AppColor.interactivePrimary)
-                                    .clipShape(Capsule())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding(.horizontal, AppSpacing.pageHorizontal)
-                    }
+                    nameInputSection
+                    solidColorSection
+                    gradientSection
+                    if !storeService.isPremium { premiumUpgradeSection }
                 }
                 .padding(.bottom, 40)
             }
@@ -365,13 +174,188 @@ struct EditProfileView: View {
             if !isInitialSetup { loadUser() }
             if isInitialSetup { isNameFocused = true }
         }
-        .onChange(of: storeService.isPremium) { isPremium in
-            if !isPremium { resetColorIfLockedAndSave() }
+        .onChange(of: storeService.isPremium) {
+            if !storeService.isPremium { resetColorIfLockedAndSave() }
         }
         .errorAlert($errorMessage)
         .sheet(isPresented: $showPaywall) {
             PaywallView().environmentObject(storeService)
         }
+    }
+
+    // MARK: - サブビュー
+
+    private var headerView: some View {
+        ZStack {
+            Text(isInitialSetup ? "SET UP PROFILE" : "EDIT PROFILE")
+                .font(.system(size: AppTypography.body, weight: .bold))
+                .foregroundColor(AppColor.textPrimary)
+
+            HStack {
+                if !isInitialSetup {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: AppTypography.body, weight: .bold))
+                            .foregroundColor(AppColor.iconInverse)
+                            .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
+                            .background(AppColor.buttonIconBackground)
+                            .clipShape(Circle())
+                    }
+                }
+                Spacer()
+                Button(action: { save() }) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: AppTypography.body, weight: .bold))
+                        .foregroundColor(AppColor.iconInverse)
+                        .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
+                        .background(isNameValid
+                            ? AppColor.interactivePrimary
+                            : AppColor.interactivePrimary.opacity(0.4))
+                        .clipShape(Circle())
+                }
+                .disabled(isSaving || !isNameValid)
+            }
+        }
+        .padding(.horizontal, AppSpacing.spXlarge)
+        .padding(.top, AppSpacing.spSmall)
+        .padding(.bottom, AppSpacing.spLarge)
+    }
+
+    private var nameInputSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.spSmall) {
+            Text("MY NAME IS")
+                .font(.system(size: AppTypography.label, weight: .bold))
+                .foregroundColor(AppColor.textSecondary)
+
+            VStack(spacing: AppSpacing.spXsmall) {
+                TextField("6-16 characters", text: $displayName,
+                         prompt: Text("6-16 characters")
+                            .foregroundColor(AppColor.textTertiary))
+                    .font(.system(size: AppTypography.title, weight: .black))
+                    .foregroundColor(AppColor.textPrimary)
+                    .keyboardType(.default)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .focused($isNameFocused)
+                    .onChange(of: displayName) { validateName() }
+                Rectangle()
+                    .fill(nameValidationError != nil ? Color.red : AppColor.borderStrong)
+                    .frame(height: AppSize.borderStrong)
+
+                if let error = nameValidationError {
+                    Text(error)
+                        .font(.system(size: AppTypography.caption, weight: .medium))
+                        .foregroundColor(.red)
+                }
+            }
+        }
+        .padding(.horizontal, AppSpacing.spXlarge)
+    }
+
+    private var solidColorSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.spSmall) {
+            Text("SOLID COLORS")
+                .font(.system(size: AppTypography.label, weight: .bold))
+                .foregroundColor(AppColor.textSecondary)
+
+            let allPresets = AppColor.freeIconPresets + AppColor.premiumIconPresets
+            let freeHexSet = Set(AppColor.freeIconPresets.map(\.hex))
+            LazyVGrid(columns: columns, spacing: AppSpacing.spMedium) {
+                ForEach(Array(allPresets.enumerated()), id: \.element.hex) { index, preset in
+                    let isLocked = !freeHexSet.contains(preset.hex) && !storeService.isPremium
+                    Button(action: {
+                        if isLocked { showPaywall = true }
+                        else { selectedColorValue = .solid(hex: preset.hex) }
+                    }) {
+                        Circle()
+                            .fill(Color(hex: preset.hex) ?? .gray)
+                            .frame(width: AppSize.iconDefault, height: AppSize.iconDefault)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.gray.opacity(0.5),
+                                            lineWidth: isSolidSelected(preset.hex) ? 3 : 0)
+                                    .frame(width: AppSize.buttonHeight, height: AppSize.buttonHeight)
+                            )
+                            .overlay(
+                                isLocked ? Image(systemName: "lock.fill")
+                                    .font(.system(size: AppTypography.caption))
+                                    .foregroundColor(.white.opacity(0.9))
+                                : nil
+                            )
+                            .opacity(isLocked ? 0.5 : 1)
+                    }
+                    .buttonStyle(.plain)
+
+                    if index == allPresets.count - 1 { randomSolidButton }
+                }
+            }
+            .allowsHitTesting(!isColorAnimating)
+        }
+        .padding(.horizontal, AppSpacing.spXlarge)
+    }
+
+    private var gradientSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.spSmall) {
+            Text("GRADIENTS")
+                .font(.system(size: AppTypography.label, weight: .bold))
+                .foregroundColor(AppColor.textSecondary)
+
+            LazyVGrid(columns: columns, spacing: AppSpacing.spMedium) {
+                ForEach(Array(AppColor.premiumGradientPresets.enumerated()), id: \.element.id) { index, preset in
+                    let isLocked = !storeService.isPremium
+                    Button(action: {
+                        if isLocked { showPaywall = true }
+                        else { selectedColorValue = .gradient(presetId: preset.id) }
+                    }) {
+                        let colors = preset.hexStops.compactMap { Color(hex: $0) }
+                        Circle()
+                            .fill(AngularGradient(
+                                colors: colors + [colors.first ?? .clear],
+                                center: .center
+                            ))
+                            .frame(width: AppSize.iconDefault, height: AppSize.iconDefault)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.gray.opacity(0.5),
+                                            lineWidth: isGradientSelected(preset.id) ? 3 : 0)
+                                    .frame(width: AppSize.buttonHeight, height: AppSize.buttonHeight)
+                            )
+                            .overlay(
+                                isLocked ? Image(systemName: "lock.fill")
+                                    .font(.system(size: AppTypography.caption))
+                                    .foregroundColor(.white.opacity(0.9))
+                                : nil
+                            )
+                            .opacity(isLocked ? 0.5 : 1)
+                    }
+                    .buttonStyle(.plain)
+
+                    if index == AppColor.premiumGradientPresets.count - 1 { randomGradientButton }
+                }
+            }
+            .allowsHitTesting(!isColorAnimating)
+        }
+        .padding(.horizontal, AppSpacing.spXlarge)
+    }
+
+    private var premiumUpgradeSection: some View {
+        VStack(spacing: AppSpacing.spSmall) {
+            Text("Unlock infinite colors")
+                .font(.system(size: AppTypography.label, weight: .medium))
+                .foregroundColor(AppColor.textSecondary)
+
+            Button(action: { showPaywall = true }) {
+                Text("LET'S GO PREMIUM")
+                    .font(.system(size: AppTypography.body, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: AppSize.buttonHeight)
+                    .background(AppColor.interactivePrimary)
+                    .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, AppSpacing.spXlarge)
     }
 
     // MARK: - プレミアム解除時のカラーリセット
@@ -495,3 +479,4 @@ struct EditProfileView: View {
         }
     }
 }
+

@@ -104,11 +104,6 @@ struct IrisLoadingView: View {
         }
     }
 
-    // MARK: - isLoading 監視
-
-    func body(geo: GeometryProxy) -> some View {
-        EmptyView()
-    }
 }
 
 // MARK: - isLoading の変化を監視する modifier 版
@@ -178,7 +173,7 @@ private struct IrisLoadingPreview: View {
             // 背景コンテンツ（ダミー）
             VStack(spacing: 20) {
                 Text("メイン画面")
-                    .font(AppTypography.title)
+                    .font(.system(size: AppTypography.title, weight: .bold))
                 Button(isLoading ? "ローディング中..." : "ローディング開始") {
                     if !isLoading {
                         isLoading = true
