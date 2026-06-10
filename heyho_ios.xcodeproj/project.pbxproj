@@ -42,6 +42,9 @@
 		B0010062 /* AppSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010062 /* AppSize.swift */; };
 		B0010063 /* AppTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010063 /* AppTypography.swift */; };
 		B0010070 /* IconColorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010070 /* IconColorValue.swift */; };
+		B0010071 /* MessageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010071 /* MessageType.swift */; };
+		B0010072 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010072 /* InviteCode.swift */; };
+		B0010073 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
 		B0010080 /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010080 /* ShareService.swift */; };
 /* End PBXBuildFile section */
 
@@ -81,6 +84,9 @@
 		F0010062 /* AppSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSize.swift; sourceTree = "<group>"; };
 		F0010063 /* AppTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTypography.swift; sourceTree = "<group>"; };
 		F0010070 /* IconColorValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorValue.swift; sourceTree = "<group>"; };
+		F0010071 /* MessageType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageType.swift; sourceTree = "<group>"; };
+		F0010072 /* InviteCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteCode.swift; sourceTree = "<group>"; };
+		F0010073 /* DisplayNameValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameValidator.swift; sourceTree = "<group>"; };
 		F0010080 /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -171,6 +177,9 @@
 				F0010008 /* HeyHo.swift */,
 				F0010050 /* PremiumConfig.swift */,
 				F0010070 /* IconColorValue.swift */,
+				F0010071 /* MessageType.swift */,
+				F0010072 /* InviteCode.swift */,
+				F0010073 /* DisplayNameValidator.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -342,6 +351,9 @@
 				B0010052 /* PaywallView.swift in Sources */,
 				B0010053 /* AnimatedGradientFill.swift in Sources */,
 				B0010070 /* IconColorValue.swift in Sources */,
+				B0010071 /* MessageType.swift in Sources */,
+				B0010072 /* InviteCode.swift in Sources */,
+				B0010073 /* DisplayNameValidator.swift in Sources */,
 				B0010080 /* ShareService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

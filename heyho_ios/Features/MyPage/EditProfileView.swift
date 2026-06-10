@@ -20,36 +20,21 @@ struct EditProfileView: View {
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.spMedium), count: 6)
 
-    /// 表示名の文字数制限（grapheme 単位）。
-    /// 変更時は Localizable.xcstrings の文言（"6-16 characters" 等）と firestore.rules の isValidDisplayName も合わせること
-    private static let nameLengthRange = 6...16
-
     /// 名前バリデーション: 英数半角・絵文字のみ6〜16文字、記号不可
     private var isNameValid: Bool {
         return Self.validateDisplayName(displayName) == nil
     }
 
-    /// バリデーション結果を返す（nil = 有効、String = エラーメッセージ）
+    /// バリデーション結果をエラーメッセージに変換する（nil = 有効）。
+    /// 判定ロジック本体は DisplayNameValidator（テスト対象）にある
     private static func validateDisplayName(_ input: String) -> String? {
-        let name = input.trimmingCharacters(in: .whitespaces)
-        if name.isEmpty { return String(localized: "Please enter your name") }
-        if !name.allSatisfy({ isAllowedCharacter($0) }) {
-            return String(localized: "Only alphanumeric characters and emoji allowed")
-        }
-        if name.range(of: "heyho", options: .caseInsensitive) != nil {
-            return String(localized: "Names containing \"heyho\" are not allowed")
-        }
-        if name.count < nameLengthRange.lowerBound { return String(localized: "Enter at least 6 characters") }
-        if name.count > nameLengthRange.upperBound { return String(localized: "Enter 16 characters or less") }
-        return nil
-    }
-
-    /// 許可文字チェック: ASCII英数字または絵文字のみ
-    private static func isAllowedCharacter(_ char: Character) -> Bool {
-        if char.isASCII { return char.isLetter || char.isNumber }
-        // 非ASCII: 絵文字を含む文字のみ許可（日本語等は除外）
-        return char.unicodeScalars.contains { scalar in
-            scalar.properties.isEmojiPresentation || (scalar.properties.isEmoji && scalar.value > 0xFF)
+        switch DisplayNameValidator.validate(input) {
+        case nil: return nil
+        case .empty: return String(localized: "Please enter your name")
+        case .disallowedCharacter: return String(localized: "Only alphanumeric characters and emoji allowed")
+        case .containsReservedWord: return String(localized: "Names containing \"heyho\" are not allowed")
+        case .tooShort: return String(localized: "Enter at least 6 characters")
+        case .tooLong: return String(localized: "Enter 16 characters or less")
         }
     }
 

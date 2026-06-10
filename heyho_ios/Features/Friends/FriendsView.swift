@@ -5,6 +5,15 @@ enum FriendRowState {
     case sendHey        // デフォルト: Heyを送る
     case sendLetsGo     // 相手からHoが返ってきた後: LetsGoを送る
     case sendHo         // 相手からHeyが来た後: Hoを返す
+
+    /// 「次に送るべきメッセージタイプ」から行状態を決める
+    init(sending type: MessageType) {
+        switch type {
+        case .hey: self = .sendHey
+        case .ho: self = .sendHo
+        case .letsGo: self = .sendLetsGo
+        }
+    }
 }
 
 #if DEBUG

@@ -86,7 +86,7 @@ final class FirestoreService {
 
         let maxRetries = 5
         for _ in 0..<maxRetries {
-            let code = Self.generateInviteCode()
+            let code = InviteCode.generate()
             do {
                 try await claimInviteCode(code: code, userId: userId)
                 return code
@@ -99,25 +99,6 @@ final class FirestoreService {
             }
         }
         throw NSError(domain: "FirestoreService", code: FirestoreService.ErrorCode.failedToGenerateCode.rawValue, userInfo: [NSLocalizedDescriptionKey: "招待コードの生成に失敗しました"])
-    }
-
-    /// 招待コードの桁数（生成・入力バリデーション共通）
-    static let inviteCodeLength = 8
-
-    /// 招待コードに使える文字かどうか（ASCII英数字のみ）
-    static func isInviteCodeCharacter(_ char: Character) -> Bool {
-        char.isASCII && (char.isLetter || char.isNumber)
-    }
-
-    /// 招待コードの形式チェック: ASCII英数字のみ・規定桁数
-    static func isValidInviteCodeFormat(_ code: String) -> Bool {
-        code.count == inviteCodeLength && code.allSatisfy(isInviteCodeCharacter)
-    }
-
-    /// 英数字8桁の招待コードを生成する（紛らわしい文字 O/0/I/1 を除外）
-    private static func generateInviteCode() -> String {
-        let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        return (0..<inviteCodeLength).map { _ in String(chars.randomElement()!) }.joined()
     }
 
     private func claimInviteCode(code: String, userId: String) async throws {
@@ -233,11 +214,7 @@ final class FirestoreService {
                     }
                     // 相手 → 自分: 相手のメッセージに応じた返信を決定
                     if last.fromUserId == friendId && last.toUserId == userId {
-                        switch last.messageType {
-                        case .hey: return (friendId, .sendHo)
-                        case .ho: return (friendId, .sendLetsGo)
-                        case .letsGo: return (friendId, .sendHey)
-                        }
+                        return (friendId, FriendRowState(sending: last.messageType.reply))
                     } else {
                         // 自分 → 相手: 何度でもHeyを送れる
                         return (friendId, .sendHey)
@@ -259,11 +236,7 @@ final class FirestoreService {
         }
         // 相手 → 自分
         if last.fromUserId == toUserId {
-            switch last.messageType {
-            case .hey: return .ho
-            case .ho: return .letsGo
-            case .letsGo: return .hey
-            }
+            return last.messageType.reply
         }
         // 自分 → 相手
         return .hey
