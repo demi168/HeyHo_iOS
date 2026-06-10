@@ -1,0 +1,486 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "6-16 characters" : {
+
+    },
+    "Add Friend" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "友だちを追加"
+          }
+        }
+      }
+    },
+    "ADD FRIENDS" : {
+
+    },
+    "Add friends from your profile" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィールから友だちを追加してください"
+          }
+        }
+      }
+    },
+    "All 12 icon colors + gradients" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイコンカラー全12色 + グラデーション"
+          }
+        }
+      }
+    },
+    "Already friends" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すでに友だちです"
+          }
+        }
+      }
+    },
+    "Are you sure you want to sign out?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サインアウトしますか？"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        }
+      }
+    },
+    "Cancelled" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセルされました"
+          }
+        }
+      }
+    },
+    "center" : {
+
+    },
+    "Code not found" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コードが見つかりません"
+          }
+        }
+      }
+    },
+    "COMMERCIAL TRANSACTIONS ACT" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特定商取引法に基づく表記"
+          }
+        }
+      }
+    },
+    "Copied" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーしました"
+          }
+        }
+      }
+    },
+    "Copy" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピー"
+          }
+        }
+      }
+    },
+    "Could not retrieve token" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トークンを取得できませんでした"
+          }
+        }
+      }
+    },
+    "Custom sounds" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタムサウンド"
+          }
+        }
+      }
+    },
+    "DEBUG: Dummy Sign In" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開発用：ダミーサインイン"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        }
+      }
+    },
+    "Delete %@ from friends?" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ を友だちから削除しますか？"
+          }
+        }
+      }
+    },
+    "Delete Account" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アカウント削除"
+          }
+        }
+      }
+    },
+    "DELETE ACCOUNT" : {
+
+    },
+    "Delete Friend" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "友だちを削除"
+          }
+        }
+      }
+    },
+    "Deleting your account will permanently remove all data. This action cannot be undone." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アカウントを削除すると、すべてのデータが完全に削除されます。この操作は取り消せません。"
+          }
+        }
+      }
+    },
+    "Display Name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示名"
+          }
+        }
+      }
+    },
+    "Edit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変更"
+          }
+        }
+      }
+    },
+    "EDIT PROFILE" : {
+
+    },
+    "Enter 16 characters or less" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "16文字以内で入力してください"
+          }
+        }
+      }
+    },
+    "Enter at least 6 characters" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6文字以上で入力してください"
+          }
+        }
+      }
+    },
+    "Enter exactly 8 characters" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8文字で入力してください"
+          }
+        }
+      }
+    },
+    "FRIEND'S CODE" : {
+
+    },
+    "GRADIENTS" : {
+
+    },
+    "HELLO,HEY HO" : {
+
+    },
+    "LEGAL INFORMATION" : {
+
+    },
+    "LET'S GO PREMIUM" : {
+
+    },
+    "Loading..." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込み中..."
+          }
+        }
+      }
+    },
+    "MY CODE IS" : {
+
+    },
+    "My Invite Code" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイ招待コード"
+          }
+        }
+      }
+    },
+    "MY NAME IS" : {
+
+    },
+    "Names containing \"heyho\" are not allowed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"heyho\" を含む名前は使用できません"
+          }
+        }
+      }
+    },
+    "No friends yet" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "友だちがいません"
+          }
+        }
+      }
+    },
+    "OK" : {
+
+    },
+    "Only alphanumeric characters allowed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "英数字のみ使用できます"
+          }
+        }
+      }
+    },
+    "Only alphanumeric characters and emoji allowed" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "英数字と絵文字のみ使用できます"
+          }
+        }
+      }
+    },
+    "Please enter your name" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前を入力してください"
+          }
+        }
+      }
+    },
+    "PREMIUM" : {
+
+    },
+    "PRIVACY POLICY" : {
+
+    },
+    "Profile" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィール"
+          }
+        }
+      }
+    },
+    "RESTORE PURCHASES" : {
+
+    },
+    "Save" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        }
+      }
+    },
+    "SEARCHING..." : {
+
+    },
+    "Send LET'S GO" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LET'S GO が送れる"
+          }
+        }
+      }
+    },
+    "SET UP PROFILE" : {
+
+    },
+    "SHARE" : {
+
+    },
+    "Sign Out" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サインアウト"
+          }
+        }
+      }
+    },
+    "SIGN OUT" : {
+
+    },
+    "SOLID COLORS" : {
+
+    },
+    "TERMS" : {
+
+    },
+    "This is your own code" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分のコードです"
+          }
+        }
+      }
+    },
+    "topLeading" : {
+
+    },
+    "Unlock infinite colors" : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無限のカラーを手に入れよう"
+          }
+        }
+      }
+    },
+    "UNLOCK PREMIUM" : {
+
+    },
+    "X: %.2f" : {
+
+    },
+    "Y: %.2f" : {
+
+    },
+    "エラー" : {
+
+    },
+    "カスタム" : {
+
+    },
+    "プリセット" : {
+
+    },
+    "メイン画面" : {
+
+    },
+    "ローディング中..." : {
+
+    },
+    "ローディング開始" : {
+
+    },
+    "読み込み中..." : {
+
+    }
+  },
+  "version" : "1.0"
+}

@@ -8,8 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		77509FDC2F51F66800E4C7AF /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 77509FDB2F51F66800E4C7AF /* AppIcon.icon */; };
+		7781284F2F977FE1001DC5F3 /* IrisLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7781284E2F977FE1001DC5F3 /* IrisLoadingView.swift */; };
 		77B29A542F42E52E00B18CFB /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B29A532F42E52E00B18CFB /* ViewModifiers.swift */; };
 		77B29A592F42FBA700B18CFB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 77B29A582F42FBA700B18CFB /* FirebaseFirestore */; };
+		77C13A782F88F30C008A024B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 77C13A772F88F30C008A024B /* Localizable.xcstrings */; };
 		B0010001 /* HeyHoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* HeyHoApp.swift */; };
 		B0010002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010002 /* RootView.swift */; };
 		B0010003 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010003 /* SignInView.swift */; };
@@ -45,8 +47,10 @@
 
 /* Begin PBXFileReference section */
 		77509FDB2F51F66800E4C7AF /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		7781284E2F977FE1001DC5F3 /* IrisLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IrisLoadingView.swift; sourceTree = "<group>"; };
 		779D85F32F6E0C5000EB3BCA /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = Configuration.storekit; path = heyho_ios/Configuration.storekit; sourceTree = "<group>"; };
 		77B29A532F42E52E00B18CFB /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
+		77C13A772F88F30C008A024B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
 		F0010002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		F0010003 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
@@ -107,7 +111,6 @@
 			children = (
 				779D85F32F6E0C5000EB3BCA /* Configuration.storekit */,
 				77B29A532F42E52E00B18CFB /* ViewModifiers.swift */,
-				F0010022 /* HeyBoyIconView.swift */,
 				G0010002 /* heyho_ios */,
 				G0010003 /* Products */,
 				F0010015 /* GoogleService-Info.plist */,
@@ -128,6 +131,7 @@
 				77509FDB2F51F66800E4C7AF /* AppIcon.icon */,
 				F0010016 /* Info.plist */,
 				F0010017 /* heyho_ios.entitlements */,
+				77C13A772F88F30C008A024B /* Localizable.xcstrings */,
 			);
 			path = heyho_ios;
 			sourceTree = "<group>";
@@ -190,6 +194,8 @@
 				G0010009 /* Friends */,
 				G0010012 /* MyPage */,
 				G0010014 /* Premium */,
+				7781284E2F977FE1001DC5F3 /* IrisLoadingView.swift */,
+				F0010022 /* HeyBoyIconView.swift */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -296,6 +302,7 @@
 			files = (
 				77509FDC2F51F66800E4C7AF /* AppIcon.icon in Resources */,
 				B0010015 /* GoogleService-Info.plist in Resources */,
+				77C13A782F88F30C008A024B /* Localizable.xcstrings in Resources */,
 				B0010020 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -325,6 +332,7 @@
 				B0010023 /* EditProfileView.swift in Sources */,
 				B0010060 /* AppColor.swift in Sources */,
 				B0010061 /* AppSpacing.swift in Sources */,
+				7781284F2F977FE1001DC5F3 /* IrisLoadingView.swift in Sources */,
 				B0010062 /* AppSize.swift in Sources */,
 				B0010063 /* AppTypography.swift in Sources */,
 				B0010040 /* HeyHoAnimationOverlay.swift in Sources */,

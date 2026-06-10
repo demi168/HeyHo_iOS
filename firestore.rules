@@ -7,16 +7,47 @@ service cloud.firestore {
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
+    // displayName のバリデーション（#32）
+    // 文字数の正は EditProfileView の 6〜16 文字（grapheme 単位）。
+    // rules の size() は絵文字を grapheme より大きく数えるため、ここでは緩い上限のみ検証する
+    function isValidDisplayName(name) {
+      return name is string && name.size() >= 6 && name.size() <= 500;
+    }
+    // private/data のバリデーション: クライアントが書けるフィールドと型を制限
+    // isPremium は StoreKit 検証後にクライアントが同期する自己申告値（ルール側の特権判定には使わない前提）
+    function isValidPrivateData(data) {
+      return data.keys().hasOnly(["fcmToken", "inviteCode", "isPremium"])
+        && (!data.keys().hasAny(["fcmToken"]) || data.fcmToken is string)
+        && (!data.keys().hasAny(["inviteCode"])
+            || (data.inviteCode is string && data.inviteCode.size() >= 6 && data.inviteCode.size() <= 8))
+        && (!data.keys().hasAny(["isPremium"]) || data.isPremium is bool);
+    }
+    // iconColor のバリデーション: ソリッド hex / gradient: / gradient_custom: プレフィックスを許可（#32）
+    function isValidIconColor(color) {
+      return color is string && color.size() <= 200;
+    }
     match /users/{userId} {
       // 公開プロフィール: getのみ許可、list（コレクション列挙）を拒否
       allow get: if isSignedIn();
       allow list: if false;
-      allow create, update: if isOwner(userId);
+      // SEC-032: 書き込みフィールドを制限し、displayName の型・長さを検証
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(["displayName", "createdAt", "iconColor"])
+        && isValidDisplayName(request.resource.data.displayName);
+      // displayName と iconColor は変更時のみバリデーション（未変更フィールドの既存値に影響させない）
+      allow update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(["displayName", "createdAt", "iconColor"])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["displayName"])
+            || isValidDisplayName(request.resource.data.displayName))
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["iconColor"])
+            || isValidIconColor(request.resource.data.iconColor));
       allow delete: if isOwner(userId);
 
-      // 機密情報（fcmToken, inviteCode）: 本人のみアクセス可
+      // 機密情報（fcmToken, inviteCode, isPremium）: 本人のみアクセス可
+      // 書き込みはフィールド・型を制限（想定外フィールドの混入を防ぐ）
       match /private/{docId} {
-        allow read, write: if isOwner(userId);
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidPrivateData(request.resource.data);
       }
 
       match /friends/{friendId} {
@@ -27,7 +58,8 @@ service cloud.firestore {
       }
     }
     match /heyhos/{heyhoId} {
-      // SEC-003: 送信者は自分であり、かつ受信者が友だちであること。messageType は許可値のみ。
+      // 送信者は自分であり、かつ受信者が友だちであること。messageType は許可値のみ。
+      // letsGo は全員無料で送信可（旧 SEC-025 のプレミアムゲートは撤廃）
       allow create: if isSignedIn()
         && request.resource.data.fromUserId == request.auth.uid
         && exists(/databases/$(database)/documents/users/$(request.auth.uid)/friends/$(request.resource.data.toUserId))

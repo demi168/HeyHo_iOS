@@ -31,7 +31,6 @@ struct FriendsView: View {
     @State private var lastSentFriendId: String?
     @State private var showMyPage = false
     @State private var showMyPageForAddFriend = false
-    @State private var showPaywall = false
     @State private var myIconColorValue: IconColorValue = .solid(hex: "FFD700")
     @State private var animationState: HeyHoAnimationState = .idle
     @State private var friendToDelete: AppUser?
@@ -76,9 +75,6 @@ struct FriendsView: View {
             }
         }
         .errorAlert($errorMessage)
-        .sheet(isPresented: $showPaywall) {
-            PaywallView().environmentObject(storeService)
-        }
         .fullScreenCover(isPresented: $showMyPage, onDismiss: {
             Task {
                 await authState.refreshCurrentUser()
@@ -163,12 +159,8 @@ struct FriendsView: View {
     private func sendHeyHo(to friend: AppUser) {
         guard let uid = authState.currentUserId, let friendId = friend.id else { return }
 
-        // プレミアムゲート: 無料ユーザーは LetsGo を送れない
+        // letsGo は全員無料（ゲートなし）
         let state = rowStates[friendId] ?? .sendHey
-        if state == .sendLetsGo && !storeService.isPremium {
-            showPaywall = true
-            return
-        }
 
         // 送信タイプに応じたアニメーション
         let name = friend.displayName
@@ -261,8 +253,7 @@ struct FriendsBodyView: View {
                                     friend: friend,
                                     state: rowStates[friend.id ?? ""] ?? .sendHey,
                                     justSent: lastSentFriendId == friend.id,
-                                    avatarIconColor: resolvedIconColor(friend),
-                                    isPremium: isPremium
+                                    avatarIconColor: resolvedIconColor(friend)
                                 ) { onSend(friend) }
                                 .contextMenu {
                                     Button(role: .destructive) {
@@ -379,13 +370,7 @@ struct FriendRow: View {
     let state: FriendRowState
     let justSent: Bool
     let avatarIconColor: IconColorValue
-    var isPremium: Bool = true
     let onSend: () -> Void
-
-    /// LetsGo がロックされているか
-    private var isLetsGoLocked: Bool {
-        state == .sendLetsGo && !isPremium
-    }
 
     var body: some View {
         Button(action: { if !justSent { onSend() } }) {
@@ -399,13 +384,6 @@ struct FriendRow: View {
                     .minimumScaleFactor(0.5)
 
                 Spacer()
-
-                // LetsGo ロック表示
-                if isLetsGoLocked {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: AppTypography.label))
-                        .foregroundColor(AppColor.textSecondary)
-                }
             }
             .padding(.leading, AppSpacing.spLarge)
             .padding(.trailing, AppSpacing.spXlarge)
@@ -416,7 +394,7 @@ struct FriendRow: View {
                     .strokeBorder(AppColor.borderDefault, lineWidth: AppSize.borderStrong)
                     .background(Capsule().fill(AppColor.backgroundSecondary))
             )
-            .opacity(justSent || isLetsGoLocked ? 0.55 : 1.0)
+            .opacity(justSent ? 0.55 : 1.0)
         }
         .buttonStyle(.plain)
     }
