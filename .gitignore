@@ -49,3 +49,6 @@ yarn-error.log*
 
 # Archived files
 _archived/
+
+# Docs (ローカルメモのみ、追跡しない)
+docs/

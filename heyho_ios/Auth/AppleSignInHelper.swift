@@ -11,14 +11,12 @@ enum AppleSignInError: Error {
 func randomNonce(length: Int = 32) -> String {
     precondition(length > 0)
     let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._")
-    var result = ""
-    var remaining = length
-    while remaining > 0 {
-        let rand = Int.random(in: 0..<charset.count)
-        result.append(charset[rand])
-        remaining -= 1
+    var randomBytes = [UInt8](repeating: 0, count: length)
+    let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
+    if errorCode != errSecSuccess {
+        fatalError("SecRandomCopyBytes が失敗しました: OSStatus \(errorCode)")
     }
-    return result
+    return String(randomBytes.map { charset[Int($0) % charset.count] })
 }
 
 func sha256(_ input: String) -> String {

@@ -121,13 +121,13 @@ struct HeyHoAnimationOverlay: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .allowsHitTesting(animationState != .idle)
-        .onChange(of: animationState) { newState in
-            if newState != .idle {
-                runAnimation(isSending: newState.isSending)
+        .onChange(of: animationState) {
+            if animationState != .idle {
+                runAnimation(isSending: animationState.isSending)
                 // サウンド＆ハプティクス
-                if case .sending(let m, _, _) = newState {
+                if case .sending(let m, _, _) = animationState {
                     FeedbackService.shared.playFeedback(for: m, isSending: true)
-                } else if case .receiving(let m, _, _) = newState {
+                } else if case .receiving(let m, _, _) = animationState {
                     FeedbackService.shared.playFeedback(for: m, isSending: false)
                 }
             }

@@ -57,8 +57,13 @@ final class FirestoreService {
     }
 
     /// FCM トークンを private サブドキュメントに保存する
-    func updateFCMToken(userId: String, token: String?) async throws {
-        try await privateRef(userId: userId).setData(["fcmToken": token as Any], merge: true)
+    func updateFCMToken(userId: String, token: String) async throws {
+        try await privateRef(userId: userId).setData(["fcmToken": token], merge: true)
+    }
+
+    /// プレミアムステータスを private サブドキュメントに保存する（Firestoreルール検証用）
+    func updatePremiumStatus(userId: String, isPremium: Bool) async throws {
+        try await privateRef(userId: userId).setData(["isPremium": isPremium], merge: true)
     }
 
     /// アイコンカラーを更新する（hex文字列、例: "FF6B6B"）
@@ -96,10 +101,23 @@ final class FirestoreService {
         throw NSError(domain: "FirestoreService", code: FirestoreService.ErrorCode.failedToGenerateCode.rawValue, userInfo: [NSLocalizedDescriptionKey: "招待コードの生成に失敗しました"])
     }
 
+    /// 招待コードの桁数（生成・入力バリデーション共通）
+    static let inviteCodeLength = 8
+
+    /// 招待コードに使える文字かどうか（ASCII英数字のみ）
+    static func isInviteCodeCharacter(_ char: Character) -> Bool {
+        char.isASCII && (char.isLetter || char.isNumber)
+    }
+
+    /// 招待コードの形式チェック: ASCII英数字のみ・規定桁数
+    static func isValidInviteCodeFormat(_ code: String) -> Bool {
+        code.count == inviteCodeLength && code.allSatisfy(isInviteCodeCharacter)
+    }
+
     /// 英数字8桁の招待コードを生成する（紛らわしい文字 O/0/I/1 を除外）
     private static func generateInviteCode() -> String {
         let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        return (0..<8).map { _ in String(chars.randomElement()!) }.joined()
+        return (0..<inviteCodeLength).map { _ in String(chars.randomElement()!) }.joined()
     }
 
     private func claimInviteCode(code: String, userId: String) async throws {

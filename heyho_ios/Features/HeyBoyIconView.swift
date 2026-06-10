@@ -126,8 +126,8 @@ struct HeyBoyIconView: View {
         .onDisappear {
             stopAnimation()
         }
-        .onChange(of: iconColorValue) { newValue in
-            handleColorValueChange(newValue)
+        .onChange(of: iconColorValue) {
+            handleColorValueChange(iconColorValue)
         }
     }
 
@@ -248,7 +248,7 @@ private extension View {
 // MARK: - プレビュー
 
 #Preview("ソリッド") {
-    HStack(spacing: AppSpacing.itemGap) {
+    HStack(spacing: AppSpacing.spMedium) {
         HeyBoyIconView(bodyColor: AppColor.defaultIconColor, size: AppSize.iconDefault)
         HeyBoyIconView(bodyColor: Color(hex: "FF2D55")!, size: AppSize.iconDefault)
         HeyBoyIconView(bodyColor: Color(hex: "CB30E0")!, size: AppSize.iconDefault)
@@ -259,7 +259,7 @@ private extension View {
 }
 
 #Preview("グラデーション") {
-    HStack(spacing: AppSpacing.itemGap) {
+    HStack(spacing: AppSpacing.spMedium) {
         HeyBoyIconView(iconColorValue: .gradient(presetId: "sunset"), size: AppSize.iconDefault)
         HeyBoyIconView(iconColorValue: .gradient(presetId: "ocean"), size: AppSize.iconDefault)
         HeyBoyIconView(iconColorValue: .gradient(presetId: "aurora"), size: AppSize.iconDefault)
@@ -278,7 +278,7 @@ private struct GradientCenterPreview: View {
     private let presets = AppColor.premiumGradientPresets
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: AppSpacing.spLarge) {
             Picker("プリセット", selection: $selectedPreset) {
                 ForEach(presets) { preset in
                     Text(preset.name).tag(preset.id)
@@ -295,7 +295,7 @@ private struct GradientCenterPreview: View {
             )
 
             // スライダーで中心点を調整
-            VStack(spacing: 8) {
+            VStack(spacing: AppSpacing.spSmall) {
                 HStack {
                     Text("X: \(centerX, specifier: "%.2f")")
                         .font(.caption).monospacedDigit()
@@ -310,8 +310,8 @@ private struct GradientCenterPreview: View {
             .padding(.horizontal)
 
             // プリセットの比較（左上中心 vs デフォルト中心）
-            HStack(spacing: 12) {
-                VStack(spacing: 4) {
+            HStack(spacing: AppSpacing.spMedium) {
+                VStack(spacing: AppSpacing.spXsmall) {
                     HeyBoyIconView(
                         iconColorValue: .gradient(presetId: selectedPreset),
                         size: 88,
@@ -321,7 +321,7 @@ private struct GradientCenterPreview: View {
                         .font(.caption)
                         .foregroundColor(.white)
                 }
-                VStack(spacing: 4) {
+                VStack(spacing: AppSpacing.spXsmall) {
                     HeyBoyIconView(
                         iconColorValue: .gradient(presetId: selectedPreset),
                         size: 88,
@@ -331,7 +331,7 @@ private struct GradientCenterPreview: View {
                         .font(.caption)
                         .foregroundColor(.white)
                 }
-                VStack(spacing: 4) {
+                VStack(spacing: AppSpacing.spXsmall) {
                     HeyBoyIconView(
                         iconColorValue: .gradient(presetId: selectedPreset),
                         size: 88,

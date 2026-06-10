@@ -1,4 +1,5 @@
 import StoreKit
+import FirebaseAuth
 
 @MainActor
 final class StoreService: ObservableObject {
@@ -40,7 +41,7 @@ final class StoreService: ObservableObject {
     // MARK: - 購入
 
     func purchase() async {
-        guard let product = products.first else {
+        guard let product = products.first(where: { $0.id == PremiumConfig.productId }) else {
             purchaseError = "商品情報を取得できません"
             return
         }
@@ -85,6 +86,7 @@ final class StoreService: ObservableObject {
             }
         }
         isPremium = hasPremium
+        syncPremiumToFirestore(hasPremium)
     }
 
     // MARK: - デバッグ用
@@ -93,6 +95,7 @@ final class StoreService: ObservableObject {
     /// テスト用: プレミアム状態を即時リセット
     func debugRevokePremium() {
         isPremium = false
+        syncPremiumToFirestore(false)
     }
     #endif
 
@@ -101,8 +104,18 @@ final class StoreService: ObservableObject {
     private func handleTransaction(_ result: VerificationResult<Transaction>) async {
         guard case .verified(let transaction) = result else { return }
         if transaction.productID == PremiumConfig.productId {
-            isPremium = transaction.revocationDate == nil
+            let newPremium = transaction.revocationDate == nil
+            isPremium = newPremium
+            syncPremiumToFirestore(newPremium)
         }
         await transaction.finish()
+    }
+
+    /// プレミアム状態を Firestore private/data に同期する（Firestoreルール検証用）
+    private func syncPremiumToFirestore(_ premium: Bool) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        Task {
+            try? await FirestoreService.shared.updatePremiumStatus(userId: uid, isPremium: premium)
+        }
     }
 }

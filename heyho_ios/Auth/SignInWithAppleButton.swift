@@ -8,7 +8,7 @@ struct SignInWithAppleButtonView: View {
     var body: some View {
         SignInWithAppleButtonViewRepresentable(onRequest: onRequest, onCompletion: onCompletion)
             .frame(height: AppSize.buttonHeight)
-            .padding(.horizontal, AppSpacing.pageHorizontal)
+            .padding(.horizontal, AppSpacing.spXlarge)
     }
 }
 
@@ -70,7 +70,10 @@ extension SignInWithAppleButtonViewRepresentable.Coordinator {
             parent.onCompletion(.failure(AppleSignInError.invalidCredential))
             return
         }
-        let nonce = currentNonce ?? ""
+        guard let nonce = currentNonce, !nonce.isEmpty else {
+            parent.onCompletion(.failure(AppleSignInError.invalidCredential))
+            return
+        }
         parent.onCompletion(.success((credential, nonce)))
     }
 

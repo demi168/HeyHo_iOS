@@ -20,7 +20,11 @@ struct EditProfileView: View {
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: AppSpacing.spMedium), count: 6)
 
-    /// 名前バリデーション: 英数半角のみ6〜22文字、記号不可
+    /// 表示名の文字数制限（grapheme 単位）。
+    /// 変更時は Localizable.xcstrings の文言（"6-16 characters" 等）と firestore.rules の isValidDisplayName も合わせること
+    private static let nameLengthRange = 6...16
+
+    /// 名前バリデーション: 英数半角・絵文字のみ6〜16文字、記号不可
     private var isNameValid: Bool {
         return Self.validateDisplayName(displayName) == nil
     }
@@ -35,8 +39,8 @@ struct EditProfileView: View {
         if name.range(of: "heyho", options: .caseInsensitive) != nil {
             return String(localized: "Names containing \"heyho\" are not allowed")
         }
-        if name.count < 6 { return String(localized: "Enter at least 6 characters") }
-        if name.count > 16 { return String(localized: "Enter 16 characters or less") }
+        if name.count < nameLengthRange.lowerBound { return String(localized: "Enter at least 6 characters") }
+        if name.count > nameLengthRange.upperBound { return String(localized: "Enter 16 characters or less") }
         return nil
     }
 
@@ -162,8 +166,11 @@ struct EditProfileView: View {
 
                     nameInputSection
                     solidColorSection
-                    gradientSection
-                    if !storeService.isPremium { premiumUpgradeSection }
+                    // グラデーション・アップグレード導線は課金有効時のみ表示
+                    if PremiumConfig.isEnabled {
+                        gradientSection
+                        if !storeService.isPremium { premiumUpgradeSection }
+                    }
                 }
                 .padding(.bottom, 40)
             }
@@ -258,11 +265,16 @@ struct EditProfileView: View {
                 .font(.system(size: AppTypography.label, weight: .bold))
                 .foregroundColor(AppColor.textSecondary)
 
-            let allPresets = AppColor.freeIconPresets + AppColor.premiumIconPresets
+            // 課金無効時は無料プリセットのみ表示（プレミアム色は非表示）
+            let allPresets = PremiumConfig.isEnabled
+                ? AppColor.freeIconPresets + AppColor.premiumIconPresets
+                : AppColor.freeIconPresets
             let freeHexSet = Set(AppColor.freeIconPresets.map(\.hex))
             LazyVGrid(columns: columns, spacing: AppSpacing.spMedium) {
                 ForEach(Array(allPresets.enumerated()), id: \.element.hex) { index, preset in
-                    let isLocked = !freeHexSet.contains(preset.hex) && !storeService.isPremium
+                    // 課金無効時はプレミアム色自体が表示されないため、ロックは課金有効時のみ成立する
+                    let isLocked = PremiumConfig.isEnabled
+                        && !freeHexSet.contains(preset.hex) && !storeService.isPremium
                     Button(action: {
                         if isLocked { showPaywall = true }
                         else { selectedColorValue = .solid(hex: preset.hex) }
@@ -286,7 +298,8 @@ struct EditProfileView: View {
                     }
                     .buttonStyle(.plain)
 
-                    if index == allPresets.count - 1 { randomSolidButton }
+                    // ランダム色生成はプレミアム機能（課金有効時のみ）
+                    if PremiumConfig.isEnabled && index == allPresets.count - 1 { randomSolidButton }
                 }
             }
             .allowsHitTesting(!isColorAnimating)
@@ -456,8 +469,8 @@ struct EditProfileView: View {
             return
         }
         isSaving = true
-        Task {
-            defer { Task { await MainActor.run { isSaving = false } } }
+        Task { @MainActor in
+            defer { isSaving = false }
             do {
                 // 初回セットアップ時は createProfile（createdAt をセット）、
                 // それ以降は updateDisplayName（createdAt を上書きしない）
@@ -467,14 +480,12 @@ struct EditProfileView: View {
                     try await authState.updateDisplayName(name)
                 }
                 try await FirestoreService.shared.updateIconColor(userId: uid, colorHex: selectedColorValue.firestoreString)
-                await MainActor.run {
-                    if isInitialSetup {
-                        authState.markProfileSetupComplete()
-                    }
-                    dismiss()
+                if isInitialSetup {
+                    authState.markProfileSetupComplete()
                 }
+                dismiss()
             } catch {
-                await MainActor.run { errorMessage = error.localizedDescription }
+                errorMessage = error.localizedDescription
             }
         }
     }

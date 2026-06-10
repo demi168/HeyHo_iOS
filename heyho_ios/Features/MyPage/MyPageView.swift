@@ -112,18 +112,19 @@ struct MyPageView: View {
 
     /// 招待コードバリデーション（英数のみ8文字）
     private var isFriendCodeValid: Bool {
-        let code = friendCodeInput.trimmingCharacters(in: .whitespaces)
-        return code.count == 8 && code.range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
+        FirestoreService.isValidInviteCodeFormat(friendCodeInput.trimmingCharacters(in: .whitespaces))
     }
 
     /// 招待コードのバリデーションエラー（空欄時は非表示）
     private var friendCodeValidationError: String? {
         let code = friendCodeInput.trimmingCharacters(in: .whitespaces)
         if code.isEmpty { return nil }
-        if code.range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) == nil {
+        if !code.allSatisfy(FirestoreService.isInviteCodeCharacter) {
             return String(localized: "Only alphanumeric characters allowed")
         }
-        if code.count < 8 { return String(localized: "Enter exactly 8 characters") }
+        if code.count < FirestoreService.inviteCodeLength {
+            return String(localized: "Enter exactly 8 characters")
+        }
         return nil
     }
 
@@ -302,9 +303,9 @@ struct MyPageView: View {
                         .foregroundColor(AppColor.textPrimary)
                         .focused($isFriendCodeFocused)
                         .onChange(of: friendCodeInput) {
-                            let filtered = String(friendCodeInput.unicodeScalars
-                                .filter { CharacterSet.alphanumerics.contains($0) }
-                                .prefix(8)).uppercased()
+                            let filtered = String(friendCodeInput
+                                .filter(FirestoreService.isInviteCodeCharacter)
+                                .prefix(FirestoreService.inviteCodeLength)).uppercased()
                             if filtered != friendCodeInput { friendCodeInput = filtered }
                         }
                     Rectangle()
@@ -328,29 +329,32 @@ struct MyPageView: View {
 
     private var settingsSection: some View {
         VStack(alignment: .leading, spacing: AppSpacing.spXxlarge) {
-            if storeService.isPremium {
-                HStack(spacing: AppSpacing.spSmall) {
-                    Image(systemName: "checkmark.seal.fill").foregroundColor(AppColor.interactivePrimary)
-                    Text("PREMIUM")
-                        .font(.system(size: AppTypography.body, weight: .black))
-                        .foregroundColor(AppColor.interactivePrimary)
-                }
-                #if DEBUG
-                Button(action: { storeService.debugRevokePremium() }) {
-                    Text("DEBUG: REVOKE PREMIUM")
-                        .font(.system(size: AppTypography.body, weight: .black))
-                        .foregroundColor(.orange)
-                }
-                #endif
-            } else {
-                Button(action: { showPaywall = true }) {
-                    Text("LET'S GO PREMIUM")
-                        .font(.system(size: AppTypography.body, weight: .bold))
-                        .foregroundColor(AppColor.iconInverse)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, AppSpacing.spLarge)
-                        .background(AppColor.interactivePrimary)
-                        .clipShape(Capsule())
+            // 課金導線（プレミアム状態表示・アップグレードボタン）は課金有効時のみ表示
+            if PremiumConfig.isEnabled {
+                if storeService.isPremium {
+                    HStack(spacing: AppSpacing.spSmall) {
+                        Image(systemName: "checkmark.seal.fill").foregroundColor(AppColor.interactivePrimary)
+                        Text("PREMIUM")
+                            .font(.system(size: AppTypography.body, weight: .black))
+                            .foregroundColor(AppColor.interactivePrimary)
+                    }
+                    #if DEBUG
+                    Button(action: { storeService.debugRevokePremium() }) {
+                        Text("DEBUG: REVOKE PREMIUM")
+                            .font(.system(size: AppTypography.body, weight: .black))
+                            .foregroundColor(.orange)
+                    }
+                    #endif
+                } else {
+                    Button(action: { showPaywall = true }) {
+                        Text("LET'S GO PREMIUM")
+                            .font(.system(size: AppTypography.body, weight: .bold))
+                            .foregroundColor(AppColor.iconInverse)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, AppSpacing.spLarge)
+                            .background(AppColor.interactivePrimary)
+                            .clipShape(Capsule())
+                    }
                 }
             }
 
@@ -401,13 +405,12 @@ struct MyPageView: View {
     private func loadInviteCode() {
         guard let uid = authState.currentUserId else { return }
         isLoadingInviteCode = true
-        Task {
-            defer { Task { await MainActor.run { isLoadingInviteCode = false } } }
+        Task { @MainActor in
+            defer { isLoadingInviteCode = false }
             do {
-                let code = try await FirestoreService.shared.ensureInviteCode(userId: uid)
-                await MainActor.run { inviteCode = code }
+                inviteCode = try await FirestoreService.shared.ensureInviteCode(userId: uid)
             } catch {
-                await MainActor.run { errorMessage = error.localizedDescription }
+                errorMessage = error.localizedDescription
             }
         }
     }
@@ -463,10 +466,6 @@ struct MyPageView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
-    }
-
-    private func restorePurchases() {
-        Task { await storeService.restorePurchases() }
     }
 
     private func deleteAccount() {
