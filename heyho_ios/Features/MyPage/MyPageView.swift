@@ -112,17 +112,17 @@ struct MyPageView: View {
 
     /// 招待コードバリデーション（英数のみ8文字）
     private var isFriendCodeValid: Bool {
-        FirestoreService.isValidInviteCodeFormat(friendCodeInput.trimmingCharacters(in: .whitespaces))
+        InviteCode.isValidFormat(friendCodeInput.trimmingCharacters(in: .whitespaces))
     }
 
     /// 招待コードのバリデーションエラー（空欄時は非表示）
     private var friendCodeValidationError: String? {
         let code = friendCodeInput.trimmingCharacters(in: .whitespaces)
         if code.isEmpty { return nil }
-        if !code.allSatisfy(FirestoreService.isInviteCodeCharacter) {
+        if !code.allSatisfy(InviteCode.isCodeCharacter) {
             return String(localized: "Only alphanumeric characters allowed")
         }
-        if code.count < FirestoreService.inviteCodeLength {
+        if code.count < InviteCode.length {
             return String(localized: "Enter exactly 8 characters")
         }
         return nil
@@ -304,8 +304,8 @@ struct MyPageView: View {
                         .focused($isFriendCodeFocused)
                         .onChange(of: friendCodeInput) {
                             let filtered = String(friendCodeInput
-                                .filter(FirestoreService.isInviteCodeCharacter)
-                                .prefix(FirestoreService.inviteCodeLength)).uppercased()
+                                .filter(InviteCode.isCodeCharacter)
+                                .prefix(InviteCode.length)).uppercased()
                             if filtered != friendCodeInput { friendCodeInput = filtered }
                         }
                     Rectangle()

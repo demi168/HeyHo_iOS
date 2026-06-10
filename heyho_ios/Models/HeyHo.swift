@@ -1,12 +1,6 @@
 import Foundation
 import FirebaseFirestore
 
-enum MessageType: String, Codable {
-    case hey = "hey"
-    case ho = "ho"
-    case letsGo = "letsGo"
-}
-
 struct HeyHo: Identifiable, Codable {
     @DocumentID var id: String?
     var fromUserId: String
