@@ -15,6 +15,7 @@ enum AppColor {
     // MARK: - ボーダー
     static let borderDefault = hex("E5E7EB")
     static let borderStrong  = hex("000000")
+    static let borderDestructive = hex("FF383C")
 
     // MARK: - アイコン
     static let iconDefault = hex("000000")
@@ -31,6 +32,16 @@ enum AppColor {
 
     // MARK: - ボタン背景
     static let buttonIconBackground = Color(white: 0.9)
+
+    // MARK: - オーバーレイ・シャドウ
+    static let overlayScrim = Color.black.opacity(0.4)
+    static let shadowSoft   = Color.black.opacity(0.1)
+
+    // MARK: - 選択状態・装飾
+    /// カラー選択中を示すリング
+    static let selectionRing = Color.gray.opacity(0.5)
+    /// カラーサークル上に重ねるアイコン（ロック・ダイス）
+    static let iconOnAccent  = Color.white.opacity(0.9)
 
     // MARK: - テキスト
     static let textPrimary     = hex("000000")
