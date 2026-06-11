@@ -48,6 +48,10 @@
 		B0010074 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010074 /* GradientPreset.swift */; };
 		B0010080 /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010080 /* ShareService.swift */; };
 		B0020001 /* HeyHoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020001 /* HeyHoTests.swift */; };
+		B0020002 /* InviteCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020002 /* InviteCodeTests.swift */; };
+		B0020003 /* DisplayNameValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020003 /* DisplayNameValidatorTests.swift */; };
+		B0020004 /* MessageTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020004 /* MessageTypeTests.swift */; };
+		B0020005 /* IconColorValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020005 /* IconColorValueTests.swift */; };
 		B0020010 /* MessageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010071 /* MessageType.swift */; };
 		B0020011 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010072 /* InviteCode.swift */; };
 		B0020012 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
@@ -99,6 +103,10 @@
 		F0010080 /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0020001 /* HeyHoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoTests.swift; sourceTree = "<group>"; };
+		F0020002 /* InviteCodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteCodeTests.swift; sourceTree = "<group>"; };
+		F0020003 /* DisplayNameValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameValidatorTests.swift; sourceTree = "<group>"; };
+		F0020004 /* MessageTypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageTypeTests.swift; sourceTree = "<group>"; };
+		F0020005 /* IconColorValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorValueTests.swift; sourceTree = "<group>"; };
 		T0020001 /* HeyHoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeyHoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -174,6 +182,10 @@
 			isa = PBXGroup;
 			children = (
 				F0020001 /* HeyHoTests.swift */,
+				F0020002 /* InviteCodeTests.swift */,
+				F0020003 /* DisplayNameValidatorTests.swift */,
+				F0020004 /* MessageTypeTests.swift */,
+				F0020005 /* IconColorValueTests.swift */,
 			);
 			path = HeyHoTests;
 			sourceTree = "<group>";
@@ -410,6 +422,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0020001 /* HeyHoTests.swift in Sources */,
+				B0020002 /* InviteCodeTests.swift in Sources */,
+				B0020003 /* DisplayNameValidatorTests.swift in Sources */,
+				B0020004 /* MessageTypeTests.swift in Sources */,
+				B0020005 /* IconColorValueTests.swift in Sources */,
 				B0020010 /* MessageType.swift in Sources */,
 				B0020011 /* InviteCode.swift in Sources */,
 				B0020012 /* DisplayNameValidator.swift in Sources */,
