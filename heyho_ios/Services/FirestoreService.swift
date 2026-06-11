@@ -43,7 +43,7 @@ final class FirestoreService {
                     do {
                         return try await self.getUser(userId: uid)
                     } catch {
-                        print("⚠️ getUser failed (userId: \(uid)): \(error.localizedDescription)")
+                        AppLogger.firestore.error("getUser failed (userId: \(uid)): \(error.localizedDescription)")
                         return nil
                     }
                 }
@@ -209,9 +209,14 @@ final class FirestoreService {
             for friendId in friendIds {
                 group.addTask { [self] in
                     // 1人分のクエリ失敗は .sendHey にフォールバックし、他の行に影響させない
-                    guard let last = try? await self.getLastHeyHo(me: userId, friendId: friendId) else {
+                    let last: HeyHo?
+                    do {
+                        last = try await self.getLastHeyHo(me: userId, friendId: friendId)
+                    } catch {
+                        AppLogger.firestore.error("getLastHeyHo failed (friendId: \(friendId)): \(error.localizedDescription)")
                         return (friendId, .sendHey)
                     }
+                    guard let last else { return (friendId, .sendHey) }
                     // 相手 → 自分: 相手のメッセージに応じた返信を決定
                     if last.fromUserId == friendId && last.toUserId == userId {
                         return (friendId, FriendRowState(sending: last.messageType.reply))

@@ -373,10 +373,14 @@ struct EditProfileView: View {
         // カラーが実際に変わった場合のみ Firestore に保存
         if selectedColorValue != oldValue, let uid = authState.currentUserId {
             Task {
-                try? await FirestoreService.shared.updateIconColor(
-                    userId: uid,
-                    colorHex: selectedColorValue.firestoreString
-                )
+                do {
+                    try await FirestoreService.shared.updateIconColor(
+                        userId: uid,
+                        colorHex: selectedColorValue.firestoreString
+                    )
+                } catch {
+                    errorMessage = error.localizedDescription
+                }
             }
         }
     }
@@ -434,7 +438,8 @@ struct EditProfileView: View {
     private func loadUser() {
         guard let uid = authState.currentUserId else { return }
         Task {
-            if let user = try? await FirestoreService.shared.getUser(userId: uid) {
+            do {
+                guard let user = try await FirestoreService.shared.getUser(userId: uid) else { return }
                 await MainActor.run {
                     displayName = user.displayName
                     originalDisplayName = user.displayName
@@ -442,6 +447,9 @@ struct EditProfileView: View {
                     // プレミアム解除済みならデフォルトに戻す
                     if !storeService.isPremium { resetColorIfLockedAndSave() }
                 }
+            } catch {
+                // 読込失敗時は初期値のまま編集を継続できる（保存時に再度エラー検知される）
+                AppLogger.firestore.error("プロフィール読込に失敗: \(error.localizedDescription)")
             }
         }
     }

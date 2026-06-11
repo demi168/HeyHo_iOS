@@ -29,7 +29,7 @@ final class PushService: NSObject {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         Messaging.messaging().token { token, error in
             if let error = error {
-                print("FCMトークンの取得に失敗: \(error.localizedDescription)")
+                AppLogger.push.error("FCMトークンの取得に失敗: \(error.localizedDescription)")
                 return
             }
             guard let token = token else { return }
@@ -37,7 +37,7 @@ final class PushService: NSObject {
                 do {
                     try await FirestoreService.shared.updateFCMToken(userId: uid, token: token)
                 } catch {
-                    print("FCMトークンの保存に失敗: \(error.localizedDescription)")
+                    AppLogger.push.error("FCMトークンの保存に失敗: \(error.localizedDescription)")
                 }
             }
         }

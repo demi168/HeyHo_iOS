@@ -42,12 +42,12 @@ final class FeedbackService {
                     audioPlayer?.play()
                     return
                 } catch {
-                    print("⚠️ サウンド再生エラー: \(error.localizedDescription)")
+                    AppLogger.feedback.error("サウンド再生エラー: \(error.localizedDescription)")
                 }
             }
         }
         // ファイル未配置時はログだけ出して無音
-        print("ℹ️ サウンドファイル未配置: \(name)")
+        AppLogger.feedback.info("サウンドファイル未配置: \(name)")
     }
 
     // MARK: - ハプティクス
