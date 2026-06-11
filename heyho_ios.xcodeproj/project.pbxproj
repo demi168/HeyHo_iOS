@@ -14,6 +14,12 @@
 		77C13A782F88F30C008A024B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 77C13A772F88F30C008A024B /* Localizable.xcstrings */; };
 		B0010001 /* HeyHoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* HeyHoApp.swift */; };
 		B0010075 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010075 /* AppLogger.swift */; };
+		B0010090 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010090 /* ColorHex.swift */; };
+		B0010091 /* MyPageComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010091 /* MyPageComponents.swift */; };
+		B0010092 /* MyPageSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010092 /* MyPageSections.swift */; };
+		B0010093 /* InviteQRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010093 /* InviteQRCodeView.swift */; };
+		B0010094 /* NameInputSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010094 /* NameInputSection.swift */; };
+		B0010095 /* IconColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010095 /* IconColorPickerView.swift */; };
 		B0010002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010002 /* RootView.swift */; };
 		B0010003 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010003 /* SignInView.swift */; };
 		B0010004 /* AuthState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010004 /* AuthState.swift */; };
@@ -69,6 +75,12 @@
 		77C13A772F88F30C008A024B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
 		F0010075 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		F0010090 /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
+		F0010091 /* MyPageComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageComponents.swift; sourceTree = "<group>"; };
+		F0010092 /* MyPageSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageSections.swift; sourceTree = "<group>"; };
+		F0010093 /* InviteQRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteQRCodeView.swift; sourceTree = "<group>"; };
+		F0010094 /* NameInputSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameInputSection.swift; sourceTree = "<group>"; };
+		F0010095 /* IconColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorPickerView.swift; sourceTree = "<group>"; };
 		F0010002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		F0010003 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		F0010004 /* AuthState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthState.swift; sourceTree = "<group>"; };
@@ -266,7 +278,12 @@
 			isa = PBXGroup;
 			children = (
 				F0010021 /* MyPageView.swift */,
+				F0010092 /* MyPageSections.swift */,
+				F0010091 /* MyPageComponents.swift */,
+				F0010093 /* InviteQRCodeView.swift */,
 				F0010023 /* EditProfileView.swift */,
+				F0010094 /* NameInputSection.swift */,
+				F0010095 /* IconColorPickerView.swift */,
 			);
 			path = MyPage;
 			sourceTree = "<group>";
@@ -275,6 +292,7 @@
 			isa = PBXGroup;
 			children = (
 				F0010060 /* AppColor.swift */,
+				F0010090 /* ColorHex.swift */,
 				F0010061 /* AppSpacing.swift */,
 				F0010062 /* AppSize.swift */,
 				F0010063 /* AppTypography.swift */,
@@ -400,6 +418,12 @@
 				B0010022 /* HeyBoyIconView.swift in Sources */,
 				B001001A /* PushService.swift in Sources */,
 				B0010021 /* MyPageView.swift in Sources */,
+				B0010090 /* ColorHex.swift in Sources */,
+				B0010091 /* MyPageComponents.swift in Sources */,
+				B0010092 /* MyPageSections.swift in Sources */,
+				B0010093 /* InviteQRCodeView.swift in Sources */,
+				B0010094 /* NameInputSection.swift in Sources */,
+				B0010095 /* IconColorPickerView.swift in Sources */,
 				B0010023 /* EditProfileView.swift in Sources */,
 				B0010060 /* AppColor.swift in Sources */,
 				B0010061 /* AppSpacing.swift in Sources */,
