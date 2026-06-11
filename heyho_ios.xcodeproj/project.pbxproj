@@ -45,7 +45,15 @@
 		B0010071 /* MessageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010071 /* MessageType.swift */; };
 		B0010072 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010072 /* InviteCode.swift */; };
 		B0010073 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
+		B0010074 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010074 /* GradientPreset.swift */; };
 		B0010080 /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010080 /* ShareService.swift */; };
+		B0020001 /* HeyHoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020001 /* HeyHoTests.swift */; };
+		B0020010 /* MessageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010071 /* MessageType.swift */; };
+		B0020011 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010072 /* InviteCode.swift */; };
+		B0020012 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
+		B0020013 /* IconColorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010070 /* IconColorValue.swift */; };
+		B0020014 /* PremiumConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010050 /* PremiumConfig.swift */; };
+		B0020015 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010074 /* GradientPreset.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -87,8 +95,11 @@
 		F0010071 /* MessageType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageType.swift; sourceTree = "<group>"; };
 		F0010072 /* InviteCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteCode.swift; sourceTree = "<group>"; };
 		F0010073 /* DisplayNameValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameValidator.swift; sourceTree = "<group>"; };
+		F0010074 /* GradientPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientPreset.swift; sourceTree = "<group>"; };
 		F0010080 /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0020001 /* HeyHoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoTests.swift; sourceTree = "<group>"; };
+		T0020001 /* HeyHoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeyHoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +110,13 @@
 				B0010016 /* FirebaseAuth in Frameworks */,
 				B0010018 /* FirebaseMessaging in Frameworks */,
 				77B29A592F42FBA700B18CFB /* FirebaseFirestore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E0020002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +136,7 @@
 				779D85F32F6E0C5000EB3BCA /* Configuration.storekit */,
 				77B29A532F42E52E00B18CFB /* ViewModifiers.swift */,
 				G0010002 /* heyho_ios */,
+				G0020001 /* HeyHoTests */,
 				G0010003 /* Products */,
 				F0010015 /* GoogleService-Info.plist */,
 				77B29A572F42F4C700B18CFB /* Frameworks */,
@@ -146,8 +165,17 @@
 			isa = PBXGroup;
 			children = (
 				T0010001 /* HeyHo.app */,
+				T0020001 /* HeyHoTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		G0020001 /* HeyHoTests */ = {
+			isa = PBXGroup;
+			children = (
+				F0020001 /* HeyHoTests.swift */,
+			);
+			path = HeyHoTests;
 			sourceTree = "<group>";
 		};
 		G0010004 /* App */ = {
@@ -180,6 +208,7 @@
 				F0010071 /* MessageType.swift */,
 				F0010072 /* InviteCode.swift */,
 				F0010073 /* DisplayNameValidator.swift */,
+				F0010074 /* GradientPreset.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -272,6 +301,22 @@
 			productReference = T0010001 /* HeyHo.app */;
 			productType = "com.apple.product-type.application";
 		};
+		N0020001 /* HeyHoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0020002 /* Build configuration list for PBXNativeTarget "HeyHoTests" */;
+			buildPhases = (
+				E0020001 /* Sources */,
+				E0020002 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HeyHoTests;
+			productName = HeyHoTests;
+			productReference = T0020001 /* HeyHoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -300,6 +345,7 @@
 			projectRoot = "";
 			targets = (
 				N0010001 /* HeyHo */,
+				N0020001 /* HeyHoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -354,7 +400,22 @@
 				B0010071 /* MessageType.swift in Sources */,
 				B0010072 /* InviteCode.swift in Sources */,
 				B0010073 /* DisplayNameValidator.swift in Sources */,
+				B0010074 /* GradientPreset.swift in Sources */,
 				B0010080 /* ShareService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E0020001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0020001 /* HeyHoTests.swift in Sources */,
+				B0020010 /* MessageType.swift in Sources */,
+				B0020011 /* InviteCode.swift in Sources */,
+				B0020012 /* DisplayNameValidator.swift in Sources */,
+				B0020013 /* IconColorValue.swift in Sources */,
+				B0020014 /* PremiumConfig.swift in Sources */,
+				B0020015 /* GradientPreset.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -530,6 +591,40 @@
 			};
 			name = Release;
 		};
+		C0020003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.demiflare168.HeyHoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		C0020004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.demiflare168.HeyHoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -547,6 +642,15 @@
 			buildConfigurations = (
 				C0010005 /* Debug */,
 				C0010006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0020002 /* Build configuration list for PBXNativeTarget "HeyHoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0020003 /* Debug */,
+				C0020004 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

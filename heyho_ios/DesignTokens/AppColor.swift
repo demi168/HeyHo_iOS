@@ -1,12 +1,5 @@
 import SwiftUI
 
-/// グラデーションプリセット定義
-struct GradientPreset: Identifiable, Equatable {
-    let id: String
-    let name: String        // 日本語表示名
-    let hexStops: [String]  // 2〜3色の hex
-}
-
 enum AppColor {
 
     /// hex文字列から Color を生成（内部用・確定値のみ使用）
@@ -70,11 +63,6 @@ enum AppColor {
     ]
 
     // MARK: - プレミアムグラデーション
-    static let premiumGradientPresets: [GradientPreset] = [
-        GradientPreset(id: "sunset",   name: "サンセット",   hexStops: ["FF6B6B", "FFD93D"]),
-        GradientPreset(id: "aurora",   name: "オーロラ",     hexStops: ["6155F5", "34C759", "00C0E8"]),
-        GradientPreset(id: "flamingo", name: "フラミンゴ",   hexStops: ["FF2D55", "AF52DE"]),
-        GradientPreset(id: "forest",   name: "フォレスト",   hexStops: ["34C759", "FFD700"]),
-        GradientPreset(id: "neon",     name: "ネオン",       hexStops: ["CB30E0", "0088FF", "00C0E8"]),
-    ]
+    /// 実体は `GradientPreset.premiumPresets`（Models/）。デザイントークンとしての公開名のみここで提供する。
+    static let premiumGradientPresets: [GradientPreset] = GradientPreset.premiumPresets
 }

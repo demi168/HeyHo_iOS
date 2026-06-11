@@ -52,7 +52,7 @@ enum IconColorValue: Equatable {
         case .solid:
             return nil
         case .gradient(let presetId):
-            return AppColor.premiumGradientPresets.first { $0.id == presetId }
+            return GradientPreset.premiumPresets.first { $0.id == presetId }
         case .customGradient(let hexStops):
             return GradientPreset(id: "custom", name: "カスタム", hexStops: hexStops)
         }
