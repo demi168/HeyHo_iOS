@@ -396,8 +396,12 @@ struct MyPageView: View {
     private func loadUser() {
         guard let uid = authState.currentUserId else { return }
         Task {
-            if let user = try? await FirestoreService.shared.getUser(userId: uid) {
+            do {
+                guard let user = try await FirestoreService.shared.getUser(userId: uid) else { return }
                 await MainActor.run { currentUser = user }
+            } catch {
+                // 読込失敗時はキャッシュ済み表示のまま（empty state で可）
+                AppLogger.firestore.error("ユーザー読込に失敗: \(error.localizedDescription)")
             }
         }
     }

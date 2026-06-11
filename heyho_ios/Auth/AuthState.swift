@@ -21,7 +21,13 @@ final class AuthState: ObservableObject {
                 if let uid = user?.uid {
                     PushService.shared.saveTokenToFirestoreIfNeeded()
                     // プロフィール設定状態を確認し、ユーザー情報をキャッシュ
-                    let appUser = try? await FirestoreService.shared.getUser(userId: uid)
+                    // 読込失敗時は nil のまま（未設定扱い）にして UI はサインインフローへ
+                    var appUser: AppUser?
+                    do {
+                        appUser = try await FirestoreService.shared.getUser(userId: uid)
+                    } catch {
+                        AppLogger.auth.error("ユーザー情報の取得に失敗: \(error.localizedDescription)")
+                    }
                     self?.currentUser = appUser
                     self?.isProfileSetupComplete = appUser.map { !$0.displayName.isEmpty } ?? false
                 } else {
@@ -90,10 +96,15 @@ final class AuthState: ObservableObject {
         isProfileSetupComplete = true
     }
 
-    /// キャッシュ済みユーザー情報を Firestore から再取得する
+    /// キャッシュ済みユーザー情報を Firestore から再取得する。
+    /// 失敗時は既存キャッシュを維持してログのみ残す
     func refreshCurrentUser() async {
         guard let uid = currentUserId else { return }
-        currentUser = try? await FirestoreService.shared.getUser(userId: uid)
+        do {
+            currentUser = try await FirestoreService.shared.getUser(userId: uid)
+        } catch {
+            AppLogger.auth.error("ユーザー情報の再取得に失敗: \(error.localizedDescription)")
+        }
     }
 
     func signOut() throws {

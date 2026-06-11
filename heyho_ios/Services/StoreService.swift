@@ -34,7 +34,7 @@ final class StoreService: ObservableObject {
         do {
             products = try await Product.products(for: [PremiumConfig.productId])
         } catch {
-            print("[StoreService] 商品取得失敗: \(error.localizedDescription)")
+            AppLogger.store.error("商品取得失敗: \(error.localizedDescription)")
         }
     }
 
@@ -115,7 +115,12 @@ final class StoreService: ObservableObject {
     private func syncPremiumToFirestore(_ premium: Bool) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         Task {
-            try? await FirestoreService.shared.updatePremiumStatus(userId: uid, isPremium: premium)
+            do {
+                try await FirestoreService.shared.updatePremiumStatus(userId: uid, isPremium: premium)
+            } catch {
+                // 課金機能は無効中（PremiumConfig.isEnabled=false）のためログのみで十分
+                AppLogger.store.error("プレミアム状態の同期に失敗 (isPremium: \(premium)): \(error.localizedDescription)")
+            }
         }
     }
 }

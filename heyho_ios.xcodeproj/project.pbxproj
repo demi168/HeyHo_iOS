@@ -13,6 +13,7 @@
 		77B29A592F42FBA700B18CFB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 77B29A582F42FBA700B18CFB /* FirebaseFirestore */; };
 		77C13A782F88F30C008A024B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 77C13A772F88F30C008A024B /* Localizable.xcstrings */; };
 		B0010001 /* HeyHoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* HeyHoApp.swift */; };
+		B0010075 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010075 /* AppLogger.swift */; };
 		B0010002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010002 /* RootView.swift */; };
 		B0010003 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010003 /* SignInView.swift */; };
 		B0010004 /* AuthState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010004 /* AuthState.swift */; };
@@ -67,6 +68,7 @@
 		77B29A532F42E52E00B18CFB /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 		77C13A772F88F30C008A024B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
+		F0010075 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		F0010002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		F0010003 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		F0010004 /* AuthState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthState.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 			isa = PBXGroup;
 			children = (
 				F0010001 /* HeyHoApp.swift */,
+				F0010075 /* AppLogger.swift */,
 				F0010002 /* RootView.swift */,
 			);
 			path = App;
@@ -382,6 +385,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0010001 /* HeyHoApp.swift in Sources */,
+				B0010075 /* AppLogger.swift in Sources */,
 				B0010002 /* RootView.swift in Sources */,
 				B0010003 /* SignInView.swift in Sources */,
 				B0010004 /* AuthState.swift in Sources */,
