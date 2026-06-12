@@ -19,5 +19,10 @@ struct RootView: View {
         }
         .environmentObject(authState)
         .environmentObject(StoreService.shared)
+        .environmentObject(RallyService.shared)
+        .onChange(of: authState.currentUserId) { _, uid in
+            // サインアウト/アカウント削除で受信購読を解除する（開始は FriendsView 側）
+            if uid == nil { RallyService.shared.stop() }
+        }
     }
 }

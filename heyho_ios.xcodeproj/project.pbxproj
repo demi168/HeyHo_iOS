@@ -16,6 +16,7 @@
 		B0010075 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010075 /* AppLogger.swift */; };
 		B0010100 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
 		B0010101 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
+		B0010102 /* RallyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010102 /* RallyService.swift */; };
 		B0010090 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010090 /* ColorHex.swift */; };
 		B0010091 /* MyPageComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010091 /* MyPageComponents.swift */; };
 		B0010092 /* MyPageSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010092 /* MyPageSections.swift */; };
@@ -85,6 +86,7 @@
 		F0010075 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		F0010100 /* FriendRowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRowState.swift; sourceTree = "<group>"; };
 		F0010101 /* FriendRallyStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatus.swift; sourceTree = "<group>"; };
+		F0010102 /* RallyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RallyService.swift; sourceTree = "<group>"; };
 		F0020006 /* FriendRallyStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatusTests.swift; sourceTree = "<group>"; };
 		F0010090 /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
 		F0010091 /* MyPageComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageComponents.swift; sourceTree = "<group>"; };
@@ -277,6 +279,7 @@
 				F0010041 /* FeedbackService.swift */,
 				F0010051 /* StoreService.swift */,
 				F0010080 /* ShareService.swift */,
+				F0010102 /* RallyService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -438,6 +441,7 @@
 				B0010075 /* AppLogger.swift in Sources */,
 				B0010100 /* FriendRowState.swift in Sources */,
 				B0010101 /* FriendRallyStatus.swift in Sources */,
+				B0010102 /* RallyService.swift in Sources */,
 				B0010002 /* RootView.swift in Sources */,
 				B0010003 /* SignInView.swift in Sources */,
 				B0010004 /* AuthState.swift in Sources */,
