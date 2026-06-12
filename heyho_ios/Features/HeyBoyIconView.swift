@@ -33,7 +33,10 @@ struct HeyBoyIconView: View {
     ]
 
     @State private var currentEyes: String = "HeyBoyEyes_default"
-    @State private var eyesTimer: Timer?
+    /// 目パチアニメーションのループ（View 破棄時にキャンセルしてリークを防ぐ）
+    @State private var eyesTask: Task<Void, Never>?
+    /// カラー変更スライドアニメーションのタスク
+    @State private var transitionTask: Task<Void, Never>?
     @State private var displayedColorValue: IconColorValue
     @State private var displayedColor: Color
     @State private var slideOffset: CGFloat = 0
@@ -156,26 +159,27 @@ struct HeyBoyIconView: View {
 
     private func startAnimationIfNeeded() {
         guard animated else { return }
-        scheduleNextEyes()
-    }
-
-    private func scheduleNextEyes() {
-        eyesTimer?.invalidate()
-        let isBlink = currentEyes == "HeyBoyEyes_blink"
-        let interval: TimeInterval = isBlink ? 0.10 : 2.0
-        eyesTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [self] _ in
-            guard animated else { return }
-            let next = Self.eyesPatterns.randomElement() ?? "HeyBoyEyes_default"
-            withAnimation(.easeInOut(duration: 0.10)) {
-                currentEyes = next
+        eyesTask?.cancel()
+        eyesTask = Task { @MainActor in
+            // 直前の目に応じた待機（瞬き後は素早く戻す）→ ランダムに次の目へ、を繰り返す
+            while !Task.isCancelled {
+                let isBlink = currentEyes == "HeyBoyEyes_blink"
+                let interval: Duration = isBlink ? .milliseconds(100) : .seconds(2)
+                try? await Task.sleep(for: interval)
+                if Task.isCancelled || !animated { return }
+                let next = Self.eyesPatterns.randomElement() ?? "HeyBoyEyes_default"
+                withAnimation(.easeInOut(duration: 0.10)) {
+                    currentEyes = next
+                }
             }
-            scheduleNextEyes()
         }
     }
 
     private func stopAnimation() {
-        eyesTimer?.invalidate()
-        eyesTimer = nil
+        eyesTask?.cancel()
+        eyesTask = nil
+        transitionTask?.cancel()
+        transitionTask = nil
         currentEyes = "HeyBoyEyes_default"
     }
 
@@ -210,24 +214,27 @@ struct HeyBoyIconView: View {
 
         isColorChanging = true
 
-        // フレームアウト
-        withAnimation(.easeIn(duration: 0.22)) {
-            slideOffset = travel
-        }
+        transitionTask?.cancel()
+        transitionTask = Task { @MainActor in
+            // フレームアウト
+            withAnimation(.easeIn(duration: 0.22)) {
+                slideOffset = travel
+            }
 
-        // フレームアウト完了後にカラー変更
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) {
+            try? await Task.sleep(for: .milliseconds(240))
+            if Task.isCancelled { return }
+
+            // カラー変更 → フレームイン
             apply()
-
-            // フレームイン
             withAnimation(.easeOut(duration: 0.25)) {
                 slideOffset = 0
             }
 
+            try? await Task.sleep(for: .milliseconds(270))
+            if Task.isCancelled { return }
+
             // フレームイン完了後にロック解除
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.27) {
-                isColorChanging = false
-            }
+            isColorChanging = false
         }
     }
 }

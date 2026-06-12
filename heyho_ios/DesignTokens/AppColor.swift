@@ -2,9 +2,11 @@ import SwiftUI
 
 enum AppColor {
 
-    /// hex文字列から Color を生成（内部用・確定値のみ使用）
+    /// hex文字列から Color を生成（内部用・確定値のみ使用）。
+    /// 渡すのは常にハードコードされた正しい hex なので通常フォールバックは発生しないが、
+    /// 万一タイポした場合にクラッシュさせず、目立つマゼンタで気付けるようにする
     private static func hex(_ value: String) -> Color {
-        Color(hex: value)!
+        Color(hex: value) ?? Color(red: 1, green: 0, blue: 1)
     }
 
     // MARK: - 背景

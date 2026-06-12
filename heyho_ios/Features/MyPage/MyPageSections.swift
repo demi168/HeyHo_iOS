@@ -154,7 +154,8 @@ struct AddFriendSectionView: View {
         }
         .onAppear {
             if focusOnAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(500))
                     isCodeFocused = true
                 }
             }
