@@ -21,18 +21,18 @@ interface NotificationTemplate {
 /** messageType → 通知テンプレートのマッピング */
 export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
   hey: {
-    title: "Hey",
-    body: "{fromName}からHeyが届きました",
+    title: "Hey!",
+    body: "{fromName} says Hey!",
     sound: "hey_default.caf",
   },
   ho: {
-    title: "Ho",
-    body: "{fromName}からHoが届きました",
+    title: "Ho!",
+    body: "{fromName} yells Ho!",
     sound: "ho_default.caf",
   },
   letsGo: {
-    title: "Let's Go",
-    body: "{fromName}からLet's Goが届きました",
+    title: "Let's Go!",
+    body: "{fromName} shouts Let's Go!!",
     sound: "letsgo_default.caf",
   },
 };
