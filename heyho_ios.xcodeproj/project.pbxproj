@@ -14,6 +14,8 @@
 		77C13A782F88F30C008A024B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 77C13A772F88F30C008A024B /* Localizable.xcstrings */; };
 		B0010001 /* HeyHoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* HeyHoApp.swift */; };
 		B0010075 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010075 /* AppLogger.swift */; };
+		B0010100 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
+		B0010101 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
 		B0010090 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010090 /* ColorHex.swift */; };
 		B0010091 /* MyPageComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010091 /* MyPageComponents.swift */; };
 		B0010092 /* MyPageSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010092 /* MyPageSections.swift */; };
@@ -68,6 +70,9 @@
 		B0020013 /* IconColorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010070 /* IconColorValue.swift */; };
 		B0020014 /* PremiumConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010050 /* PremiumConfig.swift */; };
 		B0020015 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010074 /* GradientPreset.swift */; };
+		B0020020 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
+		B0020021 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
+		B0020006 /* FriendRallyStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020006 /* FriendRallyStatusTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,6 +83,9 @@
 		77C13A772F88F30C008A024B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
 		F0010075 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		F0010100 /* FriendRowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRowState.swift; sourceTree = "<group>"; };
+		F0010101 /* FriendRallyStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatus.swift; sourceTree = "<group>"; };
+		F0020006 /* FriendRallyStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatusTests.swift; sourceTree = "<group>"; };
 		F0010090 /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
 		F0010091 /* MyPageComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageComponents.swift; sourceTree = "<group>"; };
 		F0010092 /* MyPageSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageSections.swift; sourceTree = "<group>"; };
@@ -218,6 +226,7 @@
 				F0020003 /* DisplayNameValidatorTests.swift */,
 				F0020004 /* MessageTypeTests.swift */,
 				F0020005 /* IconColorValueTests.swift */,
+				F0020006 /* FriendRallyStatusTests.swift */,
 			);
 			path = HeyHoTests;
 			sourceTree = "<group>";
@@ -254,6 +263,8 @@
 				F0010072 /* InviteCode.swift */,
 				F0010073 /* DisplayNameValidator.swift */,
 				F0010074 /* GradientPreset.swift */,
+				F0010100 /* FriendRowState.swift */,
+				F0010101 /* FriendRallyStatus.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -425,6 +436,8 @@
 			files = (
 				B0010001 /* HeyHoApp.swift in Sources */,
 				B0010075 /* AppLogger.swift in Sources */,
+				B0010100 /* FriendRowState.swift in Sources */,
+				B0010101 /* FriendRallyStatus.swift in Sources */,
 				B0010002 /* RootView.swift in Sources */,
 				B0010003 /* SignInView.swift in Sources */,
 				B0010004 /* AuthState.swift in Sources */,
@@ -481,6 +494,9 @@
 				B0020013 /* IconColorValue.swift in Sources */,
 				B0020014 /* PremiumConfig.swift in Sources */,
 				B0020015 /* GradientPreset.swift in Sources */,
+				B0020020 /* FriendRowState.swift in Sources */,
+				B0020021 /* FriendRallyStatus.swift in Sources */,
+				B0020006 /* FriendRallyStatusTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

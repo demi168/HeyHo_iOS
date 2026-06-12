@@ -1,20 +1,6 @@
 import SwiftUI
 
-/// 友だちリストの1行が「Hey / Ho / Let's Go」のどれを送れるかを表す
-enum FriendRowState {
-    case sendHey        // デフォルト: Heyを送る
-    case sendLetsGo     // 相手からHoが返ってきた後: LetsGoを送る
-    case sendHo         // 相手からHeyが来た後: Hoを返す
-
-    /// 「次に送るべきメッセージタイプ」から行状態を決める
-    init(sending type: MessageType) {
-        switch type {
-        case .hey: self = .sendHey
-        case .ho: self = .sendHo
-        case .letsGo: self = .sendLetsGo
-        }
-    }
-}
+// FriendRowState は Models/FriendRowState.swift（テスト対象の純粋ロジック）へ移動
 
 #if DEBUG
 private let debugDummyFriends: [AppUser] = [

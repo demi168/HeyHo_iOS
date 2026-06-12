@@ -234,6 +234,36 @@ final class FirestoreService {
         }
     }
 
+    /// 各友だちについてラリー状態（行状態＋返信待ちフラグ）を返す。
+    /// 判定本体は FriendRallyStatus.from（テスト対象の純粋関数）に委譲する
+    func getFriendRallyStatuses(userId: String, friendIds: [String]) async -> [String: FriendRallyStatus] {
+        await withTaskGroup(of: (String, FriendRallyStatus).self) { group in
+            for friendId in friendIds {
+                group.addTask { [self] in
+                    // 1人分のクエリ失敗は初期状態にフォールバックし、他の行に影響させない
+                    let last: HeyHo?
+                    do {
+                        last = try await self.getLastHeyHo(me: userId, friendId: friendId)
+                    } catch {
+                        AppLogger.firestore.error("getLastHeyHo failed (friendId: \(friendId)): \(error.localizedDescription)")
+                        return (friendId, .initial)
+                    }
+                    let status = FriendRallyStatus.from(
+                        lastFromUserId: last?.fromUserId,
+                        lastMessageType: last?.messageType,
+                        me: userId
+                    )
+                    return (friendId, status)
+                }
+            }
+            var result: [String: FriendRallyStatus] = [:]
+            for await (friendId, status) in group {
+                result[friendId] = status
+            }
+            return result
+        }
+    }
+
     /// 最後のメッセージを取得して、次に送るべきメッセージタイプを決定
     private func getNextMessageType(fromUserId: String, toUserId: String) async throws -> MessageType {
         guard let last = try await getLastHeyHo(me: fromUserId, friendId: toUserId) else {
