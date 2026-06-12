@@ -22,6 +22,14 @@ enum HeyHoAnimationState: Equatable {
         return false
     }
 
+    /// 送受信メッセージの種別（idle 時は nil）
+    var message: MessageType? {
+        switch self {
+        case .sending(let m, _, _), .receiving(let m, _, _): return m
+        case .idle: return nil
+        }
+    }
+
     var iconColor: IconColorValue? {
         switch self {
         case .sending(_, let c, _), .receiving(_, let c, _): return c
@@ -124,19 +132,15 @@ struct HeyHoAnimationOverlay: View {
         }
         .allowsHitTesting(animationState != .idle)
         .onChange(of: animationState) {
-            if animationState != .idle {
-                runAnimation(isSending: animationState.isSending)
-                // サウンド＆ハプティクス
-                if case .sending(let m, _, _) = animationState {
-                    FeedbackService.shared.playFeedback(for: m, isSending: true)
-                } else if case .receiving(let m, _, _) = animationState {
-                    FeedbackService.shared.playFeedback(for: m, isSending: false)
-                }
-            }
+            guard animationState != .idle, let message = animationState.message else { return }
+            let isSending = animationState.isSending
+            // ハプティクスはタップ即時。サウンドはメッセージ表示に同期するため runAnimation 内で再生
+            FeedbackService.shared.playHaptic(for: message, isSending: isSending)
+            runAnimation(message: message, isSending: isSending)
         }
     }
 
-    private func runAnimation(isSending: Bool) {
+    private func runAnimation(message: MessageType, isSending: Bool) {
         bgVisible = false
         heyBoyVisible = false
         messageVisible = false
@@ -150,12 +154,13 @@ struct HeyHoAnimationOverlay: View {
 
         animationTask?.cancel()
         animationTask = Task { @MainActor in
-            //メッセージ表示（+0.21s）
+            //メッセージ表示（+0.21s）＋同時にサウンド再生
             try? await Task.sleep(for: .milliseconds(210))
             if Task.isCancelled { return }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
                 messageVisible = true
             }
+            FeedbackService.shared.playSound(for: message)
 
             //メッセージ移動＆背景とHeyBoy非表示（+0.75s）
             try? await Task.sleep(for: .milliseconds(540))

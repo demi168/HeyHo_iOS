@@ -64,12 +64,4 @@ final class FeedbackService {
         generator.prepare()
         generator.impactOccurred()
     }
-
-    // MARK: - まとめて実行
-
-    /// サウンドとハプティクスを同時に実行する
-    func playFeedback(for message: MessageType, isSending: Bool) {
-        playSound(for: message)
-        playHaptic(for: message, isSending: isSending)
-    }
 }
