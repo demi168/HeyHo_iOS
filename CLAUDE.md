@@ -114,12 +114,26 @@ Firebase services used:
 
 ## Testing
 
-Standard XCTest setup in `HeyHo/HeyHoTests/` and `HeyHo/HeyHoUITests/`. Run tests in Xcode (⌘U).
+ユニットテストは **Swift Testing**（`import Testing` / `@Test` / `#expect`）で `HeyHoTests/` に置く。
+`HeyHoTests` は **アプリをホストしない独立ターゲット**で、`@testable import` は使わず、テスト対象を
+アプリと **dual membership** でコンパイルして検証する。そのため **テスト対象は `Foundation` のみ
+import の純粋ロジック（`Models/` の `InviteCode` / `DisplayNameValidator` / `MessageType` /
+`IconColorValue` 等）に限る**。新しい判定・変換ロジックは View/Service に直書きせず `Models/` に
+純粋関数で切り出してテストを書く。詳細は `.claude/skills/testing/SKILL.md`。
+
+```bash
+xcodebuild test -project heyho_ios.xcodeproj -scheme HeyHo \
+  -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:HeyHoTests
+```
+
+UI を伴う挙動は自動タップではなく、ユーザーの手動操作＋`log stream`/`simctl screenshot` で確認する。
 
 ## Code Conventions
 
 - Use `async/await` for all Firebase operations
 - Services are singletons accessed via `.shared`
 - SwiftUI views use declarative syntax with `@StateObject` and `@State`
+- 遅延は `DispatchQueue.main.asyncAfter` ではなく `Task { try? await Task.sleep(...) }`（キャンセル可能にする）
+- ログは `print()` ではなく `AppLogger.<category>`。`try?` でエラーを握りつぶさず、必ずログか `.errorAlert` に接続する（詳細は `.claude/skills/logging/SKILL.md`）
 - Japanese comments and strings are intentional (app is localized for Japanese users)
 - **メンテナンス楽ちん設計を絶対キープ**: 値のハードコードを避け、デザイントークン（`SemanticColor`, `SemanticSpacing`等）や定数からの参照にする。同じ値が2箇所以上に出現したら一元管理を検討。「1箇所変えれば全部変わる」を目指す。
