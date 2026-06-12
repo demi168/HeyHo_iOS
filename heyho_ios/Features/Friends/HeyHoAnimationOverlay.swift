@@ -61,6 +61,8 @@ struct HeyHoAnimationOverlay: View {
     @State private var heyBoyVisible = false
     @State private var messageVisible = false
     @State private var messageOffset: CGFloat = 0
+    /// アニメーションシーケンス（連続発火時は前回をキャンセルして重複を防ぐ）
+    @State private var animationTask: Task<Void, Never>?
 
     private let heyBoyScale: CGFloat = 0.6
 
@@ -145,14 +147,19 @@ struct HeyHoAnimationOverlay: View {
             bgVisible = true
             heyBoyVisible = true
         }
-        //メッセージ表示
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.21) {
+
+        animationTask?.cancel()
+        animationTask = Task { @MainActor in
+            //メッセージ表示（+0.21s）
+            try? await Task.sleep(for: .milliseconds(210))
+            if Task.isCancelled { return }
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
                 messageVisible = true
             }
-        }
-        //メッセージ移動＆背景とHeyBoy非表示
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+
+            //メッセージ移動＆背景とHeyBoy非表示（+0.75s）
+            try? await Task.sleep(for: .milliseconds(540))
+            if Task.isCancelled { return }
             withAnimation(.easeIn(duration: 0.25)) {
                 messageOffset = isSending ? -800 : 800
                 messageVisible = false
@@ -161,9 +168,10 @@ struct HeyHoAnimationOverlay: View {
                 heyBoyVisible = false
                 bgVisible = false
             }
-        }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            //アニメーション完了（+1.5s）
+            try? await Task.sleep(for: .milliseconds(750))
+            if Task.isCancelled { return }
             animationState = .idle
         }
     }

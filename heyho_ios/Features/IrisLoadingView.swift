@@ -67,7 +67,8 @@ struct IrisLoadingView: View {
         }
 
         // 縮小完了後にHeyBoyフレームイン
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(550))
             isIrisOpen = true
             startHeyBoyFrameIn()
         }
@@ -90,17 +91,17 @@ struct IrisLoadingView: View {
         }
 
         // フレームアウト完了後にアイリスイン
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(350))
             withAnimation(.easeInOut(duration: 0.4)) {
                 irisRadius = 0
             }
 
             // アイリスイン完了後に非表示
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                isVisible = false
-                isDismissing = false
-                isIrisOpen = false
-            }
+            try? await Task.sleep(for: .milliseconds(450))
+            isVisible = false
+            isDismissing = false
+            isIrisOpen = false
         }
     }
 
