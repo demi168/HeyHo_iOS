@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import {buildNotification} from "./notificationTemplates";
+import {buildNotification, notificationSound} from "./notificationTemplates";
 
 admin.initializeApp();
 
@@ -31,6 +31,7 @@ export const onHeyHoCreated = functions.firestore
     const fromUserDoc = await admin.firestore().collection("users").doc(fromUserId).get();
     const fromName = (fromUserDoc.data()?.displayName as string) || "Someone";
     const notification = buildNotification(messageType, fromName);
+    const sound = notificationSound(messageType);
 
     try {
       await admin.messaging().send({
@@ -41,6 +42,14 @@ export const onHeyHoCreated = functions.firestore
           messageType,
           fromUserId,
           heyhoId: context.params.heyhoId,
+        },
+        // 受信時の通知音をメッセージ種別ごとの caf にする（送信時のアプリ内効果音と統一）
+        apns: {
+          payload: {
+            aps: {
+              sound,
+            },
+          },
         },
       });
       console.log(`FCM通知を送信しました (${messageType}): ${toUserId}`);
