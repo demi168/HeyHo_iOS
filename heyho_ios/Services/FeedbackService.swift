@@ -14,25 +14,23 @@ final class FeedbackService {
     }
 
     // MARK: - メッセージ種別ごとの音声ファイル名（拡張子なし）
-    // TODO: 音声ファイル差し替え時はここのファイル名を変更する
+    // 送信・受信は同じ音を使う（1メッセージ種別 = 1ファイル）。
+    // 音声ファイル差し替え時はここのファイル名を変更する
 
     /// メッセージ種別に対応する音声ファイル名を返す
-    private func soundFileName(for message: MessageType, isSending: Bool) -> String {
-        switch (message, isSending) {
-        case (.hey, true):    return "sound_send_hey"
-        case (.hey, false):   return "sound_receive_hey"
-        case (.ho, true):     return "sound_send_ho"
-        case (.ho, false):    return "sound_receive_ho"
-        case (.letsGo, true): return "sound_send_letsgo"
-        case (.letsGo, false):return "sound_receive_letsgo"
+    private func soundFileName(for message: MessageType) -> String {
+        switch message {
+        case .hey:    return "hey_default"
+        case .ho:     return "ho_default"
+        case .letsGo: return "letsgo_default"
         }
     }
 
     // MARK: - サウンド再生
 
     /// メッセージに応じた効果音を再生する
-    func playSound(for message: MessageType, isSending: Bool) {
-        let name = soundFileName(for: message, isSending: isSending)
+    func playSound(for message: MessageType) {
+        let name = soundFileName(for: message)
         // mp3, wav, caf, m4a の順で探す
         let extensions = ["mp3", "wav", "caf", "m4a"]
         for ext in extensions {
@@ -71,7 +69,7 @@ final class FeedbackService {
 
     /// サウンドとハプティクスを同時に実行する
     func playFeedback(for message: MessageType, isSending: Bool) {
-        playSound(for: message, isSending: isSending)
+        playSound(for: message)
         playHaptic(for: message, isSending: isSending)
     }
 }

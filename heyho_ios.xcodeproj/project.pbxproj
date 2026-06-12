@@ -54,6 +54,9 @@
 		B0010073 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
 		B0010074 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010074 /* GradientPreset.swift */; };
 		B0010080 /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010080 /* ShareService.swift */; };
+		B0010096 /* hey_default.caf in Resources */ = {isa = PBXBuildFile; fileRef = F0010096 /* hey_default.caf */; };
+		B0010097 /* ho_default.caf in Resources */ = {isa = PBXBuildFile; fileRef = F0010097 /* ho_default.caf */; };
+		B0010098 /* letsgo_default.caf in Resources */ = {isa = PBXBuildFile; fileRef = F0010098 /* letsgo_default.caf */; };
 		B0020001 /* HeyHoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020001 /* HeyHoTests.swift */; };
 		B0020002 /* InviteCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020002 /* InviteCodeTests.swift */; };
 		B0020003 /* DisplayNameValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020003 /* DisplayNameValidatorTests.swift */; };
@@ -115,6 +118,9 @@
 		F0010073 /* DisplayNameValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameValidator.swift; sourceTree = "<group>"; };
 		F0010074 /* GradientPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientPreset.swift; sourceTree = "<group>"; };
 		F0010080 /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
+		F0010096 /* hey_default.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = hey_default.caf; sourceTree = "<group>"; };
+		F0010097 /* ho_default.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = ho_default.caf; sourceTree = "<group>"; };
+		F0010098 /* letsgo_default.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = letsgo_default.caf; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0020001 /* HeyHoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoTests.swift; sourceTree = "<group>"; };
 		F0020002 /* InviteCodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteCodeTests.swift; sourceTree = "<group>"; };
@@ -174,6 +180,7 @@
 				G0010007 /* Services */,
 				G0010008 /* Features */,
 				G0010013 /* DesignTokens */,
+				G0010015 /* Sounds */,
 				F0010020 /* Assets.xcassets */,
 				77509FDB2F51F66800E4C7AF /* AppIcon.icon */,
 				F0010016 /* Info.plist */,
@@ -181,6 +188,17 @@
 				77C13A772F88F30C008A024B /* Localizable.xcstrings */,
 			);
 			path = heyho_ios;
+			sourceTree = "<group>";
+		};
+		G0010015 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				F0010096 /* hey_default.caf */,
+				F0010097 /* ho_default.caf */,
+				F0010098 /* letsgo_default.caf */,
+			);
+			name = Sounds;
+			path = ../Resources/Sounds;
 			sourceTree = "<group>";
 		};
 		G0010003 /* Products */ = {
@@ -392,6 +410,9 @@
 				B0010015 /* GoogleService-Info.plist in Resources */,
 				77C13A782F88F30C008A024B /* Localizable.xcstrings in Resources */,
 				B0010020 /* Assets.xcassets in Resources */,
+				B0010096 /* hey_default.caf in Resources */,
+				B0010097 /* ho_default.caf in Resources */,
+				B0010098 /* letsgo_default.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
