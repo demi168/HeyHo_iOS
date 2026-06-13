@@ -18,8 +18,8 @@ private let debugDummyFriends: [AppUser] = [
 struct FriendsView: View {
     @EnvironmentObject var authState: AuthState
     @EnvironmentObject var storeService: StoreService
+    @EnvironmentObject var rallyService: RallyService
     @State private var friends: [AppUser] = []
-    @State private var rowStates: [String: FriendRowState] = [:]
     @State private var isLoading = true
     @State private var hasLoadedOnce = false
     @State private var errorMessage: String?
@@ -35,7 +35,7 @@ struct FriendsView: View {
         ZStack {
             FriendsBodyView(
                 friends: friends,
-                rowStates: rowStates,
+                statuses: rallyService.statuses,
                 isLoading: isLoading,
                 myIconColorValue: myIconColorValue,
                 lastSentFriendId: lastSentFriendId,
@@ -120,20 +120,12 @@ struct FriendsView: View {
                 list.insert(newFriend, at: 0)
                 newlyAddedFriendId = nil
             }
-            // 友だちリストを先に表示し、rowStates はバックグラウンドで取得
+            // 友だちリストを先に表示し、ラリー状態の取得＋受信購読を RallyService に委譲
             friends = list
-            Task { await loadRowStates() }
+            rallyService.start(userId: uid, friendIds: list.compactMap(\.id))
         } catch {
             errorMessage = error.localizedDescription
         }
-    }
-
-    private func loadRowStates() async {
-        guard let uid = authState.currentUserId else { return }
-        let ids = friends.compactMap(\.id)
-        guard !ids.isEmpty else { return }
-        let states = await FirestoreService.shared.getFriendRowStates(userId: uid, friendIds: ids)
-        await MainActor.run { rowStates = states }
     }
 
     private func deleteFriend(_ friend: AppUser) {
@@ -143,7 +135,7 @@ struct FriendsView: View {
                 try await FirestoreService.shared.removeFriend(userId: uid, friendId: friendId)
                 await MainActor.run {
                     friends.removeAll { $0.id == friendId }
-                    rowStates.removeValue(forKey: friendId)
+                    rallyService.updateFriendIds(friends.compactMap(\.id))
                 }
             } catch {
                 await MainActor.run { errorMessage = error.localizedDescription }
@@ -155,7 +147,7 @@ struct FriendsView: View {
         guard let uid = authState.currentUserId, let friendId = friend.id else { return }
 
         // letsGo は全員無料（ゲートなし）
-        let state = rowStates[friendId] ?? .sendHey
+        let state = rallyService.statuses[friendId]?.rowState ?? .sendHey
 
         // 送信タイプに応じたアニメーション
         let name = friend.displayName
@@ -171,8 +163,11 @@ struct FriendsView: View {
         Task {
             do {
                 try await FirestoreService.shared.sendHeyHo(fromUserId: uid, toUserId: friendId)
-                await MainActor.run { lastSentFriendId = friendId }
-                await loadRowStates()
+                await MainActor.run {
+                    lastSentFriendId = friendId
+                    // 送信成功 → 相手の返信待ち（ボタン無効化）を楽観更新
+                    rallyService.markSent(friendId: friendId)
+                }
                 Task {
                     try? await Task.sleep(for: .seconds(1))
                     await MainActor.run { lastSentFriendId = nil }
@@ -206,7 +201,7 @@ struct FriendsView: View {
 
 struct FriendsBodyView: View {
     let friends: [AppUser]
-    let rowStates: [String: FriendRowState]
+    let statuses: [String: FriendRallyStatus]
     let isLoading: Bool
     let myIconColorValue: IconColorValue
     let lastSentFriendId: String?
@@ -246,8 +241,9 @@ struct FriendsBodyView: View {
                             ForEach(friends) { friend in
                                 FriendRow(
                                     friend: friend,
-                                    state: rowStates[friend.id ?? ""] ?? .sendHey,
+                                    state: statuses[friend.id ?? ""]?.rowState ?? .sendHey,
                                     justSent: lastSentFriendId == friend.id,
+                                    awaitingReply: statuses[friend.id ?? ""]?.awaitingReply ?? false,
                                     avatarIconColor: resolvedIconColor(friend)
                                 ) { onSend(friend) }
                                 .contextMenu {
@@ -364,11 +360,16 @@ struct FriendRow: View {
     let friend: AppUser
     let state: FriendRowState
     let justSent: Bool
+    /// 自分が最後に送って相手の返信待ち = 送信不可
+    let awaitingReply: Bool
     let avatarIconColor: IconColorValue
     let onSend: () -> Void
 
+    /// 送信不可（送信直後の一過性 or 相手の返信待ち）
+    private var isDisabled: Bool { justSent || awaitingReply }
+
     var body: some View {
-        Button(action: { if !justSent { onSend() } }) {
+        Button(action: { if !isDisabled { onSend() } }) {
             HStack(spacing: AppSpacing.spMedium) {
                 HeyBoyIconView(iconColorValue: avatarIconColor, size: AppSize.iconDefault)
 
@@ -389,7 +390,8 @@ struct FriendRow: View {
                     .strokeBorder(AppColor.borderDefault, lineWidth: AppSize.borderStrong)
                     .background(Capsule().fill(AppColor.backgroundSecondary))
             )
-            .opacity(justSent ? 0.55 : 1.0)
+            // 見た目（dim）は既存演出を流用。最終的な状態表示デザインは別途決定
+            .opacity(isDisabled ? 0.55 : 1.0)
         }
         .buttonStyle(.plain)
     }
@@ -408,19 +410,19 @@ private let previewFriends: [AppUser] = [
     AppUser(id: "p6", displayName: "Heyho_ramone", iconColor: "gradient:sunset"),
 ]
 
-private let previewRowStates: [String: FriendRowState] = [
-    "p1": .sendHey,
-    "p2": .sendHey,
-    "p3": .sendHo,
-    "p4": .sendLetsGo,
-    "p5": .sendHey,
-    "p6": .sendHey,
+private let previewStatuses: [String: FriendRallyStatus] = [
+    "p1": FriendRallyStatus(rowState: .sendHey, awaitingReply: false),
+    "p2": FriendRallyStatus(rowState: .sendHey, awaitingReply: true),   // 返信待ち（無効化）
+    "p3": FriendRallyStatus(rowState: .sendHo, awaitingReply: false),
+    "p4": FriendRallyStatus(rowState: .sendLetsGo, awaitingReply: false),
+    "p5": FriendRallyStatus(rowState: .sendHey, awaitingReply: false),
+    "p6": FriendRallyStatus(rowState: .sendHey, awaitingReply: false),
 ]
 
 #Preview("FriendsBodyView - リスト") {
     FriendsBodyView(
         friends: previewFriends,
-        rowStates: previewRowStates,
+        statuses: previewStatuses,
         isLoading: false,
         myIconColorValue: .solid(hex: "FFD700"),
         lastSentFriendId: nil,
@@ -437,7 +439,7 @@ private let previewRowStates: [String: FriendRowState] = [
 #Preview("FriendsBodyView - ローディング") {
     FriendsBodyView(
         friends: [],
-        rowStates: [:],
+        statuses: [:],
         isLoading: true,
         myIconColorValue: .solid(hex: "FFD700"),
         lastSentFriendId: nil,
@@ -454,7 +456,7 @@ private let previewRowStates: [String: FriendRowState] = [
 #Preview("FriendsBodyView - 友だちなし") {
     FriendsBodyView(
         friends: [],
-        rowStates: [:],
+        statuses: [:],
         isLoading: false,
         myIconColorValue: .solid(hex: "FFD700"),
         lastSentFriendId: nil,
@@ -470,11 +472,11 @@ private let previewRowStates: [String: FriendRowState] = [
 
 #Preview("FriendRow - 各ステート") {
     VStack(spacing: AppSpacing.spMedium) {
-        FriendRow(friend: previewFriends[0], state: .sendHey,    justSent: false, avatarIconColor: .solid(hex: "B47850")) {}
-        FriendRow(friend: previewFriends[1], state: .sendHey,    justSent: false, avatarIconColor: .solid(hex: "A020F0")) {}
-        FriendRow(friend: previewFriends[2], state: .sendHo,     justSent: false, avatarIconColor: .solid(hex: "0064FF")) {}
-        FriendRow(friend: previewFriends[3], state: .sendLetsGo, justSent: false, avatarIconColor: .solid(hex: "FF3030")) {}
-        FriendRow(friend: previewFriends[5], state: .sendHey,    justSent: false, avatarIconColor: .gradient(presetId: "sunset")) {}
+        FriendRow(friend: previewFriends[0], state: .sendHey,    justSent: false, awaitingReply: false, avatarIconColor: .solid(hex: "B47850")) {}
+        FriendRow(friend: previewFriends[1], state: .sendHey,    justSent: false, awaitingReply: true,  avatarIconColor: .solid(hex: "A020F0")) {}
+        FriendRow(friend: previewFriends[2], state: .sendHo,     justSent: false, awaitingReply: false, avatarIconColor: .solid(hex: "0064FF")) {}
+        FriendRow(friend: previewFriends[3], state: .sendLetsGo, justSent: false, awaitingReply: false, avatarIconColor: .solid(hex: "FF3030")) {}
+        FriendRow(friend: previewFriends[5], state: .sendHey,    justSent: false, awaitingReply: false, avatarIconColor: .gradient(presetId: "sunset")) {}
     }
     .padding(.horizontal, AppSpacing.spXlarge)
     .padding(.vertical, AppSpacing.spLarge)
