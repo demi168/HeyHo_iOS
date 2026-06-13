@@ -56,6 +56,11 @@ struct FriendsView: View {
             loadMyColor()
             Task { await loadFriends() }
         }
+        .onChange(of: rallyService.incomingEvent) { _, event in
+            // リアルタイム受信（B2）・プッシュタップ（B1）共通の受信アニメ発火
+            guard let event else { return }
+            playReceiveAnimation(event)
+        }
         .alert("Delete Friend", isPresented: Binding(
             get: { friendToDelete != nil },
             set: { if !$0 { friendToDelete = nil } }
@@ -96,6 +101,28 @@ struct FriendsView: View {
 
     private func resolvedIconColor(for friend: AppUser) -> IconColorValue {
         IconColorValue(firestoreString: friend.iconColor)
+    }
+
+    /// 受信イベントから相手のアイコン色・名前を解決して受信アニメを再生する
+    private func playReceiveAnimation(_ event: IncomingHeyHo) {
+        // 友だち一覧にいれば追加取得なしで解決
+        if let friend = friends.first(where: { $0.id == event.fromUserId }) {
+            animationState = .receiving(
+                message: event.messageType,
+                iconColor: resolvedIconColor(for: friend),
+                name: friend.displayName
+            )
+            return
+        }
+        // 一覧に無い場合（追加直後など）は単発取得でフォールバック
+        Task { @MainActor in
+            let user = try? await FirestoreService.shared.getUser(userId: event.fromUserId)
+            animationState = .receiving(
+                message: event.messageType,
+                iconColor: IconColorValue(firestoreString: user?.iconColor),
+                name: user?.displayName ?? String(localized: "Someone")
+            )
+        }
     }
 
     private func loadMyColor() {
