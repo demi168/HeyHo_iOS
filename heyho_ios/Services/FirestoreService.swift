@@ -203,37 +203,6 @@ final class FirestoreService {
         }
     }
 
-    /// 各友だちについて「Hey / Ho / Let's Go」の行状態を返す
-    func getFriendRowStates(userId: String, friendIds: [String]) async -> [String: FriendRowState] {
-        await withTaskGroup(of: (String, FriendRowState).self) { group in
-            for friendId in friendIds {
-                group.addTask { [self] in
-                    // 1人分のクエリ失敗は .sendHey にフォールバックし、他の行に影響させない
-                    let last: HeyHo?
-                    do {
-                        last = try await self.getLastHeyHo(me: userId, friendId: friendId)
-                    } catch {
-                        AppLogger.firestore.error("getLastHeyHo failed (friendId: \(friendId)): \(error.localizedDescription)")
-                        return (friendId, .sendHey)
-                    }
-                    guard let last else { return (friendId, .sendHey) }
-                    // 相手 → 自分: 相手のメッセージに応じた返信を決定
-                    if last.fromUserId == friendId && last.toUserId == userId {
-                        return (friendId, FriendRowState(sending: last.messageType.reply))
-                    } else {
-                        // 自分 → 相手: 何度でもHeyを送れる
-                        return (friendId, .sendHey)
-                    }
-                }
-            }
-            var result: [String: FriendRowState] = [:]
-            for await (friendId, state) in group {
-                result[friendId] = state
-            }
-            return result
-        }
-    }
-
     /// 各友だちについてラリー状態（行状態＋返信待ちフラグ）を返す。
     /// 判定本体は FriendRallyStatus.from（テスト対象の純粋関数）に委譲する
     func getFriendRallyStatuses(userId: String, friendIds: [String]) async -> [String: FriendRallyStatus] {

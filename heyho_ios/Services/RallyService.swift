@@ -136,4 +136,12 @@ final class RallyService: ObservableObject {
         pendingTap = nil
         receive(fromUserId: tap.fromUserId, messageType: tap.messageType)
     }
+
+    #if DEBUG
+    /// DEBUG: ダミー友だちの返信をローカルで擬似発火する（実 Firestore に乗らないため）。
+    /// 実友だちの受信はリスナー/プッシュ経由なのでこのメソッドは使わない
+    func debugSimulateReceive(fromUserId: String, messageType: MessageType) {
+        receive(fromUserId: fromUserId, messageType: messageType)
+    }
+    #endif
 }

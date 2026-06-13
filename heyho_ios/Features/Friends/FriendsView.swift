@@ -3,14 +3,21 @@ import SwiftUI
 // FriendRowState は Models/FriendRowState.swift（テスト対象の純粋ロジック）へ移動
 
 #if DEBUG
+/// DEBUG 表示用ダミー友だちの ID 接頭辞（実 Firestore には存在しない）
+private let debugDummyPrefix = "dummy_"
 private let debugDummyFriends: [AppUser] = [
-    AppUser(id: "dummy_1", displayName: "ダミー太郎"),
-    AppUser(id: "dummy_2", displayName: "ダミー花子"),
-    AppUser(id: "dummy_3", displayName: "ダミー次郎"),
-    AppUser(id: "dummy_4", displayName: "ダミー三郎"),
-    AppUser(id: "dummy_5", displayName: "ダミー梅子"),
-    AppUser(id: "dummy_6", displayName: "ダミー四郎"),
+    AppUser(id: "\(debugDummyPrefix)1", displayName: "ダミー太郎"),
+    AppUser(id: "\(debugDummyPrefix)2", displayName: "ダミー花子"),
+    AppUser(id: "\(debugDummyPrefix)3", displayName: "ダミー次郎"),
+    AppUser(id: "\(debugDummyPrefix)4", displayName: "ダミー三郎"),
+    AppUser(id: "\(debugDummyPrefix)5", displayName: "ダミー梅子"),
+    AppUser(id: "\(debugDummyPrefix)6", displayName: "ダミー四郎"),
 ]
+
+extension AppUser {
+    /// DEBUG 用ダミー友だち（実 Firestore に存在しない）かどうか
+    var isDebugDummy: Bool { (id ?? "").hasPrefix(debugDummyPrefix) }
+}
 #endif
 
 // MARK: - FriendsView（データロード担当）
@@ -200,21 +207,23 @@ struct FriendsView: View {
                     await MainActor.run { lastSentFriendId = nil }
                 }
 
-                // DEBUGモード: ラリーをシミュレート
+                // DEBUGモード: ダミー友だちは実 Firestore に乗らないので返信を擬似発火する。
+                // 実友だちの受信はリスナー/プッシュ経由のため擬似発火しない（二重発火防止）
                 #if DEBUG
-                let friendIconColor = resolvedIconColor(for: friend)
-                try? await Task.sleep(for: .seconds(3))
-                switch state {
-                case .sendHey:
-                    await MainActor.run {
-                        animationState = .receiving(message: .ho, iconColor: friendIconColor, name: name)
+                if friend.isDebugDummy {
+                    try? await Task.sleep(for: .seconds(3))
+                    // 自分が送った種別への返信（Hey→Ho / Ho→LetsGo）。LetsGo の後は返信なし
+                    let replyType: MessageType? = switch state {
+                    case .sendHey: .ho
+                    case .sendHo: .letsGo
+                    case .sendLetsGo: nil
                     }
-                case .sendHo:
-                    await MainActor.run {
-                        animationState = .receiving(message: .letsGo, iconColor: friendIconColor, name: name)
+                    if let replyType {
+                        await MainActor.run {
+                            // RallyService 経由にして受信アニメ＋ awaitingReply 解除を実経路と統一する
+                            rallyService.debugSimulateReceive(fromUserId: friendId, messageType: replyType)
+                        }
                     }
-                default:
-                    break
                 }
                 #endif
             } catch {
