@@ -6,12 +6,13 @@ import SwiftUI
 /// DEBUG 表示用ダミー友だちの ID 接頭辞（実 Firestore には存在しない）
 private let debugDummyPrefix = "dummy_"
 private let debugDummyFriends: [AppUser] = [
-    AppUser(id: "\(debugDummyPrefix)1", displayName: "ダミー太郎"),
-    AppUser(id: "\(debugDummyPrefix)2", displayName: "ダミー花子"),
-    AppUser(id: "\(debugDummyPrefix)3", displayName: "ダミー次郎"),
-    AppUser(id: "\(debugDummyPrefix)4", displayName: "ダミー三郎"),
-    AppUser(id: "\(debugDummyPrefix)5", displayName: "ダミー梅子"),
-    AppUser(id: "\(debugDummyPrefix)6", displayName: "ダミー四郎"),
+    AppUser(id: "\(debugDummyPrefix)1", displayName: "JoeyHey"),
+    AppUser(id: "\(debugDummyPrefix)2", displayName: "JohnnyHo"),
+    AppUser(id: "\(debugDummyPrefix)3", displayName: "DeeDeeLetsGo"),
+    AppUser(id: "\(debugDummyPrefix)4", displayName: "TommyHey"),
+    AppUser(id: "\(debugDummyPrefix)5", displayName: "MarkyHo"),
+    AppUser(id: "\(debugDummyPrefix)6", displayName: "RichieLetsGo"),
+    AppUser(id: "\(debugDummyPrefix)7", displayName: "ElvisHey"),
 ]
 
 extension AppUser {
@@ -124,7 +125,8 @@ struct FriendsView: View {
             animationState = .receiving(
                 message: event.messageType,
                 iconColor: resolvedIconColor(for: friend),
-                name: friend.displayName
+                name: friend.displayName,
+                token: UUID()
             )
             return
         }
@@ -134,7 +136,8 @@ struct FriendsView: View {
             animationState = .receiving(
                 message: event.messageType,
                 iconColor: IconColorValue(firestoreString: user?.iconColor),
-                name: user?.displayName ?? String(localized: "Someone")
+                name: user?.displayName ?? String(localized: "Someone"),
+                token: UUID()
             )
         }
     }
@@ -197,7 +200,7 @@ struct FriendsView: View {
         case .sendHey: .hey
         }
         let name = friend.displayName
-        animationState = .sending(message: message, iconColor: myIconColorValue, name: name)
+        animationState = .sending(message: message, iconColor: myIconColorValue, name: name, token: UUID())
         // 送信アニメが終わるまでこの相手を無効化（letsGo でも再度押せるのはアニメ完了後）
         animatingFriendId = friendId
 
