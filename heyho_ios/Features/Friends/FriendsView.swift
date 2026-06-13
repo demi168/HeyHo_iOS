@@ -30,7 +30,8 @@ struct FriendsView: View {
     @State private var isLoading = true
     @State private var hasLoadedOnce = false
     @State private var errorMessage: String?
-    @State private var lastSentFriendId: String?
+    /// 送受信アニメーション再生中の相手 ID。アニメが終わる（.idle に戻る）まで送信ボタンを無効化する
+    @State private var animatingFriendId: String?
     @State private var showMyPage = false
     @State private var showMyPageForAddFriend = false
     @State private var myIconColorValue: IconColorValue = .solid(hex: "FFD700")
@@ -45,7 +46,7 @@ struct FriendsView: View {
                 statuses: rallyService.statuses,
                 isLoading: isLoading,
                 myIconColorValue: myIconColorValue,
-                lastSentFriendId: lastSentFriendId,
+                animatingFriendId: animatingFriendId,
                 isPremium: storeService.isPremium,
                 showMyPage: $showMyPage,
                 showMyPageForAddFriend: $showMyPageForAddFriend,
@@ -67,6 +68,10 @@ struct FriendsView: View {
             // リアルタイム受信（B2）・プッシュタップ（B1）共通の受信アニメ発火
             guard let event else { return }
             playReceiveAnimation(event)
+        }
+        .onChange(of: animationState) { _, newValue in
+            // アニメ完了（.idle 復帰）で無効化を解除 → 切り替わりがアニメ後に揃う
+            if newValue == .idle { animatingFriendId = nil }
         }
         .alert("Delete Friend", isPresented: Binding(
             get: { friendToDelete != nil },
@@ -112,6 +117,8 @@ struct FriendsView: View {
 
     /// 受信イベントから相手のアイコン色・名前を解決して受信アニメを再生する
     private func playReceiveAnimation(_ event: IncomingHeyHo) {
+        // 受信アニメが終わるまでこの相手を無効化（active への切り替えはアニメ完了後）
+        animatingFriendId = event.fromUserId
         // 友だち一覧にいれば追加取得なしで解決
         if let friend = friends.first(where: { $0.id == event.fromUserId }) {
             animationState = .receiving(
@@ -183,54 +190,54 @@ struct FriendsView: View {
         // letsGo は全員無料（ゲートなし）
         let state = rallyService.statuses[friendId]?.rowState ?? .sendHey
 
-        // 送信タイプに応じたアニメーション
-        let name = friend.displayName
-        switch state {
-        case .sendHo:
-            animationState = .sending(message: .ho, iconColor: myIconColorValue, name: name)
-        case .sendLetsGo:
-            animationState = .sending(message: .letsGo, iconColor: myIconColorValue, name: name)
-        default:
-            animationState = .sending(message: .hey, iconColor: myIconColorValue, name: name)
+        // 送信タイプ（行状態 → メッセージ種別）
+        let message: MessageType = switch state {
+        case .sendHo: .ho
+        case .sendLetsGo: .letsGo
+        case .sendHey: .hey
         }
+        let name = friend.displayName
+        animationState = .sending(message: message, iconColor: myIconColorValue, name: name)
+        // 送信アニメが終わるまでこの相手を無効化（letsGo でも再度押せるのはアニメ完了後）
+        animatingFriendId = friendId
+
+        // DEBUG: ダミー友だちは実 Firestore に書けない（権限エラーになる）ので、
+        // 送信を介さず楽観更新＋擬似ラリーをローカルで完結させる
+        #if DEBUG
+        if friend.isDebugDummy {
+            rallyService.markSent(friendId: friendId, messageType: message)
+            simulateDummyReply(friendId: friendId, sentState: state)
+            return
+        }
+        #endif
 
         Task {
             do {
                 try await FirestoreService.shared.sendHeyHo(fromUserId: uid, toUserId: friendId)
-                await MainActor.run {
-                    lastSentFriendId = friendId
-                    // 送信成功 → 相手の返信待ち（ボタン無効化）を楽観更新
-                    rallyService.markSent(friendId: friendId)
-                }
-                Task {
-                    try? await Task.sleep(for: .seconds(1))
-                    await MainActor.run { lastSentFriendId = nil }
-                }
-
-                // DEBUGモード: ダミー友だちは実 Firestore に乗らないので返信を擬似発火する。
-                // 実友だちの受信はリスナー/プッシュ経由のため擬似発火しない（二重発火防止）
-                #if DEBUG
-                if friend.isDebugDummy {
-                    try? await Task.sleep(for: .seconds(3))
-                    // 自分が送った種別への返信（Hey→Ho / Ho→LetsGo）。LetsGo の後は返信なし
-                    let replyType: MessageType? = switch state {
-                    case .sendHey: .ho
-                    case .sendHo: .letsGo
-                    case .sendLetsGo: nil
-                    }
-                    if let replyType {
-                        await MainActor.run {
-                            // RallyService 経由にして受信アニメ＋ awaitingReply 解除を実経路と統一する
-                            rallyService.debugSimulateReceive(fromUserId: friendId, messageType: replyType)
-                        }
-                    }
-                }
-                #endif
+                // 送信成功 → 相手の返信待ち（ボタン無効化）を楽観更新
+                await MainActor.run { rallyService.markSent(friendId: friendId, messageType: message) }
             } catch {
                 await MainActor.run { errorMessage = error.localizedDescription }
             }
         }
     }
+
+    #if DEBUG
+    /// DEBUG: ダミー友だちからの返信を3秒後に擬似発火する（受信アニメ＋無効化解除を実経路と統一）
+    private func simulateDummyReply(friendId: String, sentState: FriendRowState) {
+        // 自分が送った種別への返信（Hey→Ho / Ho→LetsGo）。LetsGo の後は返信なし
+        let replyType: MessageType? = switch sentState {
+        case .sendHey: .ho
+        case .sendHo: .letsGo
+        case .sendLetsGo: nil
+        }
+        guard let replyType else { return }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3))
+            rallyService.debugSimulateReceive(fromUserId: friendId, messageType: replyType)
+        }
+    }
+    #endif
 }
 
 // MARK: - FriendsBodyView（純粋 UI・プレビュー可能）
@@ -240,7 +247,7 @@ struct FriendsBodyView: View {
     let statuses: [String: FriendRallyStatus]
     let isLoading: Bool
     let myIconColorValue: IconColorValue
-    let lastSentFriendId: String?
+    let animatingFriendId: String?
     let isPremium: Bool
     @Binding var showMyPage: Bool
     @Binding var showMyPageForAddFriend: Bool
@@ -278,7 +285,7 @@ struct FriendsBodyView: View {
                                 FriendRow(
                                     friend: friend,
                                     state: statuses[friend.id ?? ""]?.rowState ?? .sendHey,
-                                    justSent: lastSentFriendId == friend.id,
+                                    isAnimating: animatingFriendId == friend.id,
                                     awaitingReply: statuses[friend.id ?? ""]?.awaitingReply ?? false,
                                     avatarIconColor: resolvedIconColor(friend)
                                 ) { onSend(friend) }
@@ -395,14 +402,15 @@ struct FriendsBodyView: View {
 struct FriendRow: View {
     let friend: AppUser
     let state: FriendRowState
-    let justSent: Bool
+    /// この相手の送受信アニメ再生中（アニメ完了まで無効化）
+    let isAnimating: Bool
     /// 自分が最後に送って相手の返信待ち = 送信不可
     let awaitingReply: Bool
     let avatarIconColor: IconColorValue
     let onSend: () -> Void
 
-    /// 送信不可（送信直後の一過性 or 相手の返信待ち）
-    private var isDisabled: Bool { justSent || awaitingReply }
+    /// 送信不可（アニメ再生中 or 相手の返信待ち）
+    private var isDisabled: Bool { isAnimating || awaitingReply }
 
     var body: some View {
         Button(action: { if !isDisabled { onSend() } }) {
@@ -461,7 +469,7 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         statuses: previewStatuses,
         isLoading: false,
         myIconColorValue: .solid(hex: "FFD700"),
-        lastSentFriendId: nil,
+        animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showMyPageForAddFriend: .constant(false),
@@ -478,7 +486,7 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         statuses: [:],
         isLoading: true,
         myIconColorValue: .solid(hex: "FFD700"),
-        lastSentFriendId: nil,
+        animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showMyPageForAddFriend: .constant(false),
@@ -495,7 +503,7 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         statuses: [:],
         isLoading: false,
         myIconColorValue: .solid(hex: "FFD700"),
-        lastSentFriendId: nil,
+        animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showMyPageForAddFriend: .constant(false),
@@ -508,11 +516,11 @@ private let previewStatuses: [String: FriendRallyStatus] = [
 
 #Preview("FriendRow - 各ステート") {
     VStack(spacing: AppSpacing.spMedium) {
-        FriendRow(friend: previewFriends[0], state: .sendHey,    justSent: false, awaitingReply: false, avatarIconColor: .solid(hex: "B47850")) {}
-        FriendRow(friend: previewFriends[1], state: .sendHey,    justSent: false, awaitingReply: true,  avatarIconColor: .solid(hex: "A020F0")) {}
-        FriendRow(friend: previewFriends[2], state: .sendHo,     justSent: false, awaitingReply: false, avatarIconColor: .solid(hex: "0064FF")) {}
-        FriendRow(friend: previewFriends[3], state: .sendLetsGo, justSent: false, awaitingReply: false, avatarIconColor: .solid(hex: "FF3030")) {}
-        FriendRow(friend: previewFriends[5], state: .sendHey,    justSent: false, awaitingReply: false, avatarIconColor: .gradient(presetId: "sunset")) {}
+        FriendRow(friend: previewFriends[0], state: .sendHey,    isAnimating: false, awaitingReply: false, avatarIconColor: .solid(hex: "B47850")) {}
+        FriendRow(friend: previewFriends[1], state: .sendHey,    isAnimating: false, awaitingReply: true,  avatarIconColor: .solid(hex: "A020F0")) {}
+        FriendRow(friend: previewFriends[2], state: .sendHo,     isAnimating: false, awaitingReply: false, avatarIconColor: .solid(hex: "0064FF")) {}
+        FriendRow(friend: previewFriends[3], state: .sendLetsGo, isAnimating: false, awaitingReply: false, avatarIconColor: .solid(hex: "FF3030")) {}
+        FriendRow(friend: previewFriends[5], state: .sendHey,    isAnimating: false, awaitingReply: false, avatarIconColor: .gradient(presetId: "sunset")) {}
     }
     .padding(.horizontal, AppSpacing.spXlarge)
     .padding(.vertical, AppSpacing.spLarge)

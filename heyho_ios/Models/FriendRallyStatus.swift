@@ -21,8 +21,10 @@ struct FriendRallyStatus: Equatable {
             return .initial
         }
         if from == me {
-            // 自分が最後に送った = 相手の返信待ち（ボタン無効化）
-            return FriendRallyStatus(rowState: .sendHey, awaitingReply: true)
+            // 自分が最後に送った。letsGo は hey→ho→letsGo のラリーが1巡完了なので
+            // 返信待ちにせず、次の hey を送れる状態に戻す
+            let awaitingReply = (type != .letsGo)
+            return FriendRallyStatus(rowState: .sendHey, awaitingReply: awaitingReply)
         }
         // 相手が最後に送った = 相手のメッセージに返信する番
         return FriendRallyStatus(rowState: FriendRowState(sending: type.reply), awaitingReply: false)

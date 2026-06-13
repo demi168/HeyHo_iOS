@@ -12,17 +12,19 @@ struct FriendRallyStatusTests {
         #expect(s.rowState == .sendHey)
     }
 
-    @Test func 自分が最後なら返信待ち() {
-        let s = FriendRallyStatus.from(lastFromUserId: me, lastMessageType: .hey, me: me)
-        #expect(s.awaitingReply == true)
-        #expect(s.rowState == .sendHey)
-    }
-
-    @Test func 自分が最後なら種別に関わらず返信待ち() {
-        for type in [MessageType.hey, .ho, .letsGo] {
+    @Test func 自分が最後にHeyかHoなら返信待ち() {
+        for type in [MessageType.hey, .ho] {
             let s = FriendRallyStatus.from(lastFromUserId: me, lastMessageType: type, me: me)
             #expect(s.awaitingReply == true)
+            #expect(s.rowState == .sendHey)
         }
+    }
+
+    @Test func 自分が最後にLetsGoならラリー完了で待たない() {
+        // hey→ho→letsGo で1巡完了。次は hey を送れる
+        let s = FriendRallyStatus.from(lastFromUserId: me, lastMessageType: .letsGo, me: me)
+        #expect(s.awaitingReply == false)
+        #expect(s.rowState == .sendHey)
     }
 
     @Test func 相手がHeyなら自分はHoを返す番() {

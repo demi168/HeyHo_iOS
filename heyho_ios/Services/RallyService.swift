@@ -71,9 +71,10 @@ final class RallyService: ObservableObject {
         statuses = await FirestoreService.shared.getFriendRallyStatuses(userId: userId, friendIds: friendIds)
     }
 
-    /// 送信成功時の楽観更新（相手の返信待ち = ボタン無効化）
-    func markSent(friendId: String) {
-        statuses[friendId] = FriendRallyStatus(rowState: .sendHey, awaitingReply: true)
+    /// 送信成功時の楽観更新（相手の返信待ち = ボタン無効化）。
+    /// letsGo はラリー1巡完了なので待ちにせず、次の hey を送れる状態に戻す
+    func markSent(friendId: String, messageType: MessageType) {
+        statuses[friendId] = FriendRallyStatus(rowState: .sendHey, awaitingReply: messageType != .letsGo)
     }
 
     // MARK: - 受信リスナー（B2）
