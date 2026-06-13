@@ -4,6 +4,16 @@ import UserNotifications
 import FirebaseAuth
 import FirebaseMessaging
 
+/// FCM 通知ペイロードの data フィールドのキー（Cloud Function onHeyHoCreated と対応）
+private enum PushKey {
+    static let type = "type"
+    static let fromUserId = "fromUserId"
+    static let messageType = "messageType"
+    static let heyhoId = "heyhoId"
+    /// type の値（HeyHo メッセージ通知）
+    static let typeHeyHo = "heyho"
+}
+
 final class PushService: NSObject {
     static let shared = PushService()
 
@@ -57,5 +67,26 @@ extension PushService: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         completionHandler([.banner, .sound, .badge])
+    }
+
+    /// 通知タップ時。ペイロードの送信者情報を RallyService に渡して受信を再生する（B1）。
+    /// コールドスタートで friends 未ロードなら RallyService 側で保留され、ロード完了時にフラッシュされる
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let userInfo = response.notification.request.content.userInfo
+        if userInfo[PushKey.type] as? String == PushKey.typeHeyHo,
+           let fromUserId = userInfo[PushKey.fromUserId] as? String,
+           let typeRaw = userInfo[PushKey.messageType] as? String,
+           let messageType = MessageType(rawValue: typeRaw) {
+            Task { @MainActor in
+                RallyService.shared.handlePushTap(fromUserId: fromUserId, messageType: messageType)
+            }
+        } else {
+            AppLogger.push.error("通知ペイロードの解釈に失敗（type/fromUserId/messageType 不足）")
+        }
+        completionHandler()
     }
 }
