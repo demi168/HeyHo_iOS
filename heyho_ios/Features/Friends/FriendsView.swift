@@ -5,15 +5,15 @@ import SwiftUI
 #if DEBUG
 /// DEBUG 表示用ダミー友だちの ID 接頭辞（実 Firestore には存在しない）
 private let debugDummyPrefix = "dummy_"
-private let debugDummyFriends: [AppUser] = [
-    AppUser(id: "\(debugDummyPrefix)1", displayName: "JoeyHey"),
-    AppUser(id: "\(debugDummyPrefix)2", displayName: "JohnnyHo"),
-    AppUser(id: "\(debugDummyPrefix)3", displayName: "DeeDeeLetsGo"),
-    AppUser(id: "\(debugDummyPrefix)4", displayName: "TommyHey"),
-    AppUser(id: "\(debugDummyPrefix)5", displayName: "MarkyHo"),
-    AppUser(id: "\(debugDummyPrefix)6", displayName: "RichieLetsGo"),
-    AppUser(id: "\(debugDummyPrefix)7", displayName: "ElvisHey"),
-]
+/// ダミー友だち。アイコンカラーは無料ソリッドカラーからランダムに割り当てる
+/// （グローバル let なので起動時に一度だけ評価＝セッション中は固定）
+private let debugDummyFriends: [AppUser] = {
+    let names = ["JoeyHey", "JohnnyHo", "DeeDeeLetsGo", "TommyHey", "MarkyHo", "RichieLetsGo", "ElvisHey"]
+    let palette = AppColor.freeIconPresets.map(\.hex)
+    return names.enumerated().map { index, name in
+        AppUser(id: "\(debugDummyPrefix)\(index + 1)", displayName: name, iconColor: palette.randomElement())
+    }
+}()
 
 extension AppUser {
     /// DEBUG 用ダミー友だち（実 Firestore に存在しない）かどうか
