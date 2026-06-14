@@ -60,7 +60,9 @@ struct FriendsView: View {
 
             HeyHoAnimationOverlay(animationState: $animationState)
         }
-        .irisLoading(isLoading: $isLoading)
+        .overlay {
+            HeyBoyLaunchOverlay(isLoading: isLoading)
+        }
         .onAppear {
             guard !hasLoadedOnce else { return }
             loadMyColor()
@@ -417,6 +419,80 @@ struct FriendRow: View {
             .opacity(isDisabled ? 0.55 : 1.0)
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - 起動ローディング演出
+
+/// 起動時のローディング演出。
+/// HeyBoy がポンっと登場 → 目ぱちぱちで待機 → ローディング完了後に少し静止してから画面を覆うまで拡大、
+/// フェードアウトして中身を見せる。色はブランドのデフォルト黄色で固定（ユーザーのアイコン色には連動しない）。
+private struct HeyBoyLaunchOverlay: View {
+    let isLoading: Bool
+
+    /// HeyBoy の表示サイズ（0=非表示 / iconLarge=登場 / coverSize=画面を覆う）。
+    /// scaleEffect ではなく frame サイズを直接アニメすることで、拡大してもベクター（SVG）のまま crisp に保つ
+    @State private var iconSize: CGFloat = 0
+    @State private var opacity: CGFloat = 1
+    /// 演出完了。true で完全に消す
+    @State private var finished = false
+    /// reveal を二重起動させないためのフラグ
+    @State private var revealing = false
+    /// ポップイン開始時刻（reveal 時に残りのポップイン時間を計算するため）
+    @State private var appearedAt = Date()
+
+    /// ポップインの spring が視覚的に落ち着くまでの目安時間（response 0.45 + バウンド分）
+    private let popInSettle: TimeInterval = 0.6
+    /// ローディング完了後、拡大に移るまでの静止時間
+    private let holdAfterLoaded: TimeInterval = 0.25
+
+    var body: some View {
+        if !finished {
+            GeometryReader { geo in
+                // 画面の対角線より一回り大きくして、拡大しきった時に隅まで覆う
+                let coverSize = hypot(geo.size.width, geo.size.height) * 1.1
+                ZStack {
+                    AppColor.backgroundPrimary
+                    HeyBoyIconView(
+                        iconColorValue: .solid(hex: AppColor.defaultIconHex),
+                        size: iconSize
+                    )
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+                .opacity(opacity)
+                .onAppear {
+                    // ポンっと登場
+                    appearedAt = Date()
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.55)) {
+                        iconSize = AppSize.iconLarge
+                    }
+                    if !isLoading { reveal(to: coverSize) }
+                }
+                .onChange(of: isLoading) { _, loading in
+                    if !loading { reveal(to: coverSize) }
+                }
+            }
+            .ignoresSafeArea()
+        }
+    }
+
+    private func reveal(to coverSize: CGFloat) {
+        guard !revealing else { return }
+        revealing = true
+        Task { @MainActor in
+            // ポップインが視覚的に完了するまで待つ（ローディングが早く終わっても登場演出は見せきる）
+            let remainingPopIn = max(0, popInSettle - Date().timeIntervalSince(appearedAt))
+            try? await Task.sleep(for: .seconds(remainingPopIn))
+            // 完了後の静止
+            try? await Task.sleep(for: .seconds(holdAfterLoaded))
+            // 画面を覆うまで拡大（frame 駆動なのでベクターのまま crisp）
+            withAnimation(.easeIn(duration: 0.40)) { iconSize = coverSize }
+            try? await Task.sleep(for: .milliseconds(300))
+            // フェードアウトして中身へ
+            withAnimation(.easeOut(duration: 0.35)) { opacity = 0 }
+            try? await Task.sleep(for: .milliseconds(360))
+            finished = true
+        }
     }
 }
 
