@@ -267,7 +267,8 @@ struct FriendsBodyView: View {
             VStack(spacing: 0) {
                 if isLoading {
                     Spacer()
-                    ProgressView().tint(.white)
+                    // ぐるぐるスピナーの代わりに、HeyBoy が目ぱちぱちして待機
+                    HeyBoyIconView(iconColorValue: myIconColorValue, size: AppSize.iconLarge)
                     Spacer()
                 } else if friends.isEmpty {
                     Spacer()
