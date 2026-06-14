@@ -2,9 +2,15 @@ import SwiftUI
 
 // FriendRowState は Models/FriendRowState.swift（テスト対象の純粋ロジック）へ移動
 
-#if DEBUG
-/// DEBUG 表示用ダミー友だちの ID 接頭辞（実 Firestore には存在しない）
+/// DEBUG ダミー友だちの ID 接頭辞（実 Firestore には存在しない）
 private let debugDummyPrefix = "dummy_"
+
+extension AppUser {
+    /// DEBUG 用ダミー友だち（実 Firestore に存在しない）かどうか。リリースでは常に false
+    var isDebugDummy: Bool { (id ?? "").hasPrefix(debugDummyPrefix) }
+}
+
+#if DEBUG
 /// ダミー友だち。アイコンカラーは無料ソリッドカラーからランダムに割り当てる
 /// （グローバル let なので起動時に一度だけ評価＝セッション中は固定）
 private let debugDummyFriends: [AppUser] = {
@@ -14,11 +20,6 @@ private let debugDummyFriends: [AppUser] = {
         AppUser(id: "\(debugDummyPrefix)\(index + 1)", displayName: name, iconColor: palette.randomElement())
     }
 }()
-
-extension AppUser {
-    /// DEBUG 用ダミー友だち（実 Firestore に存在しない）かどうか
-    var isDebugDummy: Bool { (id ?? "").hasPrefix(debugDummyPrefix) }
-}
 #endif
 
 // MARK: - FriendsView（データロード担当）
@@ -164,9 +165,10 @@ struct FriendsView: View {
                 list.insert(newFriend, at: 0)
                 newlyAddedFriendId = nil
             }
-            // 友だちリストを先に表示し、ラリー状態の取得＋受信購読を RallyService に委譲
+            // 友だちリストを先に表示し、ラリー状態の取得＋受信購読を RallyService に委譲。
+            // ダミー友だち（実 Firestore に無い）は無駄クエリになるので除外する
             friends = list
-            rallyService.start(userId: uid, friendIds: list.compactMap(\.id))
+            rallyService.start(userId: uid, friendIds: list.filter { !$0.isDebugDummy }.compactMap(\.id))
         } catch {
             errorMessage = error.localizedDescription
         }

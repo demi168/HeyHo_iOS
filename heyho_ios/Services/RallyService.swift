@@ -84,6 +84,8 @@ final class RallyService: ObservableObject {
         listener = db.collection("heyhos")
             .whereField("toUserId", isEqualTo: userId)
             .order(by: "createdAt", descending: true)
+            // 必要なのは「開始後に追加された最新の受信」だけ。全履歴を読まないよう最新1件に限定
+            .limit(to: 1)
             .addSnapshotListener { [weak self] snapshot, error in
                 Task { @MainActor in
                     self?.handleSnapshot(snapshot, error: error)

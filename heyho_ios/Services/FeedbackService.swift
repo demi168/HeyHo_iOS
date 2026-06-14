@@ -9,6 +9,9 @@ import UIKit
 /// UIImpactFeedbackGenerator は AVAudioSession が `.playback` でアクティブ保持されていると
 /// 抑制されてしまうため。Core Haptics はオーディオ再生中でも抑制されないので、
 /// サウンド用のセッションを常時アクティブ（＝音が安定）にしたまま両立できる。
+///
+/// `recentPlayers` / `hapticEngine` の可変状態をメインスレッドに固定して並行アクセスを防ぐ
+@MainActor
 final class FeedbackService {
     static let shared = FeedbackService()
     /// 直近のプレイヤーを数個保持して、重なる短い音が再生途中で解放されないようにする
