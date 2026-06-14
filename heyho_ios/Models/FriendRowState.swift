@@ -14,4 +14,13 @@ enum FriendRowState: Equatable {
         case .letsGo: self = .sendLetsGo
         }
     }
+
+    /// この行状態で送るメッセージ種別（init(sending:) の逆）
+    var sendableMessage: MessageType {
+        switch self {
+        case .sendHey: return .hey
+        case .sendHo: return .ho
+        case .sendLetsGo: return .letsGo
+        }
+    }
 }

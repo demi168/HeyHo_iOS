@@ -114,11 +114,14 @@ final class RallyService: ObservableObject {
 
     /// 相手からの受信を反映する（リスナー・プッシュタップ共通の入口）
     private func receive(fromUserId: String, messageType: MessageType) {
-        // 相手が返信してきた → 自分の返信待ちを解除し、行状態を「返信する番」に更新
-        statuses[fromUserId] = FriendRallyStatus(
-            rowState: FriendRowState(sending: messageType.reply),
-            awaitingReply: false
-        )
+        // 相手が最後に送った状態としてラリー状態を導出（行状態の決め方は from に一本化）
+        if let me = currentUserId {
+            statuses[fromUserId] = FriendRallyStatus.from(
+                lastFromUserId: fromUserId,
+                lastMessageType: messageType,
+                me: me
+            )
+        }
         incomingEvent = IncomingHeyHo(fromUserId: fromUserId, messageType: messageType, eventId: UUID())
     }
 

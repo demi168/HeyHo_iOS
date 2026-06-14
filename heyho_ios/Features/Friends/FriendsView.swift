@@ -194,13 +194,7 @@ struct FriendsView: View {
 
         // letsGo は全員無料（ゲートなし）
         let state = rallyService.statuses[friendId]?.rowState ?? .sendHey
-
-        // 送信タイプ（行状態 → メッセージ種別）
-        let message: MessageType = switch state {
-        case .sendHo: .ho
-        case .sendLetsGo: .letsGo
-        case .sendHey: .hey
-        }
+        let message = state.sendableMessage
         let name = friend.displayName
         animationState = .sending(message: message, iconColor: myIconColorValue, name: name, token: UUID())
         // 送信アニメが終わるまでこの相手を無効化（letsGo でも再度押せるのはアニメ完了後）
