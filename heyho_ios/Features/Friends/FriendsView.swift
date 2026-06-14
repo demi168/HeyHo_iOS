@@ -303,35 +303,31 @@ struct FriendsBodyView: View {
                         .padding(.bottom, 80 + AppSpacing.spLarge * 2)
                     }
                     .refreshable { await onRefresh() }
+                    // リスト上下端をフェードアウト（ヘッダー/フッターに溶け込ませる）
+                    .mask(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .clear, location: 0.0),
+                                .init(color: .black, location: 0.10),
+                                .init(color: .black, location: 0.90),
+                                .init(color: .clear, location: 1.0),
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                 }
             }
 
-            // すりガラスヘッダー（最前面に固定・下方向にフェードアウト）
+            // ヘッダー（最前面に固定）。背景の帯は無し＝リスト側のフェードで溶け込ませる
             VStack(spacing: 0) {
                 headerView
                     .padding(.horizontal, AppSpacing.spXlarge)
                     .padding(.bottom, AppSpacing.spLarge)
             }
             .frame(maxWidth: .infinity)
-            .background(
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    //.opacity(0.4)
-                    .ignoresSafeArea(edges: .top)
-                    .mask(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .black, location: 0.0),
-                                .init(color: .clear, location: 1.0),
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .ignoresSafeArea(edges: .top)
-                    )
-            )
 
-            // すりガラスフッター（最前面に固定・上方向にフェードアウト）
+            // フッター（最前面に固定）。背景の帯は無し＝リスト側のフェードで溶け込ませる
             VStack(spacing: 0) {
                 Spacer()
                 VStack(spacing: 0) {
@@ -355,23 +351,6 @@ struct FriendsBodyView: View {
                     .padding(.top, AppSpacing.spLarge)
                 }
                 .frame(maxWidth: .infinity)
-                .background(
-                    Rectangle()
-                        .fill(.ultraThinMaterial)
-                        //.opacity(0.8)
-                        .ignoresSafeArea(edges: .bottom)
-                        .mask(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .clear, location: 0.0),
-                                    .init(color: .black, location: 1.0),
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .ignoresSafeArea(edges: .bottom)
-                        )
-                )
             }
         }
     }
