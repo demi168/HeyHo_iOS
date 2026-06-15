@@ -12,17 +12,15 @@ struct ProfileSectionView: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: AppSpacing.spLarge) {
-            if let user {
-                HeyBoyIconView(
-                    iconColorValue: IconColorValue(firestoreString: user.iconColor),
-                    size: AppSize.iconLarge,
-                    showPremiumBadge: isPremium
-                )
-            } else {
-                Circle()
-                    .fill(AppColor.iconDefault)
-                    .frame(width: AppSize.iconLarge, height: AppSize.iconLarge)
-            }
+            // アイコンは常時マウントする（user nil 時もデフォルト色のプレースホルダ）。
+            // こうすると初回ロード(default→実色)が「初回表示」として消費され、その後の
+            // 色編集が 2 回目の変化＝スライド演出として発火する（FriendsView ヘッダーと同じ挙動）
+            HeyBoyIconView(
+                iconColorValue: user.map { IconColorValue(firestoreString: $0.iconColor) }
+                    ?? .solid(hex: AppColor.defaultIconHex),
+                size: AppSize.iconLarge,
+                showPremiumBadge: isPremium
+            )
 
             VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
                 Text("MY NAME IS")
