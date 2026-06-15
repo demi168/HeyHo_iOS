@@ -40,6 +40,8 @@ struct FriendsView: View {
     @State private var animationState: HeyHoAnimationState = .idle
     @State private var friendToDelete: AppUser?
     @State private var newlyAddedFriendId: String?
+    /// 起動ローディング明けの一斉フレームインを発火するトリガー（FriendsView は root で永続のため一度きり）
+    @State private var entranceTriggered = false
 
     var body: some View {
         ZStack {
@@ -55,13 +57,17 @@ struct FriendsView: View {
                 resolvedIconColor: resolvedIconColor(for:),
                 onSend: sendHeyHo(to:),
                 onDelete: { friend in friendToDelete = friend },
-                onRefresh: { await loadFriends() }
+                onRefresh: { await loadFriends() },
+                entranceTriggered: entranceTriggered
             )
 
             HeyHoAnimationOverlay(animationState: $animationState)
         }
         .overlay {
-            HeyBoyLaunchOverlay(isLoading: isLoading)
+            HeyBoyLaunchOverlay(isLoading: isLoading, onReveal: {
+                // 起動演出が明けたタイミングで一斉フレームインを発火（一度きり）
+                entranceTriggered = true
+            })
         }
         .onAppear {
             guard !hasLoadedOnce else { return }
@@ -256,6 +262,8 @@ struct FriendsBodyView: View {
     let onSend: (AppUser) -> Void
     let onDelete: (AppUser) -> Void
     let onRefresh: () async -> Void
+    /// 起動明けの一斉フレームインの発火トリガー（ヘッダー＋各行へ伝播）
+    var entranceTriggered: Bool = false
 
     /// ヘッダーの高さ（すりガラス領域 + 下余白）
     private var headerTotalHeight: CGFloat {
@@ -283,13 +291,16 @@ struct FriendsBodyView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: AppSpacing.spMedium) {
-                            ForEach(friends) { friend in
+                            ForEach(Array(friends.enumerated()), id: \.element.id) { index, friend in
                                 FriendRow(
                                     friend: friend,
                                     state: statuses[friend.id ?? ""]?.rowState ?? .sendHey,
                                     isAnimating: animatingFriendId == friend.id,
                                     awaitingReply: statuses[friend.id ?? ""]?.awaitingReply ?? false,
-                                    avatarIconColor: resolvedIconColor(friend)
+                                    avatarIconColor: resolvedIconColor(friend),
+                                    // ヘッダー（delay 0）の次から、上の行ほど早くスタガー登場
+                                    entranceDelay: HeyBoyEntrance.stagger * Double(index + 1),
+                                    entranceTrigger: entranceTriggered
                                 ) { onSend(friend) }
                                 .contextMenu {
                                     Button(role: .destructive) {
@@ -368,7 +379,13 @@ struct FriendsBodyView: View {
             HStack {
                 Spacer()
                 Button(action: { showMyPage = true }) {
-                    HeyBoyIconView(iconColorValue: myIconColorValue, size: AppSize.iconDefault, showPremiumBadge: isPremium)
+                    HeyBoyIconView(
+                        iconColorValue: myIconColorValue,
+                        size: AppSize.iconDefault,
+                        showPremiumBadge: isPremium,
+                        entranceDelay: 0,
+                        entranceTrigger: entranceTriggered
+                    )
                 }
                 .buttonStyle(.plain)
             }
@@ -388,6 +405,10 @@ struct FriendRow: View {
     /// 自分が最後に送って相手の返信待ち = 送信不可
     let awaitingReply: Bool
     let avatarIconColor: IconColorValue
+    /// 起動明けフレームインの遅延（nil なら通常表示）
+    var entranceDelay: TimeInterval? = nil
+    /// 起動明けフレームインの発火トリガー
+    var entranceTrigger: Bool = false
     let onSend: () -> Void
 
     /// 送信不可（アニメ再生中 or 相手の返信待ち）
@@ -396,7 +417,12 @@ struct FriendRow: View {
     var body: some View {
         Button(action: { if !isDisabled { onSend() } }) {
             HStack(spacing: AppSpacing.spMedium) {
-                HeyBoyIconView(iconColorValue: avatarIconColor, size: AppSize.iconDefault)
+                HeyBoyIconView(
+                    iconColorValue: avatarIconColor,
+                    size: AppSize.iconDefault,
+                    entranceDelay: entranceDelay,
+                    entranceTrigger: entranceTrigger
+                )
 
                 Text(friend.displayName)
                     .font(.system(size: AppTypography.display, weight: .black))
@@ -422,6 +448,14 @@ struct FriendRow: View {
     }
 }
 
+// MARK: - 起動後フレームイン演出の定数
+
+/// 起動ローディング明けに HeyBoy たちが右下からフレームインする際の設定（一元管理）
+private enum HeyBoyEntrance {
+    /// 各アイコンの登場をずらすスタガー間隔
+    static let stagger: TimeInterval = 0.06
+}
+
 // MARK: - 起動ローディング演出
 
 /// 起動時のローディング演出。
@@ -429,6 +463,8 @@ struct FriendRow: View {
 /// フェードアウトして中身を見せる。色はブランドのデフォルト黄色で固定（ユーザーのアイコン色には連動しない）。
 private struct HeyBoyLaunchOverlay: View {
     let isLoading: Bool
+    /// 画面を覆うアイコンがフェードアウトし始める瞬間に呼ぶ。中身（リスト）のフレームインと重ねる
+    var onReveal: () -> Void = {}
 
     /// HeyBoy の表示サイズ（0=非表示 / iconLarge=登場 / coverSize=画面を覆う）。
     /// scaleEffect ではなく frame サイズを直接アニメすることで、拡大してもベクター（SVG）のまま crisp に保つ
@@ -488,7 +524,8 @@ private struct HeyBoyLaunchOverlay: View {
             // 画面を覆うまで拡大（frame 駆動なのでベクターのまま crisp）
             withAnimation(.easeIn(duration: 0.40)) { iconSize = coverSize }
             try? await Task.sleep(for: .milliseconds(300))
-            // フェードアウトして中身へ
+            // フェードアウト開始と同時に、中身（ヘッダー＋リスト）のフレームインを発火
+            onReveal()
             withAnimation(.easeOut(duration: 0.35)) { opacity = 0 }
             try? await Task.sleep(for: .milliseconds(360))
             finished = true

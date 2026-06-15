@@ -23,6 +23,10 @@ struct HeyBoyIconView: View {
     var gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32)
     /// カラー変更アニメーション中かどうか（外部バインディング）
     @Binding var isColorChanging: Bool
+    /// 登場演出（右下からフレームイン）の遅延。nil なら登場演出なし（通常表示）
+    var entranceDelay: TimeInterval? = nil
+    /// 登場演出の発火トリガー。false→true で entranceDelay 後にスライドインする
+    var entranceTrigger: Bool = false
 
     private static let eyesPatterns: [String] = [
         "HeyBoyEyes_default",
@@ -41,6 +45,8 @@ struct HeyBoyIconView: View {
     @State private var displayedColor: Color
     @State private var slideOffset: CGFloat = 0
     @State private var hasAppearedWithColor = false
+    /// 登場演出を二重発火させないためのフラグ
+    @State private var entrancePlayed = false
 
     // MARK: - 後方互換イニシャライザ（Color）
 
@@ -59,7 +65,7 @@ struct HeyBoyIconView: View {
 
     // MARK: - IconColorValue イニシャライザ
 
-    init(iconColorValue: IconColorValue, size: CGFloat = 48, animated: Bool = true, showBackground: Bool = true, showPremiumBadge: Bool = false, gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32), isColorChanging: Binding<Bool> = .constant(false)) {
+    init(iconColorValue: IconColorValue, size: CGFloat = 48, animated: Bool = true, showBackground: Bool = true, showPremiumBadge: Bool = false, gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32), isColorChanging: Binding<Bool> = .constant(false), entranceDelay: TimeInterval? = nil, entranceTrigger: Bool = false) {
         self.iconColorValue = iconColorValue
         self.size = size
         self.animated = animated
@@ -67,6 +73,8 @@ struct HeyBoyIconView: View {
         self.showPremiumBadge = showPremiumBadge
         self.gradientCenter = gradientCenter
         self._isColorChanging = isColorChanging
+        self.entranceDelay = entranceDelay
+        self.entranceTrigger = entranceTrigger
         self._displayedColorValue = State(initialValue: iconColorValue)
         switch iconColorValue {
         case .solid(let hex):
@@ -74,6 +82,8 @@ struct HeyBoyIconView: View {
         case .gradient, .customGradient:
             self._displayedColor = State(initialValue: .clear)
         }
+        // 登場演出ありなら、最初は右下に隠した状態（travel = size）で生成する
+        self._slideOffset = State(initialValue: entranceDelay != nil ? size : 0)
     }
 
     // ボディのサイズ・位置（中心基準）
@@ -125,12 +135,17 @@ struct HeyBoyIconView: View {
         }
         .onAppear {
             startAnimationIfNeeded()
+            // 生成時点で既にトリガー済みなら登場演出を実行
+            if entranceTrigger { playEntrance() }
         }
         .onDisappear {
             stopAnimation()
         }
         .onChange(of: iconColorValue) {
             handleColorValueChange(iconColorValue)
+        }
+        .onChange(of: entranceTrigger) { _, triggered in
+            if triggered { playEntrance() }
         }
     }
 
@@ -204,6 +219,17 @@ struct HeyBoyIconView: View {
             if case .solid(let hex) = newValue {
                 displayedColor = Color(hex: hex) ?? AppColor.defaultIconColor
             }
+        }
+    }
+
+    /// 起動後の登場演出。右下（slideOffset=size）に隠れた状態から entranceDelay 後にスライドインする
+    private func playEntrance() {
+        guard let delay = entranceDelay, !entrancePlayed else { return }
+        entrancePlayed = true
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(delay))
+            if Task.isCancelled { return }
+            withAnimation(.easeOut(duration: 0.32)) { slideOffset = 0 }
         }
     }
 
