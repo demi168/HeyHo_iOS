@@ -25,6 +25,31 @@ struct CapsuleButton: View {
     }
 }
 
+// MARK: - 主要 CTA ボタン（黒塗り・フル幅）
+
+/// EDIT PROFILE / SUBMIT 等の主要アクションに使う黒塗りカプセルボタン。
+/// `isEnabled` が false のときは無効化し半透明にする。
+struct PrimaryButton: View {
+    let title: String
+    var isEnabled: Bool = true
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: AppTypography.body, weight: .black))
+                .foregroundColor(AppColor.textInverse)
+                .frame(maxWidth: .infinity)
+                .frame(height: AppSize.buttonHeight)
+                .background(AppColor.buttonPrimaryBackground)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .opacity(isEnabled ? 1 : 0.4)
+    }
+}
+
 // MARK: - 下線付きテキスト
 
 struct UnderlinedText<Trailing: View>: View {

@@ -39,7 +39,7 @@ struct FriendsView: View {
     @State private var errorMessage: String?
     @State private var lastSentFriendId: String?
     @State private var showMyPage = false
-    @State private var showMyPageForAddFriend = false
+    @State private var showAddFriendSheet = false
     @State private var myIconColorValue: IconColorValue = .solid(hex: "FFD700")
     @State private var animationState: HeyHoAnimationState = .idle
     @State private var friendToDelete: AppUser?
@@ -55,7 +55,7 @@ struct FriendsView: View {
                 lastSentFriendId: lastSentFriendId,
                 isPremium: storeService.isPremium,
                 showMyPage: $showMyPage,
-                showMyPageForAddFriend: $showMyPageForAddFriend,
+                showAddFriendSheet: $showAddFriendSheet,
                 resolvedIconColor: resolvedIconColor(for:),
                 onSend: sendHeyHo(to:),
                 onDelete: { friend in friendToDelete = friend },
@@ -91,20 +91,21 @@ struct FriendsView: View {
                 await loadFriends()
             }
         }) {
-            MyPageView(onFriendAdded: { friendId in
-                newlyAddedFriendId = friendId
-            }).environmentObject(authState)
+            MyPageView().environmentObject(authState)
         }
-        .fullScreenCover(isPresented: $showMyPageForAddFriend, onDismiss: {
+        .sheet(isPresented: $showAddFriendSheet, onDismiss: {
             Task {
                 await authState.refreshCurrentUser()
                 loadMyColor()
                 await loadFriends()
             }
         }) {
-            MyPageView(focusAddFriend: true, onFriendAdded: { friendId in
+            AddFriendSheetView(onFriendAdded: { friendId in
                 newlyAddedFriendId = friendId
-            }).environmentObject(authState)
+            })
+            .environmentObject(authState)
+            .presentationDetents([.height(360)])
+            .presentationDragIndicator(.visible)
         }
     }
 
@@ -226,7 +227,7 @@ struct FriendsBodyView: View {
     let lastSentFriendId: String?
     let isPremium: Bool
     @Binding var showMyPage: Bool
-    @Binding var showMyPageForAddFriend: Bool
+    @Binding var showAddFriendSheet: Bool
     let resolvedIconColor: (AppUser) -> IconColorValue
     let onSend: (AppUser) -> Void
     let onDelete: (AppUser) -> Void
@@ -311,7 +312,7 @@ struct FriendsBodyView: View {
             VStack(spacing: 0) {
                 Spacer()
                 VStack(spacing: 0) {
-                    Button(action: { showMyPageForAddFriend = true }) {
+                    Button(action: { showAddFriendSheet = true }) {
                         HStack {
                             Spacer()
                             Image(systemName: "plus")
@@ -320,10 +321,10 @@ struct FriendsBodyView: View {
                                 .font(.system(size: AppTypography.heading, weight: .black))
                             Spacer()
                         }
-                        .foregroundColor(Color.white)
+                        .foregroundColor(AppColor.textInverse)
                         .padding(.vertical, AppSpacing.spLarge)
                         .frame(minHeight: 60)
-                        .background(Capsule().fill(Color.black))
+                        .background(Capsule().fill(AppColor.buttonPrimaryBackground))
                     }
                     .buttonStyle(.plain)
                     .padding(.horizontal, AppSpacing.spXlarge)
@@ -440,7 +441,7 @@ private let previewRowStates: [String: FriendRowState] = [
         lastSentFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
-        showMyPageForAddFriend: .constant(false),
+        showAddFriendSheet: .constant(false),
         resolvedIconColor: { IconColorValue(firestoreString: $0.iconColor) },
         onSend: { _ in },
         onDelete: { _ in },
@@ -457,7 +458,7 @@ private let previewRowStates: [String: FriendRowState] = [
         lastSentFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
-        showMyPageForAddFriend: .constant(false),
+        showAddFriendSheet: .constant(false),
         resolvedIconColor: { _ in .solid(hex: "FFD700") },
         onSend: { _ in },
         onDelete: { _ in },
@@ -474,7 +475,7 @@ private let previewRowStates: [String: FriendRowState] = [
         lastSentFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
-        showMyPageForAddFriend: .constant(false),
+        showAddFriendSheet: .constant(false),
         resolvedIconColor: { _ in .solid(hex: "FFD700") },
         onSend: { _ in },
         onDelete: { _ in },

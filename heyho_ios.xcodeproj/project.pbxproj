@@ -30,6 +30,7 @@
 		B0010009 /* FirestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010009 /* FirestoreService.swift */; };
 		B0010010 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010010 /* MainTabView.swift */; };
 		B0010011 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010011 /* FriendsView.swift */; };
+		B0010099 /* AddFriendSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010099 /* AddFriendSheetView.swift */; };
 		B0010015 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F0010015 /* GoogleService-Info.plist */; };
 		B0010016 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = P0010001 /* FirebaseAuth */; };
 		B0010018 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = P0010003 /* FirebaseMessaging */; };
@@ -94,6 +95,7 @@
 		F0010009 /* FirestoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
 		F0010010 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F0010011 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		F0010099 /* AddFriendSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendSheetView.swift; sourceTree = "<group>"; };
 		F0010015 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F0010016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F0010017 /* heyho_ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = heyho_ios.entitlements; sourceTree = "<group>"; };
@@ -288,6 +290,7 @@
 			children = (
 				F0010011 /* FriendsView.swift */,
 				F0010040 /* HeyHoAnimationOverlay.swift */,
+				F0010099 /* AddFriendSheetView.swift */,
 			);
 			path = Friends;
 			sourceTree = "<group>";
@@ -435,6 +438,7 @@
 				B0010009 /* FirestoreService.swift in Sources */,
 				B0010010 /* MainTabView.swift in Sources */,
 				B0010011 /* FriendsView.swift in Sources */,
+				B0010099 /* AddFriendSheetView.swift in Sources */,
 				77B29A542F42E52E00B18CFB /* ViewModifiers.swift in Sources */,
 				B0010022 /* HeyBoyIconView.swift in Sources */,
 				B001001A /* PushService.swift in Sources */,

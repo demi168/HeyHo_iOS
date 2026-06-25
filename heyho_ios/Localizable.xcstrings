@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "6-16 characters" : {
 
     },
@@ -263,7 +266,7 @@
         }
       }
     },
-    "FRIEND'S CODE" : {
+    "Enter your friend's 8-character code" : {
 
     },
     "GRADIENTS" : {

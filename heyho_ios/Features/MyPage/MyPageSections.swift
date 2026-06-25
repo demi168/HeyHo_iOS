@@ -11,7 +11,8 @@ struct ProfileSectionView: View {
     let onEditProfile: () -> Void
 
     var body: some View {
-        HStack(alignment: .center, spacing: AppSpacing.spLarge) {
+        VStack(spacing: AppSpacing.spLarge) {
+            // アイコン（中央・上部）
             if let user {
                 HeyBoyIconView(
                     iconColorValue: IconColorValue(firestoreString: user.iconColor),
@@ -24,6 +25,7 @@ struct ProfileSectionView: View {
                     .frame(width: AppSize.iconLarge, height: AppSize.iconLarge)
             }
 
+            // 名前ブロック（左寄せ）
             VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
                 Text("MY NAME IS")
                     .font(.system(size: AppTypography.label, weight: .bold))
@@ -36,10 +38,12 @@ struct ProfileSectionView: View {
                 Rectangle()
                     .fill(AppColor.borderStrong)
                     .frame(height: AppSize.borderStrong)
-                Spacer()
-                CapsuleButton(title: "EDIT PROFILE", maxWidth: .infinity) {
-                    onEditProfile()
-                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // EDIT PROFILE（黒塗りフル幅）
+            PrimaryButton(title: "EDIT PROFILE") {
+                onEditProfile()
             }
         }
         .frame(maxWidth: .infinity)
@@ -51,7 +55,6 @@ struct ProfileSectionView: View {
 struct InviteCodeSectionView: View {
     let inviteCode: String?
     let isLoading: Bool
-    let onShowQRCode: () -> Void
     let onShare: () -> Void
 
     var body: some View {
@@ -59,104 +62,18 @@ struct InviteCodeSectionView: View {
             Text("MY CODE IS")
                 .font(.system(size: AppTypography.label, weight: .bold))
                 .foregroundColor(AppColor.textSecondary)
-            HStack(alignment: .center) {
+            HStack(alignment: .center, spacing: AppSpacing.spLarge) {
                 if isLoading {
                     ProgressView().frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     UnderlinedText(
                         text: inviteCode ?? "————————",
                         font: .system(size: AppTypography.title, weight: .black)
-                    ) {
-                        Button(action: onShowQRCode) {
-                            Image(systemName: "qrcode")
-                                .font(.system(size: AppTypography.heading, weight: .bold))
-                                .foregroundColor(AppColor.textPrimary)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(inviteCode == nil)
-                        .opacity(inviteCode == nil ? 0.4 : 1)
-                    }
+                    )
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 CapsuleButton(title: "SHARE", maxWidth: AppSize.capsuleButtonWidth) {
                     onShare()
-                }
-            }
-        }
-    }
-}
-
-// MARK: - 友だち追加（コード入力）
-
-struct AddFriendSectionView: View {
-    @Binding var codeInput: String
-    let isAdding: Bool
-    /// true の場合、表示時に入力欄へフォーカスする
-    let focusOnAppear: Bool
-    let onAdd: () -> Void
-
-    @FocusState private var isCodeFocused: Bool
-
-    /// 招待コードバリデーション（英数のみ8文字）
-    private var isCodeValid: Bool {
-        InviteCode.isValidFormat(codeInput.trimmingCharacters(in: .whitespaces))
-    }
-
-    /// 招待コードのバリデーションエラー（空欄時は非表示）
-    private var validationError: String? {
-        let code = codeInput.trimmingCharacters(in: .whitespaces)
-        if code.isEmpty { return nil }
-        if !code.allSatisfy(InviteCode.isCodeCharacter) {
-            return String(localized: "Only alphanumeric characters allowed")
-        }
-        if code.count < InviteCode.length {
-            return String(localized: "Enter exactly 8 characters")
-        }
-        return nil
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
-            Text("ADD FRIENDS")
-                .font(.system(size: AppTypography.label, weight: .bold))
-                .foregroundColor(AppColor.textSecondary)
-            HStack(alignment: .center) {
-                VStack(spacing: AppSpacing.spXsmall) {
-                    TextField("FRIEND'S CODE", text: $codeInput,
-                             prompt: Text("FRIEND'S CODE").foregroundColor(AppColor.textTertiary))
-                        .font(.system(size: AppTypography.title, weight: .black))
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
-                        .foregroundColor(AppColor.textPrimary)
-                        .focused($isCodeFocused)
-                        .onChange(of: codeInput) {
-                            let filtered = String(codeInput
-                                .filter(InviteCode.isCodeCharacter)
-                                .prefix(InviteCode.length)).uppercased()
-                            if filtered != codeInput { codeInput = filtered }
-                        }
-                    Rectangle()
-                        .fill(validationError != nil ? AppColor.borderDestructive : AppColor.borderStrong)
-                        .frame(height: AppSize.borderStrong)
-                    if let error = validationError {
-                        Text(error)
-                            .font(.system(size: AppTypography.caption, weight: .medium))
-                            .foregroundColor(AppColor.textDestructive)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                CapsuleButton(title: "ADD", maxWidth: AppSize.capsuleButtonWidth) {
-                    onAdd()
-                }
-                .disabled(!isCodeValid || isAdding)
-                .opacity(!isCodeValid || isAdding ? 0.4 : 1)
-            }
-        }
-        .onAppear {
-            if focusOnAppear {
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(500))
-                    isCodeFocused = true
                 }
             }
         }
@@ -257,18 +174,12 @@ struct SettingsSectionView: View {
 }
 
 #Preview("InviteCode - 取得済み") {
-    InviteCodeSectionView(inviteCode: "ABC12345", isLoading: false, onShowQRCode: {}, onShare: {})
+    InviteCodeSectionView(inviteCode: "ABC12345", isLoading: false, onShare: {})
         .padding(AppSpacing.spXlarge)
 }
 
 #Preview("InviteCode - ローディング") {
-    InviteCodeSectionView(inviteCode: nil, isLoading: true, onShowQRCode: {}, onShare: {})
-        .padding(AppSpacing.spXlarge)
-}
-
-#Preview("AddFriend") {
-    @Previewable @State var code = "ABC1"
-    AddFriendSectionView(codeInput: $code, isAdding: false, focusOnAppear: false, onAdd: {})
+    InviteCodeSectionView(inviteCode: nil, isLoading: true, onShare: {})
         .padding(AppSpacing.spXlarge)
 }
 

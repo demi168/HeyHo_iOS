@@ -8,16 +8,9 @@ struct MyPageView: View {
     @EnvironmentObject var storeService: StoreService
     @Environment(\.dismiss) private var dismiss
 
-    /// true の場合、表示時に友だちコード入力欄にフォーカスする
-    var focusAddFriend: Bool = false
-    /// 友達追加成功時のコールバック（追加された友達のIDを渡す）
-    var onFriendAdded: ((String) -> Void)?
-
     @State private var currentUser: AppUser?
     @State private var inviteCode: String?
     @State private var isLoadingInviteCode = false
-    @State private var friendCodeInput = ""
-    @State private var isAddingFriend = false
     @State private var errorMessage: String?
     @State private var showEditProfile = false
     @State private var showPaywall = false
@@ -40,14 +33,7 @@ struct MyPageView: View {
                     InviteCodeSectionView(
                         inviteCode: inviteCode,
                         isLoading: isLoadingInviteCode,
-                        onShowQRCode: { showQRCode = true },
-                        onShare: shareInviteCode
-                    )
-                    AddFriendSectionView(
-                        codeInput: $friendCodeInput,
-                        isAdding: isAddingFriend,
-                        focusOnAppear: focusAddFriend,
-                        onAdd: addFriendByCode
+                        onShare: { showQRCode = true }
                     )
                     SettingsSectionView(
                         isPremium: storeService.isPremium,
@@ -68,10 +54,6 @@ struct MyPageView: View {
                 .padding(.bottom, 40)
             }
         }
-        .overlay {
-            if isAddingFriend { searchingOverlay }
-        }
-        .allowsHitTesting(!isAddingFriend)
         .background(AppColor.backgroundSecondary)
         .onAppear {
             loadUser()
@@ -108,7 +90,7 @@ struct MyPageView: View {
         }
     }
 
-    // MARK: - ヘッダー・オーバーレイ
+    // MARK: - ヘッダー
 
     private var headerView: some View {
         ZStack {
@@ -130,19 +112,6 @@ struct MyPageView: View {
         .padding(.horizontal, AppSpacing.spXlarge)
         .padding(.top, AppSpacing.spSmall)
         .padding(.bottom, AppSpacing.spLarge)
-    }
-
-    private var searchingOverlay: some View {
-        AppColor.overlayScrim
-            .ignoresSafeArea()
-            .overlay {
-                VStack(spacing: AppSpacing.spSmall) {
-                    ProgressView().tint(AppColor.iconInverse)
-                    Text("SEARCHING...")
-                        .font(.system(size: AppTypography.label, weight: .bold))
-                        .foregroundColor(AppColor.textInverse)
-                }
-            }
     }
 
     // MARK: - データ読み込み
@@ -174,45 +143,6 @@ struct MyPageView: View {
     }
 
     // MARK: - アクション
-
-    private func shareInviteCode() {
-        guard let code = inviteCode else { return }
-        ShareService.shareInviteCode(code)
-    }
-
-    private func addFriendByCode() {
-        let code = friendCodeInput.trimmingCharacters(in: .whitespaces).uppercased()
-        guard InviteCode.isValidFormat(code), let myId = authState.currentUserId else { return }
-        isAddingFriend = true
-        Task {
-            do {
-                guard let friendId = try await FirestoreService.shared.getUserIdByInviteCode(code) else {
-                    await MainActor.run { isAddingFriend = false; errorMessage = String(localized: "Code not found") }
-                    return
-                }
-                if friendId == myId {
-                    await MainActor.run { isAddingFriend = false; errorMessage = String(localized: "This is your own code") }
-                    return
-                }
-                try await FirestoreService.shared.addFriend(userId: myId, friendId: friendId)
-                // 成功: haptic + コールバック + 自動dismiss
-                await MainActor.run {
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    friendCodeInput = ""
-                    isAddingFriend = false
-                    onFriendAdded?(friendId)
-                    dismiss()
-                }
-            } catch {
-                await MainActor.run {
-                    isAddingFriend = false
-                    errorMessage = FirestoreService.isAlreadyFriendsError(error)
-                        ? String(localized: "Already friends")
-                        : error.localizedDescription
-                }
-            }
-        }
-    }
 
     private func performSignOut() {
         do {

@@ -56,4 +56,31 @@ struct InviteCodeTests {
     func 無効な形式(_ code: String) {
         #expect(!InviteCode.isValidFormat(code))
     }
+
+    // MARK: - 入力正規化
+
+    @Test func 正規化は小文字を大文字化() {
+        #expect(InviteCode.normalizedInput("abcdefgh") == "ABCDEFGH")
+    }
+
+    @Test func 正規化は英数以外を除去() {
+        #expect(InviteCode.normalizedInput("ab-cd ef!") == "ABCDEF")
+        #expect(InviteCode.normalizedInput("あABいC") == "ABC")
+    }
+
+    @Test func 正規化は規定桁数で切り詰め() {
+        // 9文字 → 8文字
+        #expect(InviteCode.normalizedInput("ABCDEFGHI") == "ABCDEFGH")
+        #expect(InviteCode.normalizedInput("ABCDEFGHI").count == InviteCode.length)
+    }
+
+    @Test func 正規化は空文字を空のまま返す() {
+        #expect(InviteCode.normalizedInput("") == "")
+        #expect(InviteCode.normalizedInput("！＃あ") == "")
+    }
+
+    @Test func 正規化後は有効な形式() {
+        // 余分な記号と長さを含む入力でも、正規化すれば形式チェックを通る
+        #expect(InviteCode.isValidFormat(InviteCode.normalizedInput("ab-cd-ef-gh-ij")))
+    }
 }

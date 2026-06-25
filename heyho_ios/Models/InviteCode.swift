@@ -22,4 +22,9 @@ enum InviteCode {
     static func generate() -> String {
         String((0..<length).compactMap { _ in generationCharacters.randomElement() })
     }
+
+    /// 入力文字列を招待コード形式に正規化（英数のみ・規定桁数まで・大文字化）
+    static func normalizedInput(_ raw: String) -> String {
+        String(raw.filter(isCodeCharacter).prefix(length)).uppercased()
+    }
 }

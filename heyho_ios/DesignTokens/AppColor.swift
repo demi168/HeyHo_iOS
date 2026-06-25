@@ -34,6 +34,8 @@ enum AppColor {
 
     // MARK: - ボタン背景
     static let buttonIconBackground = Color(white: 0.9)
+    /// 主要 CTA（ADD FRIENDS / SUBMIT 等）の黒背景
+    static let buttonPrimaryBackground = hex("000000")
 
     // MARK: - オーバーレイ・シャドウ
     static let overlayScrim = Color.black.opacity(0.4)
