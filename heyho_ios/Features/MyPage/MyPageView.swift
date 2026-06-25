@@ -56,6 +56,8 @@ struct MyPageView: View {
         }
         .background(AppColor.backgroundSecondary)
         .onAppear {
+            // キャッシュ済みユーザーで即座に表示を埋め、デフォルト色の一瞬のちらつきを避ける
+            if currentUser == nil { currentUser = authState.currentUser }
             loadUser()
             loadInviteCode()
         }

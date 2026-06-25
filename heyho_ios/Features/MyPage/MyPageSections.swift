@@ -12,18 +12,14 @@ struct ProfileSectionView: View {
 
     var body: some View {
         VStack(spacing: AppSpacing.spLarge) {
-            // アイコン（中央・上部）
-            if let user {
-                HeyBoyIconView(
-                    iconColorValue: IconColorValue(firestoreString: user.iconColor),
-                    size: AppSize.iconLarge,
-                    showPremiumBadge: isPremium
-                )
-            } else {
-                Circle()
-                    .fill(AppColor.iconDefault)
-                    .frame(width: AppSize.iconLarge, height: AppSize.iconLarge)
-            }
+            // アイコン（中央・上部）。常時マウントして初回色変化を消費し、
+            // 編集時のスライド演出が正しく発火する（FriendsView ヘッダーと同じ挙動）
+            HeyBoyIconView(
+                iconColorValue: user.map { IconColorValue(firestoreString: $0.iconColor) }
+                    ?? .solid(hex: AppColor.defaultIconHex),
+                size: AppSize.iconLarge,
+                showPremiumBadge: isPremium
+            )
 
             // 名前ブロック（左寄せ）
             VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {

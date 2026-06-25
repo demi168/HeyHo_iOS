@@ -226,6 +226,9 @@ struct EditProfileView: View {
                 }
                 try await FirestoreService.shared.updateIconColor(userId: uid, colorHex: selectedColorValue.firestoreString)
                 if isInitialSetup {
+                    // 初回セットアップは fullScreenCover ではなく RootView の切替で遷移するため、
+                    // ここで currentUser を再取得しないと FriendsView が選択カラーを反映できない
+                    await authState.refreshCurrentUser()
                     authState.markProfileSetupComplete()
                 }
                 dismiss()

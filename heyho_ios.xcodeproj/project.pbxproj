@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		77509FDC2F51F66800E4C7AF /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 77509FDB2F51F66800E4C7AF /* AppIcon.icon */; };
-		7781284F2F977FE1001DC5F3 /* IrisLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7781284E2F977FE1001DC5F3 /* IrisLoadingView.swift */; };
 		77B29A542F42E52E00B18CFB /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B29A532F42E52E00B18CFB /* ViewModifiers.swift */; };
 		77B29A592F42FBA700B18CFB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 77B29A582F42FBA700B18CFB /* FirebaseFirestore */; };
 		77C13A782F88F30C008A024B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 77C13A772F88F30C008A024B /* Localizable.xcstrings */; };
 		B0010001 /* HeyHoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* HeyHoApp.swift */; };
 		B0010075 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010075 /* AppLogger.swift */; };
+		B0010100 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
+		B0010101 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
+		B0010102 /* RallyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010102 /* RallyService.swift */; };
 		B0010090 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010090 /* ColorHex.swift */; };
 		B0010091 /* MyPageComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010091 /* MyPageComponents.swift */; };
 		B0010092 /* MyPageSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010092 /* MyPageSections.swift */; };
@@ -69,16 +71,22 @@
 		B0020013 /* IconColorValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010070 /* IconColorValue.swift */; };
 		B0020014 /* PremiumConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010050 /* PremiumConfig.swift */; };
 		B0020015 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010074 /* GradientPreset.swift */; };
+		B0020020 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
+		B0020021 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
+		B0020006 /* FriendRallyStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020006 /* FriendRallyStatusTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		77509FDB2F51F66800E4C7AF /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
-		7781284E2F977FE1001DC5F3 /* IrisLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IrisLoadingView.swift; sourceTree = "<group>"; };
 		779D85F32F6E0C5000EB3BCA /* Configuration.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = Configuration.storekit; path = heyho_ios/Configuration.storekit; sourceTree = "<group>"; };
 		77B29A532F42E52E00B18CFB /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 		77C13A772F88F30C008A024B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
 		F0010075 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		F0010100 /* FriendRowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRowState.swift; sourceTree = "<group>"; };
+		F0010101 /* FriendRallyStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatus.swift; sourceTree = "<group>"; };
+		F0010102 /* RallyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RallyService.swift; sourceTree = "<group>"; };
+		F0020006 /* FriendRallyStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatusTests.swift; sourceTree = "<group>"; };
 		F0010090 /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
 		F0010091 /* MyPageComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageComponents.swift; sourceTree = "<group>"; };
 		F0010092 /* MyPageSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageSections.swift; sourceTree = "<group>"; };
@@ -220,6 +228,7 @@
 				F0020003 /* DisplayNameValidatorTests.swift */,
 				F0020004 /* MessageTypeTests.swift */,
 				F0020005 /* IconColorValueTests.swift */,
+				F0020006 /* FriendRallyStatusTests.swift */,
 			);
 			path = HeyHoTests;
 			sourceTree = "<group>";
@@ -256,6 +265,8 @@
 				F0010072 /* InviteCode.swift */,
 				F0010073 /* DisplayNameValidator.swift */,
 				F0010074 /* GradientPreset.swift */,
+				F0010100 /* FriendRowState.swift */,
+				F0010101 /* FriendRallyStatus.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -268,6 +279,7 @@
 				F0010041 /* FeedbackService.swift */,
 				F0010051 /* StoreService.swift */,
 				F0010080 /* ShareService.swift */,
+				F0010102 /* RallyService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -279,7 +291,6 @@
 				G0010009 /* Friends */,
 				G0010012 /* MyPage */,
 				G0010014 /* Premium */,
-				7781284E2F977FE1001DC5F3 /* IrisLoadingView.swift */,
 				F0010022 /* HeyBoyIconView.swift */,
 			);
 			path = Features;
@@ -428,6 +439,9 @@
 			files = (
 				B0010001 /* HeyHoApp.swift in Sources */,
 				B0010075 /* AppLogger.swift in Sources */,
+				B0010100 /* FriendRowState.swift in Sources */,
+				B0010101 /* FriendRallyStatus.swift in Sources */,
+				B0010102 /* RallyService.swift in Sources */,
 				B0010002 /* RootView.swift in Sources */,
 				B0010003 /* SignInView.swift in Sources */,
 				B0010004 /* AuthState.swift in Sources */,
@@ -452,7 +466,6 @@
 				B0010023 /* EditProfileView.swift in Sources */,
 				B0010060 /* AppColor.swift in Sources */,
 				B0010061 /* AppSpacing.swift in Sources */,
-				7781284F2F977FE1001DC5F3 /* IrisLoadingView.swift in Sources */,
 				B0010062 /* AppSize.swift in Sources */,
 				B0010063 /* AppTypography.swift in Sources */,
 				B0010040 /* HeyHoAnimationOverlay.swift in Sources */,
@@ -485,6 +498,9 @@
 				B0020013 /* IconColorValue.swift in Sources */,
 				B0020014 /* PremiumConfig.swift in Sources */,
 				B0020015 /* GradientPreset.swift in Sources */,
+				B0020020 /* FriendRowState.swift in Sources */,
+				B0020021 /* FriendRallyStatus.swift in Sources */,
+				B0020006 /* FriendRallyStatusTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

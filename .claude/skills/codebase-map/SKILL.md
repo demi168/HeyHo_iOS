@@ -42,8 +42,9 @@ iOS 18.6+ / SwiftUI / Firebase。エントリは `App/HeyHoApp.swift`。
 ### Services/（すべて `.shared` シングルトン）
 | ファイル | 責務 |
 |---------|------|
-| `FirestoreService.swift` | Firestore 全操作（users / friends / heyhos / inviteCodes / private サブドキュメント） |
-| `PushService.swift` | FCM トークン登録・通知ハンドリング（`UNUserNotificationCenter` / `Messaging` delegate） |
+| `FirestoreService.swift` | Firestore 全操作（users / friends / heyhos / inviteCodes / private サブドキュメント）。`getLastHeyHo` / `getFriendRallyStatuses` |
+| `RallyService.swift` | `@MainActor ObservableObject`。heyhos の `toUserId==自分` をリアルタイム購読し受信を検知（B2）、友だちごとのラリー状態（行状態＋返信待ち）を `@Published statuses` で保持、プッシュタップ受信も集約（B1）。`RootView` で注入 |
+| `PushService.swift` | FCM トークン登録・通知ハンドリング（`willPresent` / `didReceive`）。`didReceive` で通知タップを `RallyService.handlePushTap` へ |
 | `StoreService.swift` | `@EnvironmentObject`。StoreKit 課金・`isPremium`・エンタイトルメント検証 |
 | `FeedbackService.swift` | サウンド（`Resources/Sounds/`）・ハプティクス |
 | `ShareService.swift` | 招待シェア。`AppURL`（privacy/terms/commercial/appStore）・`ShareConstants` を保持 |
@@ -54,6 +55,8 @@ iOS 18.6+ / SwiftUI / Firebase。エントリは `App/HeyHoApp.swift`。
 | `User.swift` | `AppUser`（`@DocumentID`・displayName・createdAt・iconColor） | — |
 | `HeyHo.swift` | `HeyHo` メッセージ（fromUserId/toUserId/messageType/createdAt） | — |
 | `MessageType.swift` | `MessageType`（hey/ho/letsGo）・`reply` で返信チェーンを一元管理 | `MessageTypeTests` |
+| `FriendRowState.swift` | 友だち行が次に送れる種別（sendHey/sendHo/sendLetsGo） | — |
+| `FriendRallyStatus.swift` | 行状態＋`awaitingReply`（返信待ち＝送信無効化）。`from(lastFromUserId:lastMessageType:me:)` で導出 | `FriendRallyStatusTests` |
 | `InviteCode.swift` | 招待コードの生成・形式チェック（8桁英数字） | `InviteCodeTests` |
 | `DisplayNameValidator.swift` | 表示名バリデーション（エラー種別を enum で返す。文言変換は View 側） | `DisplayNameValidatorTests` |
 | `IconColorValue.swift` | アイコンカラーの enum ↔ Firestore 文字列変換 | `IconColorValueTests` |

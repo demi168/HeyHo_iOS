@@ -1,30 +1,25 @@
 import SwiftUI
 
-/// 友だちリストの1行が「Hey / Ho / Let's Go」のどれを送れるかを表す
-enum FriendRowState {
-    case sendHey        // デフォルト: Heyを送る
-    case sendLetsGo     // 相手からHoが返ってきた後: LetsGoを送る
-    case sendHo         // 相手からHeyが来た後: Hoを返す
+// FriendRowState は Models/FriendRowState.swift（テスト対象の純粋ロジック）へ移動
 
-    /// 「次に送るべきメッセージタイプ」から行状態を決める
-    init(sending type: MessageType) {
-        switch type {
-        case .hey: self = .sendHey
-        case .ho: self = .sendHo
-        case .letsGo: self = .sendLetsGo
-        }
-    }
+/// DEBUG ダミー友だちの ID 接頭辞（実 Firestore には存在しない）
+private let debugDummyPrefix = "dummy_"
+
+extension AppUser {
+    /// DEBUG 用ダミー友だち（実 Firestore に存在しない）かどうか。リリースでは常に false
+    var isDebugDummy: Bool { (id ?? "").hasPrefix(debugDummyPrefix) }
 }
 
 #if DEBUG
-private let debugDummyFriends: [AppUser] = [
-    AppUser(id: "dummy_1", displayName: "ダミー太郎"),
-    AppUser(id: "dummy_2", displayName: "ダミー花子"),
-    AppUser(id: "dummy_3", displayName: "ダミー次郎"),
-    AppUser(id: "dummy_4", displayName: "ダミー三郎"),
-    AppUser(id: "dummy_5", displayName: "ダミー梅子"),
-    AppUser(id: "dummy_6", displayName: "ダミー四郎"),
-]
+/// ダミー友だち。アイコンカラーは無料ソリッドカラーからランダムに割り当てる
+/// （グローバル let なので起動時に一度だけ評価＝セッション中は固定）
+private let debugDummyFriends: [AppUser] = {
+    let names = ["JoeyHey", "JohnnyHo", "DeeDeeLetsGo", "TommyHey", "MarkyHo", "RichieLetsGo", "ElvisHey"]
+    let palette = AppColor.freeIconPresets.map(\.hex)
+    return names.enumerated().map { index, name in
+        AppUser(id: "\(debugDummyPrefix)\(index + 1)", displayName: name, iconColor: palette.randomElement())
+    }
+}()
 #endif
 
 // MARK: - FriendsView（データロード担当）
@@ -32,43 +27,61 @@ private let debugDummyFriends: [AppUser] = [
 struct FriendsView: View {
     @EnvironmentObject var authState: AuthState
     @EnvironmentObject var storeService: StoreService
+    @EnvironmentObject var rallyService: RallyService
     @State private var friends: [AppUser] = []
-    @State private var rowStates: [String: FriendRowState] = [:]
     @State private var isLoading = true
     @State private var hasLoadedOnce = false
     @State private var errorMessage: String?
-    @State private var lastSentFriendId: String?
+    /// 送受信アニメーション再生中の相手 ID。アニメが終わる（.idle に戻る）まで送信ボタンを無効化する
+    @State private var animatingFriendId: String?
     @State private var showMyPage = false
     @State private var showAddFriendSheet = false
     @State private var myIconColorValue: IconColorValue = .solid(hex: "FFD700")
     @State private var animationState: HeyHoAnimationState = .idle
     @State private var friendToDelete: AppUser?
     @State private var newlyAddedFriendId: String?
+    /// 起動ローディング明けの一斉フレームインを発火するトリガー（FriendsView は root で永続のため一度きり）
+    @State private var entranceTriggered = false
 
     var body: some View {
         ZStack {
             FriendsBodyView(
                 friends: friends,
-                rowStates: rowStates,
+                statuses: rallyService.statuses,
                 isLoading: isLoading,
                 myIconColorValue: myIconColorValue,
-                lastSentFriendId: lastSentFriendId,
+                animatingFriendId: animatingFriendId,
                 isPremium: storeService.isPremium,
                 showMyPage: $showMyPage,
                 showAddFriendSheet: $showAddFriendSheet,
                 resolvedIconColor: resolvedIconColor(for:),
                 onSend: sendHeyHo(to:),
                 onDelete: { friend in friendToDelete = friend },
-                onRefresh: { await loadFriends() }
+                onRefresh: { await loadFriends() },
+                entranceTriggered: entranceTriggered
             )
 
             HeyHoAnimationOverlay(animationState: $animationState)
         }
-        .irisLoading(isLoading: $isLoading)
+        .overlay {
+            HeyBoyLaunchOverlay(isLoading: isLoading, onReveal: {
+                // 起動演出が明けたタイミングで一斉フレームインを発火（一度きり）
+                entranceTriggered = true
+            })
+        }
         .onAppear {
             guard !hasLoadedOnce else { return }
             loadMyColor()
             Task { await loadFriends() }
+        }
+        .onChange(of: rallyService.incomingEvent) { _, event in
+            // リアルタイム受信（B2）・プッシュタップ（B1）共通の受信アニメ発火
+            guard let event else { return }
+            playReceiveAnimation(event)
+        }
+        .onChange(of: animationState) { _, newValue in
+            // アニメ完了（.idle 復帰）で無効化を解除 → 切り替わりがアニメ後に揃う
+            if newValue == .idle { animatingFriendId = nil }
         }
         .alert("Delete Friend", isPresented: Binding(
             get: { friendToDelete != nil },
@@ -113,6 +126,32 @@ struct FriendsView: View {
         IconColorValue(firestoreString: friend.iconColor)
     }
 
+    /// 受信イベントから相手のアイコン色・名前を解決して受信アニメを再生する
+    private func playReceiveAnimation(_ event: IncomingHeyHo) {
+        // 受信アニメが終わるまでこの相手を無効化（active への切り替えはアニメ完了後）
+        animatingFriendId = event.fromUserId
+        // 友だち一覧にいれば追加取得なしで解決
+        if let friend = friends.first(where: { $0.id == event.fromUserId }) {
+            animationState = .receiving(
+                message: event.messageType,
+                iconColor: resolvedIconColor(for: friend),
+                name: friend.displayName,
+                token: UUID()
+            )
+            return
+        }
+        // 一覧に無い場合（追加直後など）は単発取得でフォールバック
+        Task { @MainActor in
+            let user = try? await FirestoreService.shared.getUser(userId: event.fromUserId)
+            animationState = .receiving(
+                message: event.messageType,
+                iconColor: IconColorValue(firestoreString: user?.iconColor),
+                name: user?.displayName ?? String(localized: "Someone"),
+                token: UUID()
+            )
+        }
+    }
+
     private func loadMyColor() {
         if let user = authState.currentUser {
             myIconColorValue = IconColorValue(firestoreString: user.iconColor)
@@ -135,20 +174,13 @@ struct FriendsView: View {
                 list.insert(newFriend, at: 0)
                 newlyAddedFriendId = nil
             }
-            // 友だちリストを先に表示し、rowStates はバックグラウンドで取得
+            // 友だちリストを先に表示し、ラリー状態の取得＋受信購読を RallyService に委譲。
+            // ダミー友だち（実 Firestore に無い）は無駄クエリになるので除外する
             friends = list
-            Task { await loadRowStates() }
+            rallyService.start(userId: uid, friendIds: list.filter { !$0.isDebugDummy }.compactMap(\.id))
         } catch {
             errorMessage = error.localizedDescription
         }
-    }
-
-    private func loadRowStates() async {
-        guard let uid = authState.currentUserId else { return }
-        let ids = friends.compactMap(\.id)
-        guard !ids.isEmpty else { return }
-        let states = await FirestoreService.shared.getFriendRowStates(userId: uid, friendIds: ids)
-        await MainActor.run { rowStates = states }
     }
 
     private func deleteFriend(_ friend: AppUser) {
@@ -158,7 +190,7 @@ struct FriendsView: View {
                 try await FirestoreService.shared.removeFriend(userId: uid, friendId: friendId)
                 await MainActor.run {
                     friends.removeAll { $0.id == friendId }
-                    rowStates.removeValue(forKey: friendId)
+                    rallyService.updateFriendIds(friends.compactMap(\.id))
                 }
             } catch {
                 await MainActor.run { errorMessage = error.localizedDescription }
@@ -170,61 +202,60 @@ struct FriendsView: View {
         guard let uid = authState.currentUserId, let friendId = friend.id else { return }
 
         // letsGo は全員無料（ゲートなし）
-        let state = rowStates[friendId] ?? .sendHey
-
-        // 送信タイプに応じたアニメーション
+        let state = rallyService.statuses[friendId]?.rowState ?? .sendHey
+        let message = state.sendableMessage
         let name = friend.displayName
-        switch state {
-        case .sendHo:
-            animationState = .sending(message: .ho, iconColor: myIconColorValue, name: name)
-        case .sendLetsGo:
-            animationState = .sending(message: .letsGo, iconColor: myIconColorValue, name: name)
-        default:
-            animationState = .sending(message: .hey, iconColor: myIconColorValue, name: name)
+        animationState = .sending(message: message, iconColor: myIconColorValue, name: name, token: UUID())
+        // 送信アニメが終わるまでこの相手を無効化（letsGo でも再度押せるのはアニメ完了後）
+        animatingFriendId = friendId
+
+        // DEBUG: ダミー友だちは実 Firestore に書けない（権限エラーになる）ので、
+        // 送信を介さず楽観更新＋擬似ラリーをローカルで完結させる
+        #if DEBUG
+        if friend.isDebugDummy {
+            rallyService.markSent(friendId: friendId, messageType: message)
+            simulateDummyReply(friendId: friendId, sentState: state)
+            return
         }
+        #endif
 
         Task {
             do {
                 try await FirestoreService.shared.sendHeyHo(fromUserId: uid, toUserId: friendId)
-                await MainActor.run { lastSentFriendId = friendId }
-                await loadRowStates()
-                Task {
-                    try? await Task.sleep(for: .seconds(1))
-                    await MainActor.run { lastSentFriendId = nil }
-                }
-
-                // DEBUGモード: ラリーをシミュレート
-                #if DEBUG
-                let friendIconColor = resolvedIconColor(for: friend)
-                try? await Task.sleep(for: .seconds(3))
-                switch state {
-                case .sendHey:
-                    await MainActor.run {
-                        animationState = .receiving(message: .ho, iconColor: friendIconColor, name: name)
-                    }
-                case .sendHo:
-                    await MainActor.run {
-                        animationState = .receiving(message: .letsGo, iconColor: friendIconColor, name: name)
-                    }
-                default:
-                    break
-                }
-                #endif
+                // 送信成功 → 相手の返信待ち（ボタン無効化）を楽観更新
+                await MainActor.run { rallyService.markSent(friendId: friendId, messageType: message) }
             } catch {
                 await MainActor.run { errorMessage = error.localizedDescription }
             }
         }
     }
+
+    #if DEBUG
+    /// DEBUG: ダミー友だちからの返信を3秒後に擬似発火する（受信アニメ＋無効化解除を実経路と統一）
+    private func simulateDummyReply(friendId: String, sentState: FriendRowState) {
+        // 自分が送った種別への返信（Hey→Ho / Ho→LetsGo）。LetsGo の後は返信なし
+        let replyType: MessageType? = switch sentState {
+        case .sendHey: .ho
+        case .sendHo: .letsGo
+        case .sendLetsGo: nil
+        }
+        guard let replyType else { return }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3))
+            rallyService.debugSimulateReceive(fromUserId: friendId, messageType: replyType)
+        }
+    }
+    #endif
 }
 
 // MARK: - FriendsBodyView（純粋 UI・プレビュー可能）
 
 struct FriendsBodyView: View {
     let friends: [AppUser]
-    let rowStates: [String: FriendRowState]
+    let statuses: [String: FriendRallyStatus]
     let isLoading: Bool
     let myIconColorValue: IconColorValue
-    let lastSentFriendId: String?
+    let animatingFriendId: String?
     let isPremium: Bool
     @Binding var showMyPage: Bool
     @Binding var showAddFriendSheet: Bool
@@ -232,6 +263,8 @@ struct FriendsBodyView: View {
     let onSend: (AppUser) -> Void
     let onDelete: (AppUser) -> Void
     let onRefresh: () async -> Void
+    /// 起動明けの一斉フレームインの発火トリガー（ヘッダー＋各行へ伝播）
+    var entranceTriggered: Bool = false
 
     /// ヘッダーの高さ（すりガラス領域 + 下余白）
     private var headerTotalHeight: CGFloat {
@@ -245,7 +278,8 @@ struct FriendsBodyView: View {
             VStack(spacing: 0) {
                 if isLoading {
                     Spacer()
-                    ProgressView().tint(.white)
+                    // ぐるぐるスピナーの代わりに、HeyBoy が目ぱちぱちして待機
+                    HeyBoyIconView(iconColorValue: myIconColorValue, size: AppSize.iconLarge)
                     Spacer()
                 } else if friends.isEmpty {
                     Spacer()
@@ -258,12 +292,16 @@ struct FriendsBodyView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: AppSpacing.spMedium) {
-                            ForEach(friends) { friend in
+                            ForEach(Array(friends.enumerated()), id: \.element.id) { index, friend in
                                 FriendRow(
                                     friend: friend,
-                                    state: rowStates[friend.id ?? ""] ?? .sendHey,
-                                    justSent: lastSentFriendId == friend.id,
-                                    avatarIconColor: resolvedIconColor(friend)
+                                    state: statuses[friend.id ?? ""]?.rowState ?? .sendHey,
+                                    isAnimating: animatingFriendId == friend.id,
+                                    awaitingReply: statuses[friend.id ?? ""]?.awaitingReply ?? false,
+                                    avatarIconColor: resolvedIconColor(friend),
+                                    // ヘッダー（delay 0）の次から、上の行ほど早くスタガー登場
+                                    entranceDelay: HeyBoyEntrance.stagger * Double(index + 1),
+                                    entranceTrigger: entranceTriggered
                                 ) { onSend(friend) }
                                 .contextMenu {
                                     Button(role: .destructive) {
@@ -280,35 +318,31 @@ struct FriendsBodyView: View {
                         .padding(.bottom, 80 + AppSpacing.spLarge * 2)
                     }
                     .refreshable { await onRefresh() }
+                    // リスト上下端をフェードアウト（ヘッダー/フッターに溶け込ませる）
+                    .mask(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .clear, location: 0.0),
+                                .init(color: .black, location: 0.10),
+                                .init(color: .black, location: 0.90),
+                                .init(color: .clear, location: 1.0),
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                 }
             }
 
-            // すりガラスヘッダー（最前面に固定・下方向にフェードアウト）
+            // ヘッダー（最前面に固定）。背景の帯は無し＝リスト側のフェードで溶け込ませる
             VStack(spacing: 0) {
                 headerView
                     .padding(.horizontal, AppSpacing.spXlarge)
                     .padding(.bottom, AppSpacing.spLarge)
             }
             .frame(maxWidth: .infinity)
-            .background(
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    //.opacity(0.4)
-                    .ignoresSafeArea(edges: .top)
-                    .mask(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .black, location: 0.0),
-                                .init(color: .clear, location: 1.0),
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .ignoresSafeArea(edges: .top)
-                    )
-            )
 
-            // すりガラスフッター（最前面に固定・上方向にフェードアウト）
+            // フッター（最前面に固定）。背景の帯は無し＝リスト側のフェードで溶け込ませる
             VStack(spacing: 0) {
                 Spacer()
                 VStack(spacing: 0) {
@@ -332,23 +366,6 @@ struct FriendsBodyView: View {
                     .padding(.top, AppSpacing.spLarge)
                 }
                 .frame(maxWidth: .infinity)
-                .background(
-                    Rectangle()
-                        .fill(.ultraThinMaterial)
-                        //.opacity(0.8)
-                        .ignoresSafeArea(edges: .bottom)
-                        .mask(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .clear, location: 0.0),
-                                    .init(color: .black, location: 1.0),
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .ignoresSafeArea(edges: .bottom)
-                        )
-                )
             }
         }
     }
@@ -363,7 +380,13 @@ struct FriendsBodyView: View {
             HStack {
                 Spacer()
                 Button(action: { showMyPage = true }) {
-                    HeyBoyIconView(iconColorValue: myIconColorValue, size: AppSize.iconDefault, showPremiumBadge: isPremium)
+                    HeyBoyIconView(
+                        iconColorValue: myIconColorValue,
+                        size: AppSize.iconDefault,
+                        showPremiumBadge: isPremium,
+                        entranceDelay: 0,
+                        entranceTrigger: entranceTriggered
+                    )
                 }
                 .buttonStyle(.plain)
             }
@@ -378,14 +401,29 @@ struct FriendsBodyView: View {
 struct FriendRow: View {
     let friend: AppUser
     let state: FriendRowState
-    let justSent: Bool
+    /// この相手の送受信アニメ再生中（アニメ完了まで無効化）
+    let isAnimating: Bool
+    /// 自分が最後に送って相手の返信待ち = 送信不可
+    let awaitingReply: Bool
     let avatarIconColor: IconColorValue
+    /// 起動明けフレームインの遅延（nil なら通常表示）
+    var entranceDelay: TimeInterval? = nil
+    /// 起動明けフレームインの発火トリガー
+    var entranceTrigger: Bool = false
     let onSend: () -> Void
 
+    /// 送信不可（アニメ再生中 or 相手の返信待ち）
+    private var isDisabled: Bool { isAnimating || awaitingReply }
+
     var body: some View {
-        Button(action: { if !justSent { onSend() } }) {
+        Button(action: { if !isDisabled { onSend() } }) {
             HStack(spacing: AppSpacing.spMedium) {
-                HeyBoyIconView(iconColorValue: avatarIconColor, size: AppSize.iconDefault)
+                HeyBoyIconView(
+                    iconColorValue: avatarIconColor,
+                    size: AppSize.iconDefault,
+                    entranceDelay: entranceDelay,
+                    entranceTrigger: entranceTrigger
+                )
 
                 Text(friend.displayName)
                     .font(.system(size: AppTypography.display, weight: .black))
@@ -404,9 +442,95 @@ struct FriendRow: View {
                     .strokeBorder(AppColor.borderDefault, lineWidth: AppSize.borderStrong)
                     .background(Capsule().fill(AppColor.backgroundSecondary))
             )
-            .opacity(justSent ? 0.55 : 1.0)
+            // 見た目（dim）は既存演出を流用。最終的な状態表示デザインは別途決定
+            .opacity(isDisabled ? 0.55 : 1.0)
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - 起動後フレームイン演出の定数
+
+/// 起動ローディング明けに HeyBoy たちが右下からフレームインする際の設定（一元管理）
+private enum HeyBoyEntrance {
+    /// 各アイコンの登場をずらすスタガー間隔
+    static let stagger: TimeInterval = 0.06
+}
+
+// MARK: - 起動ローディング演出
+
+/// 起動時のローディング演出。
+/// HeyBoy がポンっと登場 → 目ぱちぱちで待機 → ローディング完了後に少し静止してから画面を覆うまで拡大、
+/// フェードアウトして中身を見せる。色はブランドのデフォルト黄色で固定（ユーザーのアイコン色には連動しない）。
+private struct HeyBoyLaunchOverlay: View {
+    let isLoading: Bool
+    /// 画面を覆うアイコンがフェードアウトし始める瞬間に呼ぶ。中身（リスト）のフレームインと重ねる
+    var onReveal: () -> Void = {}
+
+    /// HeyBoy の表示サイズ（0=非表示 / iconLarge=登場 / coverSize=画面を覆う）。
+    /// scaleEffect ではなく frame サイズを直接アニメすることで、拡大してもベクター（SVG）のまま crisp に保つ
+    @State private var iconSize: CGFloat = 0
+    @State private var opacity: CGFloat = 1
+    /// 演出完了。true で完全に消す
+    @State private var finished = false
+    /// reveal を二重起動させないためのフラグ
+    @State private var revealing = false
+    /// ポップイン開始時刻（reveal 時に残りのポップイン時間を計算するため）
+    @State private var appearedAt = Date()
+
+    /// ポップインの spring が視覚的に落ち着くまでの目安時間（response 0.45 + バウンド分）
+    private let popInSettle: TimeInterval = 0.6
+    /// ローディング完了後、拡大に移るまでの静止時間
+    private let holdAfterLoaded: TimeInterval = 0.25
+
+    var body: some View {
+        if !finished {
+            GeometryReader { geo in
+                // 画面の対角線より一回り大きくして、拡大しきった時に隅まで覆う
+                let coverSize = hypot(geo.size.width, geo.size.height) * 1.1
+                ZStack {
+                    AppColor.backgroundPrimary
+                    HeyBoyIconView(
+                        iconColorValue: .solid(hex: AppColor.defaultIconHex),
+                        size: iconSize
+                    )
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+                .opacity(opacity)
+                .onAppear {
+                    // ポンっと登場
+                    appearedAt = Date()
+                    withAnimation(.spring(response: 0.45, dampingFraction: 0.55)) {
+                        iconSize = AppSize.iconLarge
+                    }
+                    if !isLoading { reveal(to: coverSize) }
+                }
+                .onChange(of: isLoading) { _, loading in
+                    if !loading { reveal(to: coverSize) }
+                }
+            }
+            .ignoresSafeArea()
+        }
+    }
+
+    private func reveal(to coverSize: CGFloat) {
+        guard !revealing else { return }
+        revealing = true
+        Task { @MainActor in
+            // ポップインが視覚的に完了するまで待つ（ローディングが早く終わっても登場演出は見せきる）
+            let remainingPopIn = max(0, popInSettle - Date().timeIntervalSince(appearedAt))
+            try? await Task.sleep(for: .seconds(remainingPopIn))
+            // 完了後の静止
+            try? await Task.sleep(for: .seconds(holdAfterLoaded))
+            // 画面を覆うまで拡大（frame 駆動なのでベクターのまま crisp）
+            withAnimation(.easeIn(duration: 0.40)) { iconSize = coverSize }
+            try? await Task.sleep(for: .milliseconds(300))
+            // フェードアウト開始と同時に、中身（ヘッダー＋リスト）のフレームインを発火
+            onReveal()
+            withAnimation(.easeOut(duration: 0.35)) { opacity = 0 }
+            try? await Task.sleep(for: .milliseconds(360))
+            finished = true
+        }
     }
 }
 
@@ -423,22 +547,22 @@ private let previewFriends: [AppUser] = [
     AppUser(id: "p6", displayName: "Heyho_ramone", iconColor: "gradient:sunset"),
 ]
 
-private let previewRowStates: [String: FriendRowState] = [
-    "p1": .sendHey,
-    "p2": .sendHey,
-    "p3": .sendHo,
-    "p4": .sendLetsGo,
-    "p5": .sendHey,
-    "p6": .sendHey,
+private let previewStatuses: [String: FriendRallyStatus] = [
+    "p1": FriendRallyStatus(rowState: .sendHey, awaitingReply: false),
+    "p2": FriendRallyStatus(rowState: .sendHey, awaitingReply: true),   // 返信待ち（無効化）
+    "p3": FriendRallyStatus(rowState: .sendHo, awaitingReply: false),
+    "p4": FriendRallyStatus(rowState: .sendLetsGo, awaitingReply: false),
+    "p5": FriendRallyStatus(rowState: .sendHey, awaitingReply: false),
+    "p6": FriendRallyStatus(rowState: .sendHey, awaitingReply: false),
 ]
 
 #Preview("FriendsBodyView - リスト") {
     FriendsBodyView(
         friends: previewFriends,
-        rowStates: previewRowStates,
+        statuses: previewStatuses,
         isLoading: false,
         myIconColorValue: .solid(hex: "FFD700"),
-        lastSentFriendId: nil,
+        animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showAddFriendSheet: .constant(false),
@@ -452,10 +576,10 @@ private let previewRowStates: [String: FriendRowState] = [
 #Preview("FriendsBodyView - ローディング") {
     FriendsBodyView(
         friends: [],
-        rowStates: [:],
+        statuses: [:],
         isLoading: true,
         myIconColorValue: .solid(hex: "FFD700"),
-        lastSentFriendId: nil,
+        animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showAddFriendSheet: .constant(false),
@@ -469,10 +593,10 @@ private let previewRowStates: [String: FriendRowState] = [
 #Preview("FriendsBodyView - 友だちなし") {
     FriendsBodyView(
         friends: [],
-        rowStates: [:],
+        statuses: [:],
         isLoading: false,
         myIconColorValue: .solid(hex: "FFD700"),
-        lastSentFriendId: nil,
+        animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showAddFriendSheet: .constant(false),
@@ -485,11 +609,11 @@ private let previewRowStates: [String: FriendRowState] = [
 
 #Preview("FriendRow - 各ステート") {
     VStack(spacing: AppSpacing.spMedium) {
-        FriendRow(friend: previewFriends[0], state: .sendHey,    justSent: false, avatarIconColor: .solid(hex: "B47850")) {}
-        FriendRow(friend: previewFriends[1], state: .sendHey,    justSent: false, avatarIconColor: .solid(hex: "A020F0")) {}
-        FriendRow(friend: previewFriends[2], state: .sendHo,     justSent: false, avatarIconColor: .solid(hex: "0064FF")) {}
-        FriendRow(friend: previewFriends[3], state: .sendLetsGo, justSent: false, avatarIconColor: .solid(hex: "FF3030")) {}
-        FriendRow(friend: previewFriends[5], state: .sendHey,    justSent: false, avatarIconColor: .gradient(presetId: "sunset")) {}
+        FriendRow(friend: previewFriends[0], state: .sendHey,    isAnimating: false, awaitingReply: false, avatarIconColor: .solid(hex: "B47850")) {}
+        FriendRow(friend: previewFriends[1], state: .sendHey,    isAnimating: false, awaitingReply: true,  avatarIconColor: .solid(hex: "A020F0")) {}
+        FriendRow(friend: previewFriends[2], state: .sendHo,     isAnimating: false, awaitingReply: false, avatarIconColor: .solid(hex: "0064FF")) {}
+        FriendRow(friend: previewFriends[3], state: .sendLetsGo, isAnimating: false, awaitingReply: false, avatarIconColor: .solid(hex: "FF3030")) {}
+        FriendRow(friend: previewFriends[5], state: .sendHey,    isAnimating: false, awaitingReply: false, avatarIconColor: .gradient(presetId: "sunset")) {}
     }
     .padding(.horizontal, AppSpacing.spXlarge)
     .padding(.vertical, AppSpacing.spLarge)
