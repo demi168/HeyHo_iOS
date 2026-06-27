@@ -117,7 +117,7 @@ struct FriendsView: View {
                 newlyAddedFriendId = friendId
             })
             .environmentObject(authState)
-            .presentationDetents([.height(360)])
+            .presentationDetents([.height(300)])
             .presentationDragIndicator(.visible)
         }
     }

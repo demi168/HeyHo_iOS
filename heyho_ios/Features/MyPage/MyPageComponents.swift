@@ -37,7 +37,7 @@ struct PrimaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: AppTypography.body, weight: .black))
+                .font(.system(size: AppTypography.heading, weight: .black))
                 .foregroundColor(AppColor.textInverse)
                 .frame(maxWidth: .infinity)
                 .frame(height: AppSize.buttonHeight)
@@ -47,6 +47,92 @@ struct PrimaryButton: View {
         .buttonStyle(.plain)
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.4)
+    }
+}
+
+// MARK: - セカンダリ CTA ボタン（白地・黒枠・フル幅）
+
+/// COPY 等のサブアクションに使う白地＋黒枠のカプセルボタン。`PrimaryButton` と対。
+struct SecondaryButton: View {
+    let title: String
+    var isEnabled: Bool = true
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: AppTypography.heading, weight: .black))
+                .foregroundColor(AppColor.textPrimary)
+                .frame(maxWidth: .infinity)
+                .frame(height: AppSize.buttonHeight)
+                .background(AppColor.backgroundSecondary, in: Capsule())
+                .overlay(Capsule().strokeBorder(AppColor.borderStrong, lineWidth: AppSize.borderStrong))
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .opacity(isEnabled ? 1 : 0.4)
+    }
+}
+
+// MARK: - シート共通ヘッダー（中央タイトル＋任意の左右ボタン）
+
+/// ボトムシート上部のツールバー。タイトルを中央に置き、左右に任意のボタンを配置する。
+/// Figma ツールバー準拠で両サイド 16pt。グラバーは `presentationDragIndicator(.visible)` 側で表示する。
+struct SheetHeader<Leading: View, Trailing: View>: View {
+    private let title: String
+    private let leading: Leading
+    private let trailing: Trailing
+
+    init(
+        title: String,
+        @ViewBuilder leading: () -> Leading,
+        @ViewBuilder trailing: () -> Trailing
+    ) {
+        self.title = title
+        self.leading = leading()
+        self.trailing = trailing()
+    }
+
+    var body: some View {
+        ZStack {
+            Text(title)
+                .font(.system(size: AppTypography.body, weight: .bold))
+                .foregroundColor(AppColor.textPrimary)
+            HStack {
+                leading
+                Spacer()
+                trailing
+            }
+        }
+        .padding(.horizontal, AppSpacing.spLarge)
+    }
+}
+
+/// 右クローズのみのシンプルなヘッダー（ADD FRIENDS / SHARE YOUR CODE 用）
+extension SheetHeader where Leading == EmptyView, Trailing == SheetCloseButton {
+    init(title: String, onClose: @escaping () -> Void) {
+        self.init(
+            title: title,
+            leading: { EmptyView() },
+            trailing: { SheetCloseButton(action: onClose) }
+        )
+    }
+}
+
+/// シートの円形クローズ（×）ボタン。アイコン色は用途に応じて指定可。
+struct SheetCloseButton: View {
+    var iconColor: Color = AppColor.textSecondary
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "xmark")
+                .font(.system(size: AppTypography.body, weight: .heavy))
+                .foregroundColor(iconColor)
+                .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
+                .background(AppColor.buttonIconBackground)
+                .clipShape(Circle())
+        }
     }
 }
 

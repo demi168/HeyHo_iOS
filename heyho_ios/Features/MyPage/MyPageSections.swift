@@ -11,7 +11,8 @@ struct ProfileSectionView: View {
     let onEditProfile: () -> Void
 
     var body: some View {
-        VStack(spacing: AppSpacing.spLarge) {
+        // アイコン↔名前グループ間は 8（Figma）。名前ブロック↔EDIT は 16 を入れ子で表現
+        VStack(spacing: AppSpacing.spSmall) {
             // アイコン（中央・上部）。常時マウントして初回色変化を消費し、
             // 編集時のスライド演出が正しく発火する（FriendsView ヘッダーと同じ挙動）
             HeyBoyIconView(
@@ -21,25 +22,27 @@ struct ProfileSectionView: View {
                 showPremiumBadge: isPremium
             )
 
-            // 名前ブロック（左寄せ）
-            VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
-                Text("MY NAME IS")
-                    .font(.system(size: AppTypography.label, weight: .bold))
-                    .foregroundColor(AppColor.textSecondary)
-                Text(user?.displayName ?? "——————")
-                    .font(.system(size: AppTypography.title, weight: .black))
-                    .foregroundColor(AppColor.textPrimary)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.7)
-                Rectangle()
-                    .fill(AppColor.borderStrong)
-                    .frame(height: AppSize.borderStrong)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(spacing: AppSpacing.spLarge) {
+                // 名前ブロック（左寄せ）
+                VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
+                    Text("MY NAME IS")
+                        .font(.system(size: AppTypography.label, weight: .bold))
+                        .foregroundColor(AppColor.textLabel)
+                    Text(user?.displayName ?? "——————")
+                        .font(.system(size: AppTypography.display, weight: .black))
+                        .foregroundColor(AppColor.textPrimary)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                    Rectangle()
+                        .fill(AppColor.borderStrong)
+                        .frame(height: AppSize.borderStrong)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            // EDIT PROFILE（黒塗りフル幅）
-            PrimaryButton(title: "EDIT PROFILE") {
-                onEditProfile()
+                // EDIT PROFILE（黒塗りフル幅）
+                PrimaryButton(title: "EDIT PROFILE") {
+                    onEditProfile()
+                }
             }
         }
         .frame(maxWidth: .infinity)
@@ -57,14 +60,14 @@ struct InviteCodeSectionView: View {
         VStack(alignment: .leading, spacing: AppSpacing.spXsmall) {
             Text("MY CODE IS")
                 .font(.system(size: AppTypography.label, weight: .bold))
-                .foregroundColor(AppColor.textSecondary)
+                .foregroundColor(AppColor.textLabel)
             HStack(alignment: .center, spacing: AppSpacing.spLarge) {
                 if isLoading {
                     ProgressView().frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     UnderlinedText(
                         text: inviteCode ?? "————————",
-                        font: .system(size: AppTypography.title, weight: .black)
+                        font: .system(size: AppTypography.display, weight: .black)
                     )
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -118,36 +121,42 @@ struct SettingsSectionView: View {
                 }
             }
 
-            Button(action: { onOpenLink(AppURL.privacy) }) {
-                Text("PRIVACY POLICY")
-                    .font(.system(size: AppTypography.body, weight: .black))
-                    .foregroundColor(AppColor.textPrimary)
-            }
-            Button(action: { onOpenLink(AppURL.terms) }) {
-                Text("TERMS")
-                    .font(.system(size: AppTypography.body, weight: .black))
-                    .foregroundColor(AppColor.textPrimary)
-            }
-            Button(action: { onOpenLink(AppURL.commercial) }) {
-                Text("LEGAL INFORMATION")
-                    .font(.system(size: AppTypography.body, weight: .black))
-                    .foregroundColor(AppColor.textPrimary)
-            }
-            Button(action: onSignOut) {
-                Text("SIGN OUT")
-                    .font(.system(size: AppTypography.body, weight: .black))
-                    .foregroundColor(AppColor.textPrimary)
-            }
-            Button(action: onDeleteAccount) {
-                if isDeletingAccount {
-                    ProgressView()
-                } else {
-                    Text("DELETE ACCOUNT")
-                        .font(.system(size: AppTypography.body, weight: .black))
-                        .foregroundColor(AppColor.textDestructive)
+            // 情報系メニュー（グループ内 16・グループ間 32）
+            VStack(alignment: .leading, spacing: AppSpacing.spLarge) {
+                Button(action: { onOpenLink(AppURL.privacy) }) {
+                    Text("PRIVACY POLICY")
+                        .font(.system(size: AppTypography.body, weight: .bold))
+                        .foregroundColor(AppColor.textPrimary)
+                }
+                Button(action: { onOpenLink(AppURL.terms) }) {
+                    Text("TERMS")
+                        .font(.system(size: AppTypography.body, weight: .bold))
+                        .foregroundColor(AppColor.textPrimary)
+                }
+                Button(action: { onOpenLink(AppURL.commercial) }) {
+                    Text("LEGAL INFORMATION")
+                        .font(.system(size: AppTypography.body, weight: .bold))
+                        .foregroundColor(AppColor.textPrimary)
                 }
             }
-            .disabled(isDeletingAccount)
+            // アカウント系メニュー
+            VStack(alignment: .leading, spacing: AppSpacing.spLarge) {
+                Button(action: onSignOut) {
+                    Text("SIGN OUT")
+                        .font(.system(size: AppTypography.body, weight: .bold))
+                        .foregroundColor(AppColor.textPrimary)
+                }
+                Button(action: onDeleteAccount) {
+                    if isDeletingAccount {
+                        ProgressView()
+                    } else {
+                        Text("💣 DELETE ACCOUNT")
+                            .font(.system(size: AppTypography.body, weight: .bold))
+                            .foregroundColor(AppColor.textDestructive)
+                    }
+                }
+                .disabled(isDeletingAccount)
+            }
         }
     }
 }

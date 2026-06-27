@@ -89,39 +89,33 @@ struct EditProfileView: View {
     // MARK: - サブビュー
 
     private var headerView: some View {
-        ZStack {
-            Text(isInitialSetup ? "SET UP PROFILE" : "EDIT PROFILE")
-                .font(.system(size: AppTypography.body, weight: .bold))
-                .foregroundColor(AppColor.textPrimary)
-
-            HStack {
+        // 共通 SheetHeader（左クローズ＋右保存）。初回セットアップ時はクローズ非表示
+        SheetHeader(
+            title: isInitialSetup ? "SET UP PROFILE" : "EDIT PROFILE",
+            leading: {
                 if !isInitialSetup {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: AppTypography.body, weight: .bold))
-                            .foregroundColor(AppColor.iconInverse)
-                            .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
-                            .background(AppColor.buttonIconBackground)
-                            .clipShape(Circle())
-                    }
+                    SheetCloseButton(iconColor: AppColor.textPrimary) { dismiss() }
                 }
-                Spacer()
-                Button(action: { save() }) {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: AppTypography.body, weight: .bold))
-                        .foregroundColor(AppColor.iconInverse)
-                        .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
-                        .background(isNameValid
-                            ? AppColor.interactivePrimary
-                            : AppColor.interactivePrimary.opacity(0.4))
-                        .clipShape(Circle())
-                }
-                .disabled(isSaving || !isNameValid)
-            }
-        }
-        .padding(.horizontal, AppSpacing.spXlarge)
+            },
+            trailing: { saveButton }
+        )
         .padding(.top, AppSpacing.spSmall)
         .padding(.bottom, AppSpacing.spLarge)
+    }
+
+    /// 保存（✓）ボタン。名前が有効なときのみ活性
+    private var saveButton: some View {
+        Button(action: { save() }) {
+            Image(systemName: "checkmark")
+                .font(.system(size: AppTypography.body, weight: .bold))
+                .foregroundColor(AppColor.iconInverse)
+                .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
+                .background(isNameValid
+                    ? AppColor.interactivePrimary
+                    : AppColor.interactivePrimary.opacity(0.4))
+                .clipShape(Circle())
+        }
+        .disabled(isSaving || !isNameValid)
     }
 
     private var premiumUpgradeSection: some View {

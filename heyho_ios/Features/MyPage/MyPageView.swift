@@ -24,7 +24,7 @@ struct MyPageView: View {
         VStack(spacing: 0) {
             headerView
             ScrollView {
-                VStack(alignment: .leading, spacing: AppSpacing.spXxlarge) {
+                VStack(alignment: .leading, spacing: 0) {
                     ProfileSectionView(
                         user: currentUser,
                         isPremium: storeService.isPremium,
@@ -35,6 +35,8 @@ struct MyPageView: View {
                         isLoading: isLoadingInviteCode,
                         onShare: { showQRCode = true }
                     )
+                    // プロフィール→コード間（Figma 36px → 最寄り 32px）
+                    .padding(.top, AppSpacing.spXxlarge)
                     SettingsSectionView(
                         isPremium: storeService.isPremium,
                         isDeletingAccount: isDeletingAccount,
@@ -48,9 +50,10 @@ struct MyPageView: View {
                         onSignOut: { showSignOutConfirmation = true },
                         onDeleteAccount: { showDeleteConfirmation = true }
                     )
-                    .padding(.top, AppSpacing.spSmall)
+                    // コード→メニュー間（Figma 64px）
+                    .padding(.top, AppSpacing.spXxxlarge)
                 }
-                .padding(.horizontal, AppSpacing.spXlarge)
+                .padding(.horizontal, AppSpacing.spXxlarge)
                 .padding(.bottom, 40)
             }
         }
@@ -69,7 +72,13 @@ struct MyPageView: View {
         }
         .sheet(isPresented: $showQRCode) {
             if let code = inviteCode {
-                InviteQRCodeView(inviteCode: code).presentationDetents([.large])
+                InviteQRCodeView(
+                    inviteCode: code,
+                    iconColorValue: currentUser.map { IconColorValue(firestoreString: $0.iconColor) }
+                        ?? .solid(hex: AppColor.defaultIconHex)
+                )
+                .presentationDetents([.height(InviteQRCodeView.sheetDetentHeight)])
+                .presentationDragIndicator(.visible)
             }
         }
         .sheet(isPresented: $showPaywall) {
@@ -111,7 +120,7 @@ struct MyPageView: View {
                 Spacer()
             }
         }
-        .padding(.horizontal, AppSpacing.spXlarge)
+        .padding(.horizontal, AppSpacing.spLarge)
         .padding(.top, AppSpacing.spSmall)
         .padding(.bottom, AppSpacing.spLarge)
     }

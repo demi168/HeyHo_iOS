@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "💣 DELETE ACCOUNT" : {
+
+    },
     "6-16 characters" : {
 
     },
@@ -188,9 +191,6 @@
         }
       }
     },
-    "DELETE ACCOUNT" : {
-
-    },
     "Delete Friend" : {
       "localizations" : {
         "ja" : {
@@ -233,9 +233,6 @@
         }
       }
     },
-    "EDIT PROFILE" : {
-
-    },
     "Enter 16 characters or less" : {
       "localizations" : {
         "ja" : {
@@ -265,9 +262,6 @@
           }
         }
       }
-    },
-    "Enter your friend's 8-character code" : {
-
     },
     "GRADIENTS" : {
 
@@ -405,12 +399,6 @@
           }
         }
       }
-    },
-    "SET UP PROFILE" : {
-
-    },
-    "SHARE" : {
-
     },
     "Sign Out" : {
       "localizations" : {

@@ -50,6 +50,8 @@ enum AppColor {
     // MARK: - テキスト
     static let textPrimary     = hex("000000")
     static let textSecondary   = hex("9CA3AF")
+    /// 小見出しラベル用グレー（Figma text/label）。MY NAME IS / MY CODE IS 等
+    static let textLabel       = hex("767676")
     static let textTertiary   = hex("BFBFBF")
     static let textDestructive = hex("FF383C")
     static let textInverse     = hex("FFFFFF")

@@ -7,4 +7,6 @@ enum AppSpacing {
     static let spLarge = CGFloat(16.00)
     static let spXlarge = CGFloat(24.00)
     static let spXxlarge = CGFloat(32.00)
+    /// 大セクション分離（MyPage コード→メニュー間 等。Figma 64px）
+    static let spXxxlarge = CGFloat(64.00)
 }

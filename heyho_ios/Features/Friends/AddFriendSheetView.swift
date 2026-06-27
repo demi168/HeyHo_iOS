@@ -34,15 +34,19 @@ struct AddFriendSheetView: View {
     }
 
     var body: some View {
-        VStack(spacing: AppSpacing.spXlarge) {
-            header
+        VStack(spacing: 0) {
+            // ヘッダー（ToolBar）は両サイド 16（Figma）。本文は 32
+            SheetHeader(title: "ADD FRIENDS", onClose: { dismiss() })
             codeInputSection
-            Spacer(minLength: 0)
+                .padding(.horizontal, AppSpacing.spXxlarge)
+                .padding(.top, AppSpacing.spXlarge)
+            // 入力→SUBMIT 間は 32 固定（Figma）。余ったシート高さは下に逃がす
             submitButton
+                .padding(.horizontal, AppSpacing.spXxlarge)
+                .padding(.top, AppSpacing.spXxlarge)
+            Spacer(minLength: AppSpacing.spXxlarge)
         }
-        .padding(.horizontal, AppSpacing.spXlarge)
         .padding(.top, AppSpacing.spMedium)
-        .padding(.bottom, AppSpacing.spXlarge)
         .background(AppColor.backgroundSecondary)
         .overlay { if isAdding { searchingOverlay } }
         .allowsHitTesting(!isAdding)
@@ -56,51 +60,34 @@ struct AddFriendSheetView: View {
         }
     }
 
-    // ヘッダー: 中央タイトル + 右上クローズ
-    private var header: some View {
-        ZStack {
-            Text("ADD FRIENDS")
-                .font(.system(size: AppTypography.body, weight: .semibold))
-                .foregroundColor(AppColor.textPrimary)
-            HStack {
-                Spacer()
-                Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: AppTypography.label, weight: .bold))
-                        .foregroundColor(AppColor.textSecondary)
-                        .frame(width: AppSize.buttonIcon, height: AppSize.buttonIcon)
-                        .background(AppColor.buttonIconBackground)
-                        .clipShape(Circle())
-                }
-            }
-        }
-    }
-
     // コード入力: 大型・中央寄せ + アンダーライン + 説明/エラー文
     private var codeInputSection: some View {
-        VStack(spacing: AppSpacing.spSmall) {
-            TextField("", text: $codeInput,
-                      prompt: Text(verbatim: "ABC12345").foregroundColor(AppColor.textTertiary))
-                .font(.system(size: AppTypography.title, weight: .black))
+        // 説明ラベルは入力欄の「上」に配置（Figma）。エラー時は同位置を赤文字に切替
+        VStack(spacing: AppSpacing.spXsmall) {
+            Text(validationError ?? "ENTER YOUR FRIEND’S 8-DIGITS CODE")
+                .font(.system(size: AppTypography.label, weight: .bold))
+                .foregroundColor(validationError != nil ? AppColor.textDestructive : AppColor.textLabel)
                 .multilineTextAlignment(.center)
-                .textInputAutocapitalization(.characters)
-                .autocorrectionDisabled()
-                .foregroundColor(AppColor.textPrimary)
-                .focused($isCodeFocused)
-                .submitLabel(.go)
-                .onChange(of: codeInput) {
-                    // 入力を招待コード形式に正規化（英数のみ・8桁まで・大文字）
-                    let normalized = InviteCode.normalizedInput(codeInput)
-                    if normalized != codeInput { codeInput = normalized }
-                }
-                .onSubmit { addFriendByCode() }
-            Rectangle()
-                .fill(validationError != nil ? AppColor.borderDestructive : AppColor.borderStrong)
-                .frame(height: AppSize.borderStrong)
-            Text(validationError ?? String(localized: "Enter your friend's 8-character code"))
-                .font(.system(size: AppTypography.label, weight: .regular))
-                .foregroundColor(validationError != nil ? AppColor.textDestructive : AppColor.textSecondary)
-                .multilineTextAlignment(.center)
+            VStack(spacing: AppSpacing.spXsmall) {
+                TextField("", text: $codeInput,
+                          prompt: Text(verbatim: "ABC12345").foregroundColor(AppColor.textTertiary))
+                    .font(.system(size: AppTypography.hero, weight: .black))
+                    .multilineTextAlignment(.center)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
+                    .foregroundColor(AppColor.textPrimary)
+                    .focused($isCodeFocused)
+                    .submitLabel(.go)
+                    .onChange(of: codeInput) {
+                        // 入力を招待コード形式に正規化（英数のみ・8桁まで・大文字）
+                        let normalized = InviteCode.normalizedInput(codeInput)
+                        if normalized != codeInput { codeInput = normalized }
+                    }
+                    .onSubmit { addFriendByCode() }
+                Rectangle()
+                    .fill(validationError != nil ? AppColor.borderDestructive : AppColor.borderStrong)
+                    .frame(height: AppSize.borderStrong)
+            }
         }
     }
 
@@ -164,7 +151,7 @@ struct AddFriendSheetView: View {
         .sheet(isPresented: .constant(true)) {
             AddFriendSheetView()
                 .environmentObject(AuthState())
-                .presentationDetents([.height(360)])
+                .presentationDetents([.height(300)])
                 .presentationDragIndicator(.visible)
         }
 }
