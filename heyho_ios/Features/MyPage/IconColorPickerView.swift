@@ -58,7 +58,7 @@ struct IconColorPickerView: View {
 
     private var solidColorSection: some View {
         VStack(alignment: .leading, spacing: AppSpacing.spSmall) {
-            Text("SOLID COLORS")
+            Text("HEYBOY COLORS")
                 .font(.system(size: AppTypography.label, weight: .bold))
                 .foregroundColor(AppColor.textSecondary)
 

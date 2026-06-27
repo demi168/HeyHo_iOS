@@ -29,7 +29,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "プロフィールから友だちを追加してください"
+            "value" : "プロフィールから友だちを追加して"
           }
         }
       }
@@ -49,7 +49,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "すでに友だちです"
+            "value" : "すでに友だちだよ"
           }
         }
       }
@@ -59,7 +59,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "サインアウトしますか？"
+            "value" : "サインアウトする？"
           }
         }
       }
@@ -79,7 +79,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キャンセルされました"
+            "value" : "キャンセルされたよ"
           }
         }
       }
@@ -92,7 +92,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "コードが見つかりません"
+            "value" : "コードが見つからないって"
           }
         }
       }
@@ -114,7 +114,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "コピーしました"
+            "value" : "コピーした！"
           }
         }
       }
@@ -135,7 +135,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "トークンを取得できませんでした"
+            "value" : "トークンを取得できないって"
           }
         }
       }
@@ -176,7 +176,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ を友だちから削除しますか？"
+            "value" : "%@ を友だちから削除する？"
           }
         }
       }
@@ -238,7 +238,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "16文字以内で入力してください"
+            "value" : "16文字以内にして！"
           }
         }
       }
@@ -248,7 +248,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "6文字以上で入力してください"
+            "value" : "6文字以上でおねがい！"
           }
         }
       }
@@ -258,7 +258,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "8文字で入力してください"
+            "value" : "8文字でたのみます"
           }
         }
       }
@@ -295,7 +295,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "マイ招待コード"
+            "value" : "マイコード"
           }
         }
       }
@@ -308,7 +308,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\"heyho\" を含む名前は使用できません"
+            "value" : "\"heyho\" を含む名前は使えないんです"
           }
         }
       }
@@ -331,7 +331,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "英数字のみ使用できます"
+            "value" : "英数字だけなんすわ"
           }
         }
       }
@@ -341,7 +341,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "英数字と絵文字のみ使用できます"
+            "value" : "英数字と絵文字だけなの"
           }
         }
       }
@@ -351,7 +351,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "名前を入力してください"
+            "value" : "名前を入力してね"
           }
         }
       }
@@ -382,7 +382,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "保存"
+            "value" : "保存！"
           }
         }
       }
@@ -413,7 +413,7 @@
     "SIGN OUT" : {
 
     },
-    "SOLID COLORS" : {
+    "HEYBOY COLORS" : {
 
     },
     "Someone" : {

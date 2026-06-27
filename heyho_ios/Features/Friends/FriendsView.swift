@@ -422,12 +422,13 @@ struct FriendRow: View {
                     iconColorValue: avatarIconColor,
                     size: AppSize.iconDefault,
                     entranceDelay: entranceDelay,
-                    entranceTrigger: entranceTrigger
+                    entranceTrigger: entranceTrigger,
+                    isHiding: isDisabled
                 )
 
                 Text(friend.displayName)
                     .font(.system(size: AppTypography.display, weight: .black))
-                    .foregroundColor(AppColor.textPrimary)
+                    .foregroundColor(isDisabled ? AppColor.textSecondary : AppColor.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
 
@@ -439,11 +440,10 @@ struct FriendRow: View {
             .frame(minHeight: 80)
             .background(
                 Capsule()
-                    .strokeBorder(AppColor.borderDefault, lineWidth: AppSize.borderStrong)
+                    // Active=黒枠 / Disabled（返信待ち・アニメ中）=グレー枠
+                    .strokeBorder(isDisabled ? AppColor.borderDisabled : AppColor.borderStrong, lineWidth: AppSize.borderStrong)
                     .background(Capsule().fill(AppColor.backgroundSecondary))
             )
-            // 見た目（dim）は既存演出を流用。最終的な状態表示デザインは別途決定
-            .opacity(isDisabled ? 0.55 : 1.0)
         }
         .buttonStyle(.plain)
     }

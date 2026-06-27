@@ -27,6 +27,8 @@ struct HeyBoyIconView: View {
     var entranceDelay: TimeInterval? = nil
     /// 登場演出の発火トリガー。false→true で entranceDelay 後にスライドインする
     var entranceTrigger: Bool = false
+    /// 隠れ（Disabled）状態。true で HeyBoy が円の右下に潜って一部だけ覗く
+    var isHiding: Bool = false
 
     private static let eyesPatterns: [String] = [
         "HeyBoyEyes_default",
@@ -65,7 +67,7 @@ struct HeyBoyIconView: View {
 
     // MARK: - IconColorValue イニシャライザ
 
-    init(iconColorValue: IconColorValue, size: CGFloat = 48, animated: Bool = true, showBackground: Bool = true, showPremiumBadge: Bool = false, gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32), isColorChanging: Binding<Bool> = .constant(false), entranceDelay: TimeInterval? = nil, entranceTrigger: Bool = false) {
+    init(iconColorValue: IconColorValue, size: CGFloat = 48, animated: Bool = true, showBackground: Bool = true, showPremiumBadge: Bool = false, gradientCenter: UnitPoint = UnitPoint(x: 0.34, y: 0.32), isColorChanging: Binding<Bool> = .constant(false), entranceDelay: TimeInterval? = nil, entranceTrigger: Bool = false, isHiding: Bool = false) {
         self.iconColorValue = iconColorValue
         self.size = size
         self.animated = animated
@@ -75,6 +77,7 @@ struct HeyBoyIconView: View {
         self._isColorChanging = isColorChanging
         self.entranceDelay = entranceDelay
         self.entranceTrigger = entranceTrigger
+        self.isHiding = isHiding
         self._displayedColorValue = State(initialValue: iconColorValue)
         switch iconColorValue {
         case .solid(let hex):
@@ -94,6 +97,11 @@ struct HeyBoyIconView: View {
     private var eyesSize: CGFloat { size * 0.375 }
     private var eyesRelativeOffset: CGPoint { CGPoint(x: -size * 0.268, y: -size * 0.229) }
 
+    /// 隠れ状態で HeyBoy を円の右下へ潜らせる量（Figma 実測 +15px/48px）。
+    /// slideOffset と同方向に body・eyes を平行移動し、clipShape(Circle()) で一部だけ覗かせる
+    private static let hidingOffsetRatio: CGFloat = 0.3125
+    private var hidingOffset: CGFloat { isHiding ? size * Self.hidingOffsetRatio : 0 }
+
     var body: some View {
         ZStack {
             // 1. 黒背景
@@ -106,8 +114,8 @@ struct HeyBoyIconView: View {
             bodyView
                 .frame(width: bodySize, height: bodySize)
                 .offset(
-                    x: bodyOffset.x + slideOffset,
-                    y: bodyOffset.y + slideOffset
+                    x: bodyOffset.x + slideOffset + hidingOffset,
+                    y: bodyOffset.y + slideOffset + hidingOffset
                 )
 
             // 3. 目（ボディ中心からの相対位置）
@@ -116,10 +124,12 @@ struct HeyBoyIconView: View {
                 .scaledToFit()
                 .frame(width: eyesSize, height: eyesSize)
                 .offset(
-                    x: bodyOffset.x + eyesRelativeOffset.x + slideOffset,
-                    y: bodyOffset.y + eyesRelativeOffset.y + slideOffset
+                    x: bodyOffset.x + eyesRelativeOffset.x + slideOffset + hidingOffset,
+                    y: bodyOffset.y + eyesRelativeOffset.y + slideOffset + hidingOffset
                 )
         }
+        // 隠れ↔表示の切り替えのみ滑らかにダックさせる（初回表示は非アニメ）
+        .animation(.easeInOut(duration: 0.28), value: isHiding)
         .frame(width: size, height: size)
         .if(showBackground) { view in
             view.clipShape(Circle())

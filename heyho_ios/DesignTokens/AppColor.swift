@@ -15,7 +15,8 @@ enum AppColor {
     static let backgroundSignIn    = hex("FF2D55")
 
     // MARK: - ボーダー
-    static let borderDefault = hex("E5E7EB")
+    /// Disabled 状態の枠線（Figma Grays/Gray 5）。FriendRow の返信待ち等で使用
+    static let borderDisabled = hex("E5E5EA")
     static let borderStrong  = hex("000000")
     static let borderDestructive = hex("FF383C")
 
@@ -36,6 +37,11 @@ enum AppColor {
     static let buttonIconBackground = Color(white: 0.9)
     /// 主要 CTA（ADD FRIENDS / SUBMIT 等）の黒背景
     static let buttonPrimaryBackground = hex("000000")
+
+    // MARK: - 起動スプラッシュ
+    /// 起動スプラッシュ／Launch Screen の黒背景（design-tokens gray.1000 = #000000）。
+    /// Launch Screen 側は Info.plist が ColorSet "LaunchBackground"(#000000) を参照する（enum を参照できないため）。両者は同値に保つこと。
+    static let splashBackground = hex("000000")
 
     // MARK: - オーバーレイ・シャドウ
     static let overlayScrim = Color.black.opacity(0.4)
