@@ -35,28 +35,38 @@ final class PushService: NSObject {
         }
     }
 
+    /// サインイン後に呼ぶ。FCM キャッシュからトークンを取得して Firestore に保存する
     func saveTokenToFirestoreIfNeeded() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        Messaging.messaging().token { token, error in
+        Messaging.messaging().token { [weak self] token, error in
             if let error = error {
                 AppLogger.push.error("FCMトークンの取得に失敗: \(error.localizedDescription)")
                 return
             }
-            guard let token = token else { return }
-            Task {
-                do {
-                    try await FirestoreService.shared.updateFCMToken(userId: uid, token: token)
-                } catch {
-                    AppLogger.push.error("FCMトークンの保存に失敗: \(error.localizedDescription)")
-                }
+            guard let token else { return }
+            self?.persistToken(token)
+        }
+    }
+
+    /// FCM トークンを Firestore に保存する（サインイン済みのときのみ）
+    private func persistToken(_ token: String) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        Task {
+            do {
+                try await FirestoreService.shared.updateFCMToken(userId: uid, token: token)
+                AppLogger.push.info("FCMトークンを保存しました")
+            } catch {
+                AppLogger.push.error("FCMトークンの保存に失敗: \(error.localizedDescription)")
             }
         }
     }
 }
 
 extension PushService: MessagingDelegate {
+    /// FCM がトークンを発行・更新したときに呼ばれる。
+    /// パラメータのトークンをそのまま使い .token の再取得は行わない（APNs 競合回避）
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        saveTokenToFirestoreIfNeeded()
+        guard let token = fcmToken else { return }
+        persistToken(token)
     }
 }
 

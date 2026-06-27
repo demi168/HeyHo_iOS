@@ -12,16 +12,6 @@
 		77B29A592F42FBA700B18CFB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 77B29A582F42FBA700B18CFB /* FirebaseFirestore */; };
 		77C13A782F88F30C008A024B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 77C13A772F88F30C008A024B /* Localizable.xcstrings */; };
 		B0010001 /* HeyHoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010001 /* HeyHoApp.swift */; };
-		B0010075 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010075 /* AppLogger.swift */; };
-		B0010100 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
-		B0010101 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
-		B0010102 /* RallyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010102 /* RallyService.swift */; };
-		B0010090 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010090 /* ColorHex.swift */; };
-		B0010091 /* MyPageComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010091 /* MyPageComponents.swift */; };
-		B0010092 /* MyPageSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010092 /* MyPageSections.swift */; };
-		B0010093 /* InviteQRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010093 /* InviteQRCodeView.swift */; };
-		B0010094 /* NameInputSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010094 /* NameInputSection.swift */; };
-		B0010095 /* IconColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010095 /* IconColorPickerView.swift */; };
 		B0010002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010002 /* RootView.swift */; };
 		B0010003 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010003 /* SignInView.swift */; };
 		B0010004 /* AuthState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010004 /* AuthState.swift */; };
@@ -32,7 +22,6 @@
 		B0010009 /* FirestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010009 /* FirestoreService.swift */; };
 		B0010010 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010010 /* MainTabView.swift */; };
 		B0010011 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010011 /* FriendsView.swift */; };
-		B0010099 /* AddFriendSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010099 /* AddFriendSheetView.swift */; };
 		B0010015 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F0010015 /* GoogleService-Info.plist */; };
 		B0010016 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = P0010001 /* FirebaseAuth */; };
 		B0010018 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = P0010003 /* FirebaseMessaging */; };
@@ -56,15 +45,30 @@
 		B0010072 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010072 /* InviteCode.swift */; };
 		B0010073 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
 		B0010074 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010074 /* GradientPreset.swift */; };
+		B0010075 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010075 /* AppLogger.swift */; };
 		B0010080 /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010080 /* ShareService.swift */; };
+		B0010090 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010090 /* ColorHex.swift */; };
+		B0010091 /* MyPageComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010091 /* MyPageComponents.swift */; };
+		B0010092 /* MyPageSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010092 /* MyPageSections.swift */; };
+		B0010093 /* InviteQRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010093 /* InviteQRCodeView.swift */; };
+		B0010094 /* NameInputSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010094 /* NameInputSection.swift */; };
+		B0010095 /* IconColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010095 /* IconColorPickerView.swift */; };
 		B0010096 /* hey_default.caf in Resources */ = {isa = PBXBuildFile; fileRef = F0010096 /* hey_default.caf */; };
 		B0010097 /* ho_default.caf in Resources */ = {isa = PBXBuildFile; fileRef = F0010097 /* ho_default.caf */; };
 		B0010098 /* letsgo_default.caf in Resources */ = {isa = PBXBuildFile; fileRef = F0010098 /* letsgo_default.caf */; };
+		B0010099 /* AddFriendSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010099 /* AddFriendSheetView.swift */; };
+		B0010100 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
+		B0010101 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
+		B0010102 /* RallyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010102 /* RallyService.swift */; };
+		B0010110 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010110 /* SplashView.swift */; };
+		B0010111 /* SplashTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010111 /* SplashTiming.swift */; };
 		B0020001 /* HeyHoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020001 /* HeyHoTests.swift */; };
 		B0020002 /* InviteCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020002 /* InviteCodeTests.swift */; };
 		B0020003 /* DisplayNameValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020003 /* DisplayNameValidatorTests.swift */; };
 		B0020004 /* MessageTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020004 /* MessageTypeTests.swift */; };
 		B0020005 /* IconColorValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020005 /* IconColorValueTests.swift */; };
+		B0020006 /* FriendRallyStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020006 /* FriendRallyStatusTests.swift */; };
+		B0020007 /* SplashTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020007 /* SplashTimingTests.swift */; };
 		B0020010 /* MessageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010071 /* MessageType.swift */; };
 		B0020011 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010072 /* InviteCode.swift */; };
 		B0020012 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
@@ -73,11 +77,7 @@
 		B0020015 /* GradientPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010074 /* GradientPreset.swift */; };
 		B0020020 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
 		B0020021 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
-		B0020006 /* FriendRallyStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020006 /* FriendRallyStatusTests.swift */; };
-		B0010110 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010110 /* SplashView.swift */; };
-		B0010111 /* SplashTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010111 /* SplashTiming.swift */; };
 		B0020022 /* SplashTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010111 /* SplashTiming.swift */; };
-		B0020007 /* SplashTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020007 /* SplashTimingTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,17 +86,6 @@
 		77B29A532F42E52E00B18CFB /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 		77C13A772F88F30C008A024B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F0010001 /* HeyHoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoApp.swift; sourceTree = "<group>"; };
-		F0010075 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
-		F0010100 /* FriendRowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRowState.swift; sourceTree = "<group>"; };
-		F0010101 /* FriendRallyStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatus.swift; sourceTree = "<group>"; };
-		F0010102 /* RallyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RallyService.swift; sourceTree = "<group>"; };
-		F0020006 /* FriendRallyStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatusTests.swift; sourceTree = "<group>"; };
-		F0010090 /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
-		F0010091 /* MyPageComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageComponents.swift; sourceTree = "<group>"; };
-		F0010092 /* MyPageSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageSections.swift; sourceTree = "<group>"; };
-		F0010093 /* InviteQRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteQRCodeView.swift; sourceTree = "<group>"; };
-		F0010094 /* NameInputSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameInputSection.swift; sourceTree = "<group>"; };
-		F0010095 /* IconColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorPickerView.swift; sourceTree = "<group>"; };
 		F0010002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		F0010003 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		F0010004 /* AuthState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthState.swift; sourceTree = "<group>"; };
@@ -107,7 +96,6 @@
 		F0010009 /* FirestoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
 		F0010010 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F0010011 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
-		F0010099 /* AddFriendSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendSheetView.swift; sourceTree = "<group>"; };
 		F0010015 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F0010016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F0010017 /* heyho_ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = heyho_ios.entitlements; sourceTree = "<group>"; };
@@ -131,19 +119,31 @@
 		F0010072 /* InviteCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteCode.swift; sourceTree = "<group>"; };
 		F0010073 /* DisplayNameValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameValidator.swift; sourceTree = "<group>"; };
 		F0010074 /* GradientPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientPreset.swift; sourceTree = "<group>"; };
+		F0010075 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
 		F0010080 /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
+		F0010090 /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
+		F0010091 /* MyPageComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageComponents.swift; sourceTree = "<group>"; };
+		F0010092 /* MyPageSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPageSections.swift; sourceTree = "<group>"; };
+		F0010093 /* InviteQRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteQRCodeView.swift; sourceTree = "<group>"; };
+		F0010094 /* NameInputSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameInputSection.swift; sourceTree = "<group>"; };
+		F0010095 /* IconColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorPickerView.swift; sourceTree = "<group>"; };
 		F0010096 /* hey_default.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = hey_default.caf; sourceTree = "<group>"; };
 		F0010097 /* ho_default.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = ho_default.caf; sourceTree = "<group>"; };
 		F0010098 /* letsgo_default.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = letsgo_default.caf; sourceTree = "<group>"; };
-		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0010099 /* AddFriendSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendSheetView.swift; sourceTree = "<group>"; };
+		F0010100 /* FriendRowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRowState.swift; sourceTree = "<group>"; };
+		F0010101 /* FriendRallyStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatus.swift; sourceTree = "<group>"; };
+		F0010102 /* RallyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RallyService.swift; sourceTree = "<group>"; };
+		F0010110 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		F0010111 /* SplashTiming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashTiming.swift; sourceTree = "<group>"; };
 		F0020001 /* HeyHoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoTests.swift; sourceTree = "<group>"; };
 		F0020002 /* InviteCodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteCodeTests.swift; sourceTree = "<group>"; };
 		F0020003 /* DisplayNameValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameValidatorTests.swift; sourceTree = "<group>"; };
 		F0020004 /* MessageTypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageTypeTests.swift; sourceTree = "<group>"; };
 		F0020005 /* IconColorValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorValueTests.swift; sourceTree = "<group>"; };
-		F0010110 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
-		F0010111 /* SplashTiming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashTiming.swift; sourceTree = "<group>"; };
+		F0020006 /* FriendRallyStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatusTests.swift; sourceTree = "<group>"; };
 		F0020007 /* SplashTimingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashTimingTests.swift; sourceTree = "<group>"; };
+		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		T0020001 /* HeyHoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeyHoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -207,17 +207,6 @@
 			path = heyho_ios;
 			sourceTree = "<group>";
 		};
-		G0010015 /* Sounds */ = {
-			isa = PBXGroup;
-			children = (
-				F0010096 /* hey_default.caf */,
-				F0010097 /* ho_default.caf */,
-				F0010098 /* letsgo_default.caf */,
-			);
-			name = Sounds;
-			path = ../Resources/Sounds;
-			sourceTree = "<group>";
-		};
 		G0010003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -225,20 +214,6 @@
 				T0020001 /* HeyHoTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		G0020001 /* HeyHoTests */ = {
-			isa = PBXGroup;
-			children = (
-				F0020001 /* HeyHoTests.swift */,
-				F0020002 /* InviteCodeTests.swift */,
-				F0020003 /* DisplayNameValidatorTests.swift */,
-				F0020004 /* MessageTypeTests.swift */,
-				F0020005 /* IconColorValueTests.swift */,
-				F0020006 /* FriendRallyStatusTests.swift */,
-				F0020007 /* SplashTimingTests.swift */,
-			);
-			path = HeyHoTests;
 			sourceTree = "<group>";
 		};
 		G0010004 /* App */ = {
@@ -351,6 +326,31 @@
 			path = Premium;
 			sourceTree = "<group>";
 		};
+		G0010015 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				F0010096 /* hey_default.caf */,
+				F0010097 /* ho_default.caf */,
+				F0010098 /* letsgo_default.caf */,
+			);
+			name = Sounds;
+			path = ../Resources/Sounds;
+			sourceTree = "<group>";
+		};
+		G0020001 /* HeyHoTests */ = {
+			isa = PBXGroup;
+			children = (
+				F0020001 /* HeyHoTests.swift */,
+				F0020002 /* InviteCodeTests.swift */,
+				F0020003 /* DisplayNameValidatorTests.swift */,
+				F0020004 /* MessageTypeTests.swift */,
+				F0020005 /* IconColorValueTests.swift */,
+				F0020006 /* FriendRallyStatusTests.swift */,
+				F0020007 /* SplashTimingTests.swift */,
+			);
+			path = HeyHoTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -400,7 +400,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 2650;
 			};
 			buildConfigurationList = C0010001 /* Build configuration list for PBXProject "heyho_ios" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -693,6 +693,7 @@
 		C0020003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -710,6 +711,7 @@
 		C0020004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
