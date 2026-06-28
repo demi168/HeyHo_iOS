@@ -133,11 +133,6 @@ struct SettingsSectionView: View {
                         .font(.system(size: AppTypography.body, weight: .bold))
                         .foregroundColor(AppColor.textPrimary)
                 }
-                Button(action: { onOpenLink(AppURL.commercial) }) {
-                    Text("LEGAL INFORMATION")
-                        .font(.system(size: AppTypography.body, weight: .bold))
-                        .foregroundColor(AppColor.textPrimary)
-                }
             }
             // アカウント系メニュー
             VStack(alignment: .leading, spacing: AppSpacing.spLarge) {

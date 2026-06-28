@@ -62,6 +62,7 @@
 		B0010102 /* RallyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010102 /* RallyService.swift */; };
 		B0010110 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010110 /* SplashView.swift */; };
 		B0010111 /* SplashTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010111 /* SplashTiming.swift */; };
+		B00101A0 /* AppVersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00101A0 /* AppVersionInfo.swift */; };
 		B0020001 /* HeyHoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020001 /* HeyHoTests.swift */; };
 		B0020002 /* InviteCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020002 /* InviteCodeTests.swift */; };
 		B0020003 /* DisplayNameValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020003 /* DisplayNameValidatorTests.swift */; };
@@ -69,6 +70,7 @@
 		B0020005 /* IconColorValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020005 /* IconColorValueTests.swift */; };
 		B0020006 /* FriendRallyStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020006 /* FriendRallyStatusTests.swift */; };
 		B0020007 /* SplashTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020007 /* SplashTimingTests.swift */; };
+		B00200A0 /* AppVersionInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00200A0 /* AppVersionInfoTests.swift */; };
 		B0020010 /* MessageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010071 /* MessageType.swift */; };
 		B0020011 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010072 /* InviteCode.swift */; };
 		B0020012 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
@@ -78,6 +80,7 @@
 		B0020020 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
 		B0020021 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
 		B0020022 /* SplashTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010111 /* SplashTiming.swift */; };
+		B00200A1 /* AppVersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00101A0 /* AppVersionInfo.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -136,6 +139,7 @@
 		F0010102 /* RallyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RallyService.swift; sourceTree = "<group>"; };
 		F0010110 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		F0010111 /* SplashTiming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashTiming.swift; sourceTree = "<group>"; };
+		F00101A0 /* AppVersionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfo.swift; sourceTree = "<group>"; };
 		F0020001 /* HeyHoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoTests.swift; sourceTree = "<group>"; };
 		F0020002 /* InviteCodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteCodeTests.swift; sourceTree = "<group>"; };
 		F0020003 /* DisplayNameValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameValidatorTests.swift; sourceTree = "<group>"; };
@@ -143,6 +147,7 @@
 		F0020005 /* IconColorValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorValueTests.swift; sourceTree = "<group>"; };
 		F0020006 /* FriendRallyStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatusTests.swift; sourceTree = "<group>"; };
 		F0020007 /* SplashTimingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashTimingTests.swift; sourceTree = "<group>"; };
+		F00200A0 /* AppVersionInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfoTests.swift; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		T0020001 /* HeyHoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HeyHoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -252,6 +257,7 @@
 				F0010100 /* FriendRowState.swift */,
 				F0010101 /* FriendRallyStatus.swift */,
 				F0010111 /* SplashTiming.swift */,
+				F00101A0 /* AppVersionInfo.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -347,6 +353,7 @@
 				F0020005 /* IconColorValueTests.swift */,
 				F0020006 /* FriendRallyStatusTests.swift */,
 				F0020007 /* SplashTimingTests.swift */,
+				F00200A0 /* AppVersionInfoTests.swift */,
 			);
 			path = HeyHoTests;
 			sourceTree = "<group>";
@@ -492,6 +499,7 @@
 				B0010080 /* ShareService.swift in Sources */,
 				B0010110 /* SplashView.swift in Sources */,
 				B0010111 /* SplashTiming.swift in Sources */,
+				B00101A0 /* AppVersionInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -514,7 +522,9 @@
 				B0020021 /* FriendRallyStatus.swift in Sources */,
 				B0020006 /* FriendRallyStatusTests.swift in Sources */,
 				B0020007 /* SplashTimingTests.swift in Sources */,
+				B00200A0 /* AppVersionInfoTests.swift in Sources */,
 				B0020022 /* SplashTiming.swift in Sources */,
+				B00200A1 /* AppVersionInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

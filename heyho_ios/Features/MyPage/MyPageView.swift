@@ -56,6 +56,12 @@ struct MyPageView: View {
                 .padding(.horizontal, AppSpacing.spXxlarge)
                 .padding(.bottom, 40)
             }
+            // バージョン・ビルド情報（画面下部中央・控えめ表示）
+            Text(AppVersionInfo.current())
+                .font(.system(size: AppTypography.caption, weight: .regular))
+                .foregroundColor(AppColor.textTertiary)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, AppSpacing.spSmall)
         }
         .background(AppColor.backgroundSecondary)
         .onAppear {
