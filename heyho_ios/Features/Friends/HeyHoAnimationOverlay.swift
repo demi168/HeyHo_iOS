@@ -39,11 +39,10 @@ enum HeyHoAnimationState: Equatable {
         }
     }
 
-    /// 「To: 〇〇」または「From: 〇〇」のラベル
+    /// 送信先／受信元のユーザー名
     var nameLabel: String? {
         switch self {
-        case .sending(_, _, let name, _): return "To: \(name)"
-        case .receiving(_, _, let name, _): return "From: \(name)"
+        case .sending(_, _, let name, _), .receiving(_, _, let name, _): return name
         case .idle: return nil
         }
     }
@@ -111,12 +110,10 @@ struct HeyHoAnimationOverlay: View {
                 }
 
                 // To: / From: ラベル + メッセージ（左揃え）
-                VStack(alignment: .leading, spacing: 0) {
-                    if let label = animationState.nameLabel {
-                        Text(label)
-                            .font(.system(size: AppTypography.heading, weight: .black))
-                            .foregroundColor(.white)
-                            .rotationEffect(.degrees(-15))
+                // 送信: ラベルを上（HeyBoyは右下）／受信: ラベルを下（HeyBoyは左上）に置き、HeyBoyとの重なりを避ける
+                VStack(alignment: .center, spacing: -8) {
+                    if isSending, let label = animationState.nameLabel {
+                        nameLabelText(label)
                     }
 
                     if let imageName = animationState.messageImageName {
@@ -125,10 +122,15 @@ struct HeyHoAnimationOverlay: View {
                             .scaledToFit()
                             .frame(width: screenW * 0.72)
                     }
+
+                    if !isSending, let label = animationState.nameLabel {
+                        nameLabelText(label)
+                    }
                 }
                 .scaleEffect(messageVisible ? 1.0 : 0.75)
                 .opacity(messageVisible ? 1.0 : 0.0)
-                .offset(y: -screenH * 0.12 + messageOffset)
+                // 受信はブロックを中央へ（左上のHeyBoyを避ける）、送信は上寄せのまま
+                .offset(y: (isSending ? -screenH * 0.12 : 0) + messageOffset)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -139,6 +141,14 @@ struct HeyHoAnimationOverlay: View {
             FeedbackService.shared.playHaptic(for: message)
             runAnimation(message: message, isSending: animationState.isSending)
         }
+    }
+
+    /// To: / From: のユーザー名ラベル（送信・受信で共通）
+    private func nameLabelText(_ label: String) -> some View {
+        Text(label)
+            .font(.system(size: AppTypography.title, weight: .black))
+            .foregroundColor(.white)
+            .rotationEffect(.degrees(-15))
     }
 
     private func runAnimation(message: MessageType, isSending: Bool) {
