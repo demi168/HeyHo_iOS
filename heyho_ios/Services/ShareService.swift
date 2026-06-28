@@ -14,6 +14,5 @@ enum AppURL {
     static let terms = URL(string: "\(hostingBase)/terms.html")!
     static let commercial = URL(string: "\(hostingBase)/commercial.html")!
 
-    // TODO: リリース時に実際のApp Store IDに差し替え
-    static let appStore = URL(string: "https://apps.apple.com/app/heyho/id0000000000")!
+    static let appStore = URL(string: "https://apps.apple.com/app/heyho/id6785144750")!
 }
