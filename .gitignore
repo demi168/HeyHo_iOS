@@ -21,10 +21,8 @@ xcuserdata/
 .build/
 .swiftpm/
 
-# CocoaPods
+# CocoaPods (このプロジェクトはSPMを使用。CocoaPods用xcworkspaceルールは不要)
 Pods/
-*.xcworkspace
-!default.xcworkspace
 
 # Firebase / secrets (replace with your real file locally)
 GoogleService-Info.plist
