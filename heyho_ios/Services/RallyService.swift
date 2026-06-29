@@ -25,6 +25,7 @@ final class RallyService: ObservableObject {
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
     private var currentUserId: String?
+    private var loadStatusesTask: Task<Void, Never>?
     /// リスナー開始後の初回スナップショット（既存分の配信）を受信アニメに誤爆させないためのフラグ
     private var didReceiveInitialSnapshot = false
     /// コールドスタートでプッシュタップが先に来た場合の保留（friends ロード後にフラッシュ）
@@ -42,7 +43,7 @@ final class RallyService: ObservableObject {
         }
         stop()
         currentUserId = userId
-        Task { await loadStatuses(userId: userId, friendIds: friendIds) }
+        loadStatusesTask = Task { await loadStatuses(userId: userId, friendIds: friendIds) }
         subscribe(userId: userId)
         flushPendingTapIfPossible()
     }
@@ -50,12 +51,15 @@ final class RallyService: ObservableObject {
     /// friends 再ロード時に行状態を取り直す（リスナー自体は toUserId==自分 固定なので張り替え不要）
     func updateFriendIds(_ ids: [String]) {
         guard let uid = currentUserId else { return }
-        Task { await loadStatuses(userId: uid, friendIds: ids) }
+        loadStatusesTask?.cancel()
+        loadStatusesTask = Task { await loadStatuses(userId: uid, friendIds: ids) }
         flushPendingTapIfPossible()
     }
 
     /// サインアウト/アカウント削除時に購読を解除して全状態をリセットする
     func stop() {
+        loadStatusesTask?.cancel()
+        loadStatusesTask = nil
         listener?.remove()
         listener = nil
         currentUserId = nil
@@ -68,7 +72,9 @@ final class RallyService: ObservableObject {
     // MARK: - 行状態
 
     private func loadStatuses(userId: String, friendIds: [String]) async {
-        statuses = await FirestoreService.shared.getFriendRallyStatuses(userId: userId, friendIds: friendIds)
+        let result = await FirestoreService.shared.getFriendRallyStatuses(userId: userId, friendIds: friendIds)
+        guard !Task.isCancelled else { return }
+        statuses = result
     }
 
     /// 送信成功時の楽観更新（相手の返信待ち = ボタン無効化）。
@@ -143,11 +149,9 @@ final class RallyService: ObservableObject {
         receive(fromUserId: tap.fromUserId, messageType: tap.messageType)
     }
 
-    #if DEBUG
-    /// DEBUG: ダミー友だちの返信をローカルで擬似発火する（実 Firestore に乗らないため）。
-    /// 実友だちの受信はリスナー/プッシュ経由なのでこのメソッドは使わない
-    func debugSimulateReceive(fromUserId: String, messageType: MessageType) {
+    /// ローカル友だち（チュートリアルボット・デバッグダミー）の返信を擬似発火する。
+    /// 実 Firestore に乗らないため、ローカルシミュレーション専用
+    func simulateLocalReceive(fromUserId: String, messageType: MessageType) {
         receive(fromUserId: fromUserId, messageType: messageType)
     }
-    #endif
 }

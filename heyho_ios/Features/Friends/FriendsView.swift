@@ -5,9 +5,18 @@ import SwiftUI
 /// DEBUG ダミー友だちの ID 接頭辞（実 Firestore には存在しない）
 private let debugDummyPrefix = "dummy_"
 
+/// チュートリアルボットの ID 接頭辞（実 Firestore には存在しない）
+private let localBotPrefix = "bot_"
+/// チュートリアルボット。削除しない限り常に友だちリストに表示する
+private let localBotFriend = AppUser(id: "\(localBotPrefix)heyho", displayName: "HeyBoy", iconColor: AppColor.defaultIconHex)
+/// ユーザーがボットを削除済みかどうかを永続化するキー
+private let botDismissedKey = "heyho.localBotDismissed"
+
 extension AppUser {
     /// DEBUG 用ダミー友だち（実 Firestore に存在しない）かどうか。リリースでは常に false
     var isDebugDummy: Bool { (id ?? "").hasPrefix(debugDummyPrefix) }
+    /// ローカルのみの友だち（チュートリアルボット or デバッグダミー）かどうか
+    var isLocalFriend: Bool { isDebugDummy || (id ?? "").hasPrefix(localBotPrefix) }
 }
 
 #if DEBUG
@@ -42,6 +51,8 @@ struct FriendsView: View {
     @State private var newlyAddedFriendId: String?
     /// 起動ローディング明けの一斉フレームインを発火するトリガー（FriendsView は root で永続のため一度きり）
     @State private var entranceTriggered = false
+    @AppStorage(botDismissedKey) private var localBotDismissed = false
+    @State private var simulationTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
@@ -97,22 +108,10 @@ struct FriendsView: View {
             }
         }
         .errorAlert($errorMessage)
-        .fullScreenCover(isPresented: $showMyPage, onDismiss: {
-            Task {
-                await authState.refreshCurrentUser()
-                loadMyColor()
-                await loadFriends()
-            }
-        }) {
+        .fullScreenCover(isPresented: $showMyPage, onDismiss: { Task { await reloadAfterDismiss() } }) {
             MyPageView().environmentObject(authState)
         }
-        .sheet(isPresented: $showAddFriendSheet, onDismiss: {
-            Task {
-                await authState.refreshCurrentUser()
-                loadMyColor()
-                await loadFriends()
-            }
-        }) {
+        .sheet(isPresented: $showAddFriendSheet, onDismiss: { Task { await reloadAfterDismiss() } }) {
             AddFriendSheetView(onFriendAdded: { friendId in
                 newlyAddedFriendId = friendId
             })
@@ -174,23 +173,34 @@ struct FriendsView: View {
                 list.insert(newFriend, at: 0)
                 newlyAddedFriendId = nil
             }
+            // チュートリアルボット（ユーザーが削除していなければ末尾に追加）
+            if !localBotDismissed { list.append(localBotFriend) }
             // 友だちリストを先に表示し、ラリー状態の取得＋受信購読を RallyService に委譲。
-            // ダミー友だち（実 Firestore に無い）は無駄クエリになるので除外する
+            // ローカル友だち（実 Firestore に無い）は無駄クエリになるので除外する
             friends = list
-            rallyService.start(userId: uid, friendIds: list.filter { !$0.isDebugDummy }.compactMap(\.id))
+            rallyService.start(userId: uid, friendIds: list.filter { !$0.isLocalFriend }.compactMap(\.id))
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
     private func deleteFriend(_ friend: AppUser) {
-        guard let uid = authState.currentUserId, let friendId = friend.id else { return }
+        guard let friendId = friend.id else { return }
+
+        if friend.isLocalFriend {
+            localBotDismissed = true
+            friends.removeAll { $0.id == friendId }
+            rallyService.updateFriendIds(friends.filter { !$0.isLocalFriend }.compactMap(\.id))
+            return
+        }
+
+        guard let uid = authState.currentUserId else { return }
         Task {
             do {
                 try await FirestoreService.shared.removeFriend(userId: uid, friendId: friendId)
                 await MainActor.run {
                     friends.removeAll { $0.id == friendId }
-                    rallyService.updateFriendIds(friends.compactMap(\.id))
+                    rallyService.updateFriendIds(friends.filter { !$0.isLocalFriend }.compactMap(\.id))
                 }
             } catch {
                 await MainActor.run { errorMessage = error.localizedDescription }
@@ -209,15 +219,13 @@ struct FriendsView: View {
         // 送信アニメが終わるまでこの相手を無効化（letsGo でも再度押せるのはアニメ完了後）
         animatingFriendId = friendId
 
-        // DEBUG: ダミー友だちは実 Firestore に書けない（権限エラーになる）ので、
-        // 送信を介さず楽観更新＋擬似ラリーをローカルで完結させる
-        #if DEBUG
-        if friend.isDebugDummy {
+        // ローカル友だち（ボット・デバッグダミー）は実 Firestore に書けないので
+        // 楽観更新＋擬似ラリーをローカルで完結させる
+        if friend.isLocalFriend {
             rallyService.markSent(friendId: friendId, messageType: message)
-            simulateDummyReply(friendId: friendId, sentState: state)
+            simulateLocalReply(friendId: friendId, sentState: state)
             return
         }
-        #endif
 
         Task {
             do {
@@ -230,22 +238,27 @@ struct FriendsView: View {
         }
     }
 
-    #if DEBUG
-    /// DEBUG: ダミー友だちからの返信を3秒後に擬似発火する（受信アニメ＋無効化解除を実経路と統一）
-    private func simulateDummyReply(friendId: String, sentState: FriendRowState) {
-        // 自分が送った種別への返信（Hey→Ho / Ho→LetsGo）。LetsGo の後は返信なし
+    /// ローカル友だち（ボット・デバッグダミー）からの返信を3秒後に擬似発火する
+    /// （Hey→Ho / Ho→LetsGo。LetsGo の後は返信なし）
+    private func simulateLocalReply(friendId: String, sentState: FriendRowState) {
         let replyType: MessageType? = switch sentState {
         case .sendHey: .ho
         case .sendHo: .letsGo
         case .sendLetsGo: nil
         }
         guard let replyType else { return }
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(3))
-            rallyService.debugSimulateReceive(fromUserId: friendId, messageType: replyType)
+        simulationTask?.cancel()
+        simulationTask = Task { @MainActor in
+            do {
+                try await Task.sleep(for: .seconds(3))
+                rallyService.simulateLocalReceive(fromUserId: friendId, messageType: replyType)
+            } catch is CancellationError {
+                // キャンセル済み（正常）
+            } catch {
+                AppLogger.rally.error("simulateLocalReply: \(error)")
+            }
         }
     }
-    #endif
 }
 
 // MARK: - FriendsBodyView（純粋 UI・プレビュー可能）
