@@ -168,6 +168,33 @@ small {
     color: #fafafa;
 }
 
+/* 言語トグル */
+.lang-toggle {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.lang-toggle button {
+    padding: 0.35rem 1rem;
+    border: 2px solid #1a1a1a;
+    border-radius: 999px;
+    background: transparent;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.lang-toggle button.active {
+    background: #1a1a1a;
+    color: #fafafa;
+}
+
+.lang-toggle button:not(.active):hover {
+    background: #f0f0f0;
+}
+
 /* 特商法 定義リスト */
 .tokusho-list {
     list-style: none;
