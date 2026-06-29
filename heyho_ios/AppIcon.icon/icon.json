@@ -63,12 +63,16 @@
       "hidden" : false,
       "layers" : [
         {
+          "blend-mode" : "normal",
+          "fill" : "automatic",
           "glass" : false,
           "hidden" : false,
           "image-name" : "3 – Layer.png",
           "name" : "3 – Layer"
         },
         {
+          "blend-mode" : "normal",
+          "fill" : "none",
           "glass-specializations" : [
             {
               "value" : true
@@ -83,7 +87,11 @@
           "name" : "2 – Layer 2"
         },
         {
+          "blend-mode" : "multiply",
           "fill-specializations" : [
+            {
+              "value" : "automatic"
+            },
             {
               "appearance" : "dark",
               "value" : {
@@ -104,7 +112,8 @@
               }
             }
           ],
-          "hidden" : true,
+          "glass" : true,
+          "hidden" : false,
           "image-name" : "1 – Layer.png",
           "name" : "1 – Layer"
         }
