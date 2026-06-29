@@ -70,7 +70,6 @@
 		B0020005 /* IconColorValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020005 /* IconColorValueTests.swift */; };
 		B0020006 /* FriendRallyStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020006 /* FriendRallyStatusTests.swift */; };
 		B0020007 /* SplashTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020007 /* SplashTimingTests.swift */; };
-		B00200A0 /* AppVersionInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00200A0 /* AppVersionInfoTests.swift */; };
 		B0020010 /* MessageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010071 /* MessageType.swift */; };
 		B0020011 /* InviteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010072 /* InviteCode.swift */; };
 		B0020012 /* DisplayNameValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010073 /* DisplayNameValidator.swift */; };
@@ -80,6 +79,7 @@
 		B0020020 /* FriendRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010100 /* FriendRowState.swift */; };
 		B0020021 /* FriendRallyStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010101 /* FriendRallyStatus.swift */; };
 		B0020022 /* SplashTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010111 /* SplashTiming.swift */; };
+		B00200A0 /* AppVersionInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00200A0 /* AppVersionInfoTests.swift */; };
 		B00200A1 /* AppVersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00101A0 /* AppVersionInfo.swift */; };
 /* End PBXBuildFile section */
 
