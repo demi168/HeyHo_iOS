@@ -151,6 +151,11 @@ struct FriendsView: View {
         }
     }
 
+    private func reloadAfterDismiss() async {
+        loadMyColor()
+        await loadFriends()
+    }
+
     private func loadMyColor() {
         if let user = authState.currentUser {
             myIconColorValue = IconColorValue(firestoreString: user.iconColor)
