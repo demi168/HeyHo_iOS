@@ -43,8 +43,9 @@ struct DisplayNameValidatorTests {
         #expect(DisplayNameValidator.validate(name) == .disallowedCharacter)
     }
 
-    @Test(arguments: ["heyho", "HEYHO", "myHeyHoName", "xxheyhoxx"])
-    func 予約語heyhoはcontainsReservedWord(_ name: String) {
+    @Test(arguments: ["heyho", "HEYHO", "myHeyHoName", "xxheyhoxx",
+                      "heyboy", "HEYBOY", "myHeyBoyName", "xxheyboyxx"])
+    func 予約語はcontainsReservedWord(_ name: String) {
         #expect(DisplayNameValidator.validate(name) == .containsReservedWord)
     }
 

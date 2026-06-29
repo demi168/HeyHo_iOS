@@ -20,7 +20,8 @@ enum DisplayNameValidator {
         let name = input.trimmingCharacters(in: .whitespaces)
         if name.isEmpty { return .empty }
         if !name.allSatisfy({ isAllowedCharacter($0) }) { return .disallowedCharacter }
-        if name.range(of: "heyho", options: .caseInsensitive) != nil { return .containsReservedWord }
+        let reserved = ["heyho", "heyboy"]
+        if reserved.contains(where: { name.range(of: $0, options: .caseInsensitive) != nil }) { return .containsReservedWord }
         if name.count < lengthRange.lowerBound { return .tooShort }
         if name.count > lengthRange.upperBound { return .tooLong }
         return nil
