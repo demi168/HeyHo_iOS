@@ -13,7 +13,7 @@ struct EditProfileView: View {
 
     @State private var displayName = ""
     @State private var originalDisplayName = ""
-    @State private var selectedColorValue: IconColorValue = .solid(hex: "FFD700")
+    @State private var selectedColorValue: IconColorValue = .solid(hex: AppColor.defaultIconHex)
     @State private var isSaving = false
     @State private var errorMessage: String?
     @State private var nameValidationError: String?
@@ -160,6 +160,7 @@ struct EditProfileView: View {
                         userId: uid,
                         colorHex: selectedColorValue.firestoreString
                     )
+                    await authState.refreshCurrentUser()
                 } catch {
                     errorMessage = error.localizedDescription
                 }
@@ -219,10 +220,10 @@ struct EditProfileView: View {
                     try await authState.updateDisplayName(name)
                 }
                 try await FirestoreService.shared.updateIconColor(userId: uid, colorHex: selectedColorValue.firestoreString)
+                // authState.currentUser はキャッシュのため、保存内容を反映するには明示的な再取得が要る。
+                // これを怠ると FriendsView 側の色・名前表示がアプリ再起動まで更新されない
+                await authState.refreshCurrentUser()
                 if isInitialSetup {
-                    // 初回セットアップは fullScreenCover ではなく RootView の切替で遷移するため、
-                    // ここで currentUser を再取得しないと FriendsView が選択カラーを反映できない
-                    await authState.refreshCurrentUser()
                     authState.markProfileSetupComplete()
                 }
                 dismiss()

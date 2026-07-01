@@ -45,7 +45,7 @@ struct FriendsView: View {
     @State private var animatingFriendId: String?
     @State private var showMyPage = false
     @State private var showAddFriendSheet = false
-    @State private var myIconColorValue: IconColorValue = .solid(hex: "FFD700")
+    @State private var myIconColorValue: IconColorValue = .solid(hex: AppColor.defaultIconHex)
     @State private var animationState: HeyHoAnimationState = .idle
     @State private var friendToDelete: AppUser?
     @State private var newlyAddedFriendId: String?
@@ -579,7 +579,7 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         friends: previewFriends,
         statuses: previewStatuses,
         isLoading: false,
-        myIconColorValue: .solid(hex: "FFD700"),
+        myIconColorValue: .solid(hex: AppColor.defaultIconHex),
         animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
@@ -596,12 +596,12 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         friends: [],
         statuses: [:],
         isLoading: true,
-        myIconColorValue: .solid(hex: "FFD700"),
+        myIconColorValue: .solid(hex: AppColor.defaultIconHex),
         animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showAddFriendSheet: .constant(false),
-        resolvedIconColor: { _ in .solid(hex: "FFD700") },
+        resolvedIconColor: { _ in .solid(hex: AppColor.defaultIconHex) },
         onSend: { _ in },
         onDelete: { _ in },
         onRefresh: {}
@@ -613,12 +613,12 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         friends: [],
         statuses: [:],
         isLoading: false,
-        myIconColorValue: .solid(hex: "FFD700"),
+        myIconColorValue: .solid(hex: AppColor.defaultIconHex),
         animatingFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showAddFriendSheet: .constant(false),
-        resolvedIconColor: { _ in .solid(hex: "FFD700") },
+        resolvedIconColor: { _ in .solid(hex: AppColor.defaultIconHex) },
         onSend: { _ in },
         onDelete: { _ in },
         onRefresh: {}

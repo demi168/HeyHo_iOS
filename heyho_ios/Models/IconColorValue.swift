@@ -13,7 +13,7 @@ enum IconColorValue: Equatable {
 
     private static let gradientPrefix = "gradient:"
     private static let customGradientPrefix = "gradient_custom:"
-    private static let defaultHex = "FFD700"
+    private static let defaultHex = "FFCC00"
 
     /// Firestore 文字列からパース（nil → デフォルト黄色）
     init(firestoreString: String?) {

@@ -24,7 +24,7 @@ struct IconColorValueTests {
 
     @Test(arguments: [nil, ""])
     func nilと空文字はデフォルト黄色にフォールバックする(_ input: String?) {
-        #expect(IconColorValue(firestoreString: input) == .solid(hex: "FFD700"))
+        #expect(IconColorValue(firestoreString: input) == .solid(hex: "FFCC00"))
     }
 
     // MARK: - シリアライズ
