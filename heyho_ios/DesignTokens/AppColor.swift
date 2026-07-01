@@ -53,6 +53,10 @@ enum AppColor {
     /// カラーサークル上に重ねるアイコン（ロック・ダイス）
     static let iconOnAccent  = Color.white.opacity(0.9)
 
+    // MARK: - ハイライト
+    /// 新規追加行の枠線グロー等、注目を引きたい箇所に使う強調色
+    static let highlightGlow = interactivePrimary
+
     // MARK: - テキスト
     static let textPrimary     = hex("000000")
     static let textSecondary   = hex("9CA3AF")

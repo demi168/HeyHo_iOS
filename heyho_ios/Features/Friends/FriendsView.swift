@@ -49,9 +49,13 @@ struct FriendsView: View {
     @State private var animationState: HeyHoAnimationState = .idle
     @State private var friendToDelete: AppUser?
     @State private var newlyAddedFriendId: String?
+    /// 「新規追加された1行」のポップイン＋枠線グロー演出のトリガー（並び替え専用の newlyAddedFriendId とは分離）
+    @State private var highlightedFriendId: String?
     /// 起動ローディング明けの一斉フレームインを発火するトリガー（FriendsView は root で永続のため一度きり）
     @State private var entranceTriggered = false
     @AppStorage(botDismissedKey) private var localBotDismissed = false
+    /// HeyBoy ボットの初回表示演出を再生済みかどうか（以後のセッション・再起動では発火させない）
+    @AppStorage("heyho.localBotIntroShown") private var localBotIntroShown = false
     @State private var simulationTask: Task<Void, Never>?
 
     var body: some View {
@@ -62,6 +66,7 @@ struct FriendsView: View {
                 isLoading: isLoading,
                 myIconColorValue: myIconColorValue,
                 animatingFriendId: animatingFriendId,
+                highlightedFriendId: highlightedFriendId,
                 isPremium: storeService.isPremium,
                 showMyPage: $showMyPage,
                 showAddFriendSheet: $showAddFriendSheet,
@@ -177,15 +182,34 @@ struct FriendsView: View {
                 let newFriend = list.remove(at: idx)
                 list.insert(newFriend, at: 0)
                 newlyAddedFriendId = nil
+                playNewFriendHighlight(friendId: newId)
             }
             // チュートリアルボット（ユーザーが削除していなければ末尾に追加）
-            if !localBotDismissed { list.append(localBotFriend) }
+            if !localBotDismissed {
+                list.append(localBotFriend)
+                // ボットの初回表示のみポップイン＋グローを再生（以後のセッションでは発火させない）
+                if !localBotIntroShown, let botId = localBotFriend.id {
+                    localBotIntroShown = true
+                    playNewFriendHighlight(friendId: botId)
+                }
+            }
             // 友だちリストを先に表示し、ラリー状態の取得＋受信購読を RallyService に委譲。
             // ローカル友だち（実 Firestore に無い）は無駄クエリになるので除外する
             friends = list
             rallyService.start(userId: uid, friendIds: list.filter { !$0.isLocalFriend }.compactMap(\.id))
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// 新規追加された1行のポップイン＋枠線グローを発火し、一定時間後に自動で解除する。
+    /// 起動直後は HeyBoyLaunchOverlay のスプラッシュ（最大 ~1.9秒）に隠れて FriendRow 側の再生開始が
+    /// 遅れるため、その待ち時間 + アニメ本体(~1.2秒)より確実に長く保持してから解除する
+    private func playNewFriendHighlight(friendId: String) {
+        highlightedFriendId = friendId
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3.5))
+            if highlightedFriendId == friendId { highlightedFriendId = nil }
         }
     }
 
@@ -274,6 +298,8 @@ struct FriendsBodyView: View {
     let isLoading: Bool
     let myIconColorValue: IconColorValue
     let animatingFriendId: String?
+    /// ポップイン＋枠線グロー演出の対象（新規追加された1行）
+    let highlightedFriendId: String?
     let isPremium: Bool
     @Binding var showMyPage: Bool
     @Binding var showAddFriendSheet: Bool
@@ -319,7 +345,8 @@ struct FriendsBodyView: View {
                                     avatarIconColor: resolvedIconColor(friend),
                                     // ヘッダー（delay 0）の次から、上の行ほど早くスタガー登場
                                     entranceDelay: HeyBoyEntrance.stagger * Double(index + 1),
-                                    entranceTrigger: entranceTriggered
+                                    entranceTrigger: entranceTriggered,
+                                    isNewlyAdded: friend.id == highlightedFriendId
                                 ) { onSend(friend) }
                                 .contextMenu {
                                     Button(role: .destructive) {
@@ -428,10 +455,39 @@ struct FriendRow: View {
     var entranceDelay: TimeInterval? = nil
     /// 起動明けフレームインの発火トリガー
     var entranceTrigger: Bool = false
+    /// 新規追加された行かどうか（true でポップイン→枠線トレース→黒への変化を一度だけ再生）
+    var isNewlyAdded: Bool = false
     let onSend: () -> Void
 
     /// 送信不可（アニメ再生中 or 相手の返信待ち）
     private var isDisabled: Bool { isAnimating || awaitingReply }
+
+    @State private var popScale: CGFloat
+    @State private var popOpacity: Double
+    /// 青トレースリングの描画進捗（0=非表示 → 1=一周描画完了）
+    @State private var traceProgress: CGFloat = 0
+    /// 青トレースリングの不透明度（クロスフェードで 1→0）
+    @State private var traceOpacity: Double = 1
+    /// 黒枠線の不透明度（クロスフェードで 0→1。完了後は通常表示の黒枠と見分けがつかなくなる）
+    @State private var blackOpacity: Double = 0
+    /// 新規追加ハイライトの二重発火を防ぐガード
+    @State private var highlightPlayed = false
+
+    init(friend: AppUser, state: FriendRowState, isAnimating: Bool, awaitingReply: Bool, avatarIconColor: IconColorValue, entranceDelay: TimeInterval? = nil, entranceTrigger: Bool = false, isNewlyAdded: Bool = false, onSend: @escaping () -> Void) {
+        self.friend = friend
+        self.state = state
+        self.isAnimating = isAnimating
+        self.awaitingReply = awaitingReply
+        self.avatarIconColor = avatarIconColor
+        self.entranceDelay = entranceDelay
+        self.entranceTrigger = entranceTrigger
+        self.isNewlyAdded = isNewlyAdded
+        self.onSend = onSend
+        // isNewlyAdded なら初回描画から「隠れた」状態にしておき、.onAppear のアニメで登場させる
+        // （.onAppear 内で隠す→戻すだと1フレーム目が通常表示のまま描画され、アニメが視認できないことがある）
+        self._popScale = State(initialValue: isNewlyAdded ? 0.7 : 1)
+        self._popOpacity = State(initialValue: isNewlyAdded ? 0 : 1)
+    }
 
     var body: some View {
         Button(action: { if !isDisabled { onSend() } }) {
@@ -456,15 +512,91 @@ struct FriendRow: View {
             .padding(.trailing, AppSpacing.spXlarge)
             .padding(.vertical, AppSpacing.spLarge)
             .frame(minHeight: 80)
-            .background(
-                Capsule()
-                    // Active=黒枠 / Disabled（返信待ち・アニメ中）=グレー枠
-                    .strokeBorder(isDisabled ? AppColor.borderDisabled : AppColor.borderStrong, lineWidth: AppSize.borderStrong)
-                    .background(Capsule().fill(AppColor.backgroundSecondary))
-            )
+            .background(Capsule().fill(AppColor.backgroundSecondary))
+            .overlay {
+                if isNewlyAdded {
+                    // 新規追加行の注目喚起: グレーの土台トラックの上に青い進捗リングが
+                    // 上部から時計回りに1周描画され、描き終わると黒にクロスフェードして通常表示に合流する
+                    ZStack {
+                        Capsule()
+                            .strokeBorder(AppColor.borderDisabled, lineWidth: AppSize.borderStrong)
+                        Capsule()
+                            .trim(from: 0, to: traceProgress)
+                            .stroke(AppColor.highlightGlow, style: StrokeStyle(lineWidth: AppSize.borderStrong, lineCap: .round))
+                            .opacity(traceOpacity)
+                        Capsule()
+                            .strokeBorder(AppColor.borderStrong, lineWidth: AppSize.borderStrong)
+                            .opacity(blackOpacity)
+                    }
+                } else {
+                    Capsule()
+                        // Active=黒枠 / Disabled（返信待ち・アニメ中）=グレー枠
+                        .strokeBorder(isDisabled ? AppColor.borderDisabled : AppColor.borderStrong, lineWidth: AppSize.borderStrong)
+                }
+            }
+            .scaleEffect(popScale)
+            .opacity(popOpacity)
         }
         .buttonStyle(.plain)
+        .onAppear {
+            // entranceTrigger が既に true（起動スプラッシュ明け後に追加された等）なら即再生。
+            // false の場合はスプラッシュに隠れて見えないため、下の onChange(of: entranceTrigger) まで待つ
+            if isNewlyAdded && entranceTrigger { playNewFriendHighlight() }
+        }
+        .onChange(of: isNewlyAdded) { _, newValue in
+            if newValue && entranceTrigger { playNewFriendHighlight() }
+        }
+        .onChange(of: entranceTrigger) { _, newValue in
+            if newValue && isNewlyAdded { playNewFriendHighlight() }
+        }
     }
+
+    /// 新規追加行のポップイン（スプリング）→ 青トレースリング（上から1周描画）→ 黒へのクロスフェード、を
+    /// 順番に一度だけ再生する。「隠れた」初期状態は init 側（popScale/popOpacity の初期値）で描画済みなので、
+    /// ここでは表示状態への遷移のみ行う
+    private func playNewFriendHighlight() {
+        guard !highlightPlayed else { return }
+        highlightPlayed = true
+
+        withAnimation(.spring(response: NewFriendHighlight.popSpringResponse, dampingFraction: NewFriendHighlight.popSpringDamping)) {
+            popScale = 1
+            popOpacity = 1
+        }
+
+        Task { @MainActor in
+            // ポップインが視覚的に落ち着くまで待ってから枠線トレースを開始する（同時発火させない）
+            try? await Task.sleep(for: .seconds(NewFriendHighlight.traceStartDelay))
+            withAnimation(.easeInOut(duration: NewFriendHighlight.traceDuration)) {
+                traceProgress = 1
+            }
+            // 1周描き終わるまで待ち、少し保持してから黒へクロスフェード
+            try? await Task.sleep(for: .seconds(NewFriendHighlight.traceDuration))
+            try? await Task.sleep(for: .milliseconds(NewFriendHighlight.traceHoldMilliseconds))
+            withAnimation(.easeInOut(duration: NewFriendHighlight.crossfadeDuration)) {
+                traceOpacity = 0
+                blackOpacity = 1
+            }
+        }
+    }
+}
+
+// MARK: - 新規追加ハイライト演出の定数
+
+/// FriendRow のポップイン→枠線トレース→黒へのクロスフェード演出の設定（一元管理）。
+/// 発火順: ポップイン開始 → (traceStartDelay 秒後) 青リングが上部から時計回りに1周描画(traceDuration)
+///        → (traceHoldMilliseconds 保持) → 黒へクロスフェード(crossfadeDuration) → 完了（通常の黒枠と合流）
+private enum NewFriendHighlight {
+    /// ポップインの spring パラメータ（HeyBoyLaunchOverlay の登場演出と統一）
+    static let popSpringResponse: Double = 0.45
+    static let popSpringDamping: Double = 0.55
+    /// ポップイン開始から枠線トレース開始までの待ち時間（同時発火を避け、ポップが視覚的に落ち着いてからトレースを出す）
+    static let traceStartDelay: Double = 0.4
+    /// 青いリングが上部から時計回りに1周描画されるまでの時間
+    static let traceDuration: Double = 0.5
+    /// 1周描き終えてから黒への変化を始めるまでの保持時間
+    static let traceHoldMilliseconds: Int = 200
+    /// 青→黒のクロスフェード時間
+    static let crossfadeDuration: Double = 0.3
 }
 
 // MARK: - 起動後フレームイン演出の定数
@@ -581,6 +713,7 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         isLoading: false,
         myIconColorValue: .solid(hex: AppColor.defaultIconHex),
         animatingFriendId: nil,
+        highlightedFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showAddFriendSheet: .constant(false),
@@ -598,6 +731,7 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         isLoading: true,
         myIconColorValue: .solid(hex: AppColor.defaultIconHex),
         animatingFriendId: nil,
+        highlightedFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showAddFriendSheet: .constant(false),
@@ -615,10 +749,29 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         isLoading: false,
         myIconColorValue: .solid(hex: AppColor.defaultIconHex),
         animatingFriendId: nil,
+        highlightedFriendId: nil,
         isPremium: true,
         showMyPage: .constant(false),
         showAddFriendSheet: .constant(false),
         resolvedIconColor: { _ in .solid(hex: AppColor.defaultIconHex) },
+        onSend: { _ in },
+        onDelete: { _ in },
+        onRefresh: {}
+    )
+}
+
+#Preview("FriendsBodyView - 新規追加ハイライト") {
+    FriendsBodyView(
+        friends: previewFriends,
+        statuses: previewStatuses,
+        isLoading: false,
+        myIconColorValue: .solid(hex: AppColor.defaultIconHex),
+        animatingFriendId: nil,
+        highlightedFriendId: previewFriends[0].id,
+        isPremium: true,
+        showMyPage: .constant(false),
+        showAddFriendSheet: .constant(false),
+        resolvedIconColor: { IconColorValue(firestoreString: $0.iconColor) },
         onSend: { _ in },
         onDelete: { _ in },
         onRefresh: {}
@@ -637,6 +790,14 @@ private let previewStatuses: [String: FriendRallyStatus] = [
     .padding(.vertical, AppSpacing.spLarge)
     .frame(maxWidth: .infinity)
     .background(AppColor.backgroundPrimary)
+}
+
+#Preview("FriendRow - 新規追加ハイライト") {
+    FriendRow(friend: previewFriends[0], state: .sendHey, isAnimating: false, awaitingReply: false, avatarIconColor: .solid(hex: "B47850"), isNewlyAdded: true) {}
+        .padding(.horizontal, AppSpacing.spXlarge)
+        .padding(.vertical, AppSpacing.spLarge)
+        .frame(maxWidth: .infinity)
+        .background(AppColor.backgroundPrimary)
 }
 
 #endif
