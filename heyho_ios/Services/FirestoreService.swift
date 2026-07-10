@@ -160,16 +160,17 @@ final class FirestoreService {
         try await myRef.delete()
     }
 
-    func friendIds(userId: String) async throws -> [String] {
-        let snapshot = try await db.collection("users").document(userId).collection("friends").getDocuments()
-        return snapshot.documents.map(\.documentID)
-    }
-
     func friends(userId: String) async throws -> [AppUser] {
-        let ids = try await friendIds(userId: userId)
-        guard !ids.isEmpty else { return [] }
-        // getUsers はバッチ処理済み（in クエリ10件上限に対応）
-        return try await getUsers(userIds: ids)
+        let snapshot = try await db.collection("users").document(userId).collection("friends").getDocuments()
+        // getUsers の並列取得は完了順で配列順が毎回変わるため、addedAt 降順（新しい友だちが上）に確定させる。
+        // order(by: "addedAt") クエリは addedAt 欠損ドキュメントを結果から除外してしまうため、メモリ上でソートする
+        let entries = snapshot.documents.map { doc in
+            (id: doc.documentID, addedAt: (doc.get("addedAt") as? Timestamp)?.dateValue())
+        }
+        let orderedIds = FriendListOrder.orderedIds(entries)
+        guard !orderedIds.isEmpty else { return [] }
+        let users = try await getUsers(userIds: orderedIds)
+        return FriendListOrder.reorder(users, toMatch: orderedIds, id: { $0.id })
     }
 
     // MARK: - HeyHos
