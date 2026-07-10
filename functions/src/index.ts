@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
-import {buildNotification, notificationSound} from "./notificationTemplates";
+import {buildFriendAddedNotification, buildNotification, friendAddedNotificationSound, notificationSound} from "./notificationTemplates";
 
 admin.initializeApp();
 
@@ -81,6 +81,44 @@ export const onFriendAdded = functions.firestore
       addedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
     console.log(`相互フレンド作成: ${friendId} -> ${userId}`);
+
+    // 相互ドキュメントを新規作成した場合のみ通知を送る（既存の early return パスでは送らないため1回だけになる）
+    try {
+      // fcmToken は private サブドキュメントから取得（onHeyHoCreated と同じ方法）
+      const privateDoc = await admin.firestore()
+        .collection("users").doc(friendId)
+        .collection("private").doc("data").get();
+      const fcmToken = privateDoc.data()?.fcmToken as string | undefined;
+
+      if (!fcmToken) {
+        console.log(`ユーザー ${friendId} のFCMトークンが見つかりません`);
+        return;
+      }
+
+      const fromUserDoc = await admin.firestore().collection("users").doc(userId).get();
+      const fromName = (fromUserDoc.data()?.displayName as string) || "Someone";
+      const notification = buildFriendAddedNotification(fromName);
+
+      await admin.messaging().send({
+        token: fcmToken,
+        notification,
+        data: {
+          // クライアントは通知タップ時に fromUserId を使って該当行のアニメーションを発火する
+          type: "friendAdded",
+          fromUserId: userId,
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: friendAddedNotificationSound(),
+            },
+          },
+        },
+      });
+      console.log(`友だち追加通知を送信しました: ${friendId}`);
+    } catch (error) {
+      console.error(`友だち追加通知エラー (${friendId}):`, error);
+    }
   });
 
 /**

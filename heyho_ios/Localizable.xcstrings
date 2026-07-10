@@ -4,10 +4,10 @@
     "" : {
 
     },
-    "💣 DELETE ACCOUNT" : {
+    "6-16 characters" : {
 
     },
-    "6-16 characters" : {
+    "ADD FRIENDS" : {
 
     },
     "Add Friend" : {
@@ -20,9 +20,6 @@
           }
         }
       }
-    },
-    "ADD FRIENDS" : {
-
     },
     "Add friends from your profile" : {
       "localizations" : {
@@ -64,6 +61,17 @@
         }
       }
     },
+    "COMMERCIAL TRANSACTIONS ACT" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特定商取引法に基づく表記"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "ja" : {
@@ -84,26 +92,12 @@
         }
       }
     },
-    "center" : {
-
-    },
     "Code not found" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "コードが見つからないって"
-          }
-        }
-      }
-    },
-    "COMMERCIAL TRANSACTIONS ACT" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "特定商取引法に基づく表記"
           }
         }
       }
@@ -289,6 +283,9 @@
     "MY CODE IS" : {
 
     },
+    "MY NAME IS" : {
+
+    },
     "My Invite Code" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -299,9 +296,6 @@
           }
         }
       }
-    },
-    "MY NAME IS" : {
-
     },
     "Names containing \"heyho\" are not allowed" : {
       "localizations" : {
@@ -346,6 +340,12 @@
         }
       }
     },
+    "PREMIUM" : {
+
+    },
+    "PRIVACY POLICY" : {
+
+    },
     "Please enter your name" : {
       "localizations" : {
         "ja" : {
@@ -355,12 +355,6 @@
           }
         }
       }
-    },
-    "PREMIUM" : {
-
-    },
-    "PRIVACY POLICY" : {
-
     },
     "Profile" : {
       "extractionState" : "stale",
@@ -376,6 +370,12 @@
     "RESTORE PURCHASES" : {
 
     },
+    "SEARCHING..." : {
+
+    },
+    "SIGN OUT" : {
+
+    },
     "Save" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -386,9 +386,6 @@
           }
         }
       }
-    },
-    "SEARCHING..." : {
-
     },
     "Send LET'S GO" : {
       "localizations" : {
@@ -410,14 +407,44 @@
         }
       }
     },
-    "SIGN OUT" : {
-
-    },
     "Someone" : {
 
     },
     "TERMS" : {
 
+    },
+    "Tap again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一回タップだ！"
+          }
+        }
+      }
+    },
+    "Tap me." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップしてみて！"
+          }
+        }
+      }
+    },
+    "That's all. Enjoy!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最高だ！Hey, Ho, Let's Go!"
+          }
+        }
+      }
     },
     "This is your own code" : {
       "localizations" : {
@@ -429,7 +456,7 @@
         }
       }
     },
-    "topLeading" : {
+    "UNLOCK PREMIUM" : {
 
     },
     "Unlock infinite colors" : {
@@ -442,13 +469,27 @@
         }
       }
     },
-    "UNLOCK PREMIUM" : {
-
+    "Wait a moment." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ちょっと待つんだ"
+          }
+        }
+      }
     },
     "X: %.2f" : {
 
     },
     "Y: %.2f" : {
+
+    },
+    "center" : {
+
+    },
+    "topLeading" : {
 
     },
     "エラー" : {
@@ -459,6 +500,20 @@
     },
     "プリセット" : {
 
+    },
+    "💣 DELETE ACCOUNT" : {
+
+    },
+    "%@, unreplied message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@、未返信のメッセージあり"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

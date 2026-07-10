@@ -12,6 +12,8 @@ private enum PushKey {
     static let heyhoId = "heyhoId"
     /// type の値（HeyHo メッセージ通知）
     static let typeHeyHo = "heyho"
+    /// type の値（友だちに追加された通知）
+    static let typeFriendAdded = "friendAdded"
 }
 
 final class PushService: NSObject {
@@ -87,12 +89,18 @@ extension PushService: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        if userInfo[PushKey.type] as? String == PushKey.typeHeyHo,
+        let type = userInfo[PushKey.type] as? String
+        if type == PushKey.typeHeyHo,
            let fromUserId = userInfo[PushKey.fromUserId] as? String,
            let typeRaw = userInfo[PushKey.messageType] as? String,
            let messageType = MessageType(rawValue: typeRaw) {
             Task { @MainActor in
                 RallyService.shared.handlePushTap(fromUserId: fromUserId, messageType: messageType)
+            }
+        } else if type == PushKey.typeFriendAdded,
+                  let fromUserId = userInfo[PushKey.fromUserId] as? String {
+            Task { @MainActor in
+                RallyService.shared.handleFriendAddedPushTap(friendId: fromUserId)
             }
         } else {
             AppLogger.push.error("通知ペイロードの解釈に失敗（type/fromUserId/messageType 不足）")

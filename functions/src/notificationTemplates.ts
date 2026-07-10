@@ -65,3 +65,29 @@ export function buildNotification(
 export function notificationSound(messageType: string): string {
   return (NOTIFICATION_TEMPLATES[messageType] ?? DEFAULT_TEMPLATE).sound;
 }
+
+/** 友だち追加通知のテンプレート（messageType とは無関係のため NOTIFICATION_TEMPLATES には含めない） */
+const FRIEND_ADDED_TEMPLATE: NotificationTemplate = {
+  title: "HeyHo",
+  body: "{fromName}さんと友だちになりました",
+  sound: "default",
+};
+
+/**
+ * 送信者名から友だち追加通知の title / body を生成する
+ */
+export function buildFriendAddedNotification(
+  fromName: string
+): { title: string; body: string } {
+  return {
+    title: FRIEND_ADDED_TEMPLATE.title,
+    body: FRIEND_ADDED_TEMPLATE.body.replace("{fromName}", fromName),
+  };
+}
+
+/**
+ * 友だち追加通知の通知音のファイル名を返す（APNS の aps.sound 用）。
+ */
+export function friendAddedNotificationSound(): string {
+  return FRIEND_ADDED_TEMPLATE.sound;
+}

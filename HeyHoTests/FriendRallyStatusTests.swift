@@ -10,6 +10,7 @@ struct FriendRallyStatusTests {
         #expect(s == .initial)
         #expect(s.awaitingReply == false)
         #expect(s.rowState == .sendHey)
+        #expect(s.incomingMessage == nil)
     }
 
     @Test func 自分が最後にHeyかHoなら返信待ち() {
@@ -17,6 +18,7 @@ struct FriendRallyStatusTests {
             let s = FriendRallyStatus.from(lastFromUserId: me, lastMessageType: type, me: me)
             #expect(s.awaitingReply == true)
             #expect(s.rowState == .sendHey)
+            #expect(s.incomingMessage == nil)
         }
     }
 
@@ -25,22 +27,27 @@ struct FriendRallyStatusTests {
         let s = FriendRallyStatus.from(lastFromUserId: me, lastMessageType: .letsGo, me: me)
         #expect(s.awaitingReply == false)
         #expect(s.rowState == .sendHey)
+        #expect(s.incomingMessage == nil)
     }
 
-    @Test func 相手がHeyなら自分はHoを返す番() {
+    @Test func 相手がHeyなら自分はHoを返す番かつ未返信バッジ対象() {
         let s = FriendRallyStatus.from(lastFromUserId: friend, lastMessageType: .hey, me: me)
         #expect(s.awaitingReply == false)
         #expect(s.rowState == .sendHo)   // hey.reply == ho
+        #expect(s.incomingMessage == .hey)
     }
 
-    @Test func 相手がHoなら自分はLetsGoを返す番() {
+    @Test func 相手がHoなら自分はLetsGoを返す番かつ未返信バッジ対象() {
         let s = FriendRallyStatus.from(lastFromUserId: friend, lastMessageType: .ho, me: me)
         #expect(s.rowState == .sendLetsGo)  // ho.reply == letsGo
+        #expect(s.incomingMessage == .ho)
     }
 
-    @Test func 相手がLetsGoなら自分はHeyに戻る() {
+    @Test func 相手がLetsGoなら自分はHeyに戻るが未返信バッジは対象外() {
+        // letsGo はラリー1巡完了の合図で、相手はこちらの返信を待っていないため incomingMessage は nil
         let s = FriendRallyStatus.from(lastFromUserId: friend, lastMessageType: .letsGo, me: me)
         #expect(s.rowState == .sendHey)  // letsGo.reply == hey
         #expect(s.awaitingReply == false)
+        #expect(s.incomingMessage == nil)
     }
 }
