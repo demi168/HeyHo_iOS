@@ -9,4 +9,6 @@ enum AppSize {
     static let iconDefault = CGFloat(48.00)
     static let iconLarge = CGFloat(96.00)
     static let capsuleButtonWidth = CGFloat(80.00)
+    /// 角丸矩形（吹き出し等、カプセルにしない要素）の角丸半径
+    static let radiusLarge = CGFloat(16.00)
 }

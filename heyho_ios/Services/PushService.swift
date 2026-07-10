@@ -26,10 +26,9 @@ final class PushService: NSObject {
     func configure() {
         UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
-        requestAuthorization()
     }
 
-    private func requestAuthorization() {
+    func requestAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in
             DispatchQueue.main.async {
                 UIApplication.shared.registerForRemoteNotifications()
