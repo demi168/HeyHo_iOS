@@ -8,10 +8,10 @@ struct OnboardingCoachmark: View {
 
     private var text: LocalizedStringKey {
         switch step {
-        case .tapToSend: return "Tap me."
-        case .waitingReply: return "Wait a moment."
-        case .tapAgain: return "Tap again."
-        case .completed: return "That's all. Enjoy!"
+        case .tapToSend: return "Hey,Tap me."
+        case .waitingReply: return "Wait a moment..."
+        case .tapAgain: return "Tap again.Let's Go!"
+        case .completed: return "That's all.Enjoy!"
         }
     }
 
