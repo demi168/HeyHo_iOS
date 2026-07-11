@@ -9,8 +9,26 @@ private let debugDummyPrefix = "dummy_"
 private let localBotPrefix = "bot_"
 /// チュートリアルボット。削除しない限り常に友だちリストに表示する
 private let localBotFriend = AppUser(id: "\(localBotPrefix)heyho", displayName: "HeyBoy", iconColor: AppColor.defaultIconHex)
-/// ユーザーがボットを削除済みかどうかを永続化するキー
-private let botDismissedKey = "heyho.localBotDismissed"
+
+/// 初回体験（チュートリアルボット・オンボーディング）関連の UserDefaults キー。
+/// MyPageView の DEBUG リセットボタンからも参照するため internal（一元管理）
+enum OnboardingStorageKey {
+    static let localBotDismissed = "heyho.localBotDismissed"
+    static let localBotIntroShown = "heyho.localBotIntroShown"
+    static let onboardingShown = "heyho.onboardingShown"
+
+    #if DEBUG
+    /// シミュレータ検証用: 初回体験フラグを全リセットする。
+    /// 次回の Friends 一覧ロード（MyPage を閉じた直後等）で HeyBoy ボットとオンボーディングが再度発火する。
+    /// simctl 経由の UserDefaults 書き換えは cfprefsd にキャッシュされ反映されないため、
+    /// アプリ内から直接リセットできるようにしている
+    static func debugReset() {
+        UserDefaults.standard.removeObject(forKey: localBotDismissed)
+        UserDefaults.standard.removeObject(forKey: localBotIntroShown)
+        UserDefaults.standard.removeObject(forKey: onboardingShown)
+    }
+    #endif
+}
 
 extension AppUser {
     /// DEBUG 用ダミー友だち（実 Firestore に存在しない）かどうか。リリースでは常に false
@@ -53,9 +71,20 @@ struct FriendsView: View {
     @State private var highlightedFriendId: String?
     /// 起動ローディング明けの一斉フレームインを発火するトリガー（FriendsView は root で永続のため一度きり）
     @State private var entranceTriggered = false
-    @AppStorage(botDismissedKey) private var localBotDismissed = false
+    @AppStorage(OnboardingStorageKey.localBotDismissed) private var localBotDismissed = false
     /// HeyBoy ボットの初回表示演出を再生済みかどうか（以後のセッション・再起動では発火させない）
-    @AppStorage("heyho.localBotIntroShown") private var localBotIntroShown = false
+    @AppStorage(OnboardingStorageKey.localBotIntroShown) private var localBotIntroShown = false
+    /// 初回オンボーディング（HeyBoy行への吹き出し誘導）を表示済みかどうか（中断されても再表示しない）
+    @AppStorage(OnboardingStorageKey.onboardingShown) private var onboardingShown = false
+    /// オンボーディング吹き出しの現在ステップ（nilで非表示）
+    @State private var onboardingStep: OnboardingStep?
+    /// スプラッシュ明け（entranceTriggered）を待ってからオンボーディングを開始するための保留フラグ
+    @State private var onboardingIntroPending = false
+    /// 今回のセッションで既にオンボーディング開始を試行したか（永続化しない）。
+    /// onboardingShown は実際に吹き出しが表示された瞬間に確定するため、
+    /// scheduleOnboardingIntro() のguard待ち（settleDelay中）に loadFriends() が再度呼ばれても
+    /// 二重スケジュールしないようにこのフラグで防ぐ
+    @State private var onboardingIntroAttempted = false
     @State private var simulationTask: Task<Void, Never>?
 
     var body: some View {
@@ -67,6 +96,7 @@ struct FriendsView: View {
                 myIconColorValue: myIconColorValue,
                 animatingFriendId: animatingFriendId,
                 highlightedFriendId: highlightedFriendId,
+                onboardingTargetFriendId: onboardingStep != nil ? localBotFriend.id : nil,
                 isPremium: storeService.isPremium,
                 showMyPage: $showMyPage,
                 showAddFriendSheet: $showAddFriendSheet,
@@ -76,6 +106,9 @@ struct FriendsView: View {
                 onRefresh: { await loadFriends() },
                 entranceTriggered: entranceTriggered
             )
+            .overlayPreferenceValue(OnboardingSpotlightPreferenceKey.self) { anchor in
+                OnboardingSpotlightOverlay(step: onboardingStep, anchor: anchor)
+            }
 
             HeyHoAnimationOverlay(animationState: $animationState)
         }
@@ -94,6 +127,9 @@ struct FriendsView: View {
             // リアルタイム受信（B2）・プッシュタップ（B1）共通の受信アニメ発火
             guard let event else { return }
             playReceiveAnimation(event)
+            if event.fromUserId == localBotFriend.id {
+                onboardingStep = .afterReceivingReply(current: onboardingStep)
+            }
         }
         .onChange(of: rallyService.friendAddedEvent) { _, event in
             // 「友だちに追加された側」の検知（リスナー・プッシュタップ共通）
@@ -104,6 +140,15 @@ struct FriendsView: View {
             // アニメ完了（.idle 復帰）で無効化を解除 → 切り替わりがアニメ後に揃う
             if newValue == .idle {
                 animatingFriendId = nil
+                // オンボーディング完了メッセージはLetsGo送信アニメ明けから一定時間見せて自動で閉じる
+                if onboardingStep == .completed { scheduleOnboardingCompletionDismiss() }
+            }
+        }
+        .onChange(of: entranceTriggered) { _, triggered in
+            // 起動スプラッシュ明けを待っていたオンボーディング開始を発火
+            if triggered && onboardingIntroPending {
+                onboardingIntroPending = false
+                scheduleOnboardingIntro()
             }
         }
         .alert("Delete Friend", isPresented: Binding(
@@ -229,6 +274,21 @@ struct FriendsView: View {
                     localBotIntroShown = true
                     playNewFriendHighlight(friendId: botId)
                 }
+                // オンボーディングは実友だちゼロの新規ユーザーのみ対象
+                //（友だちが多いとHeyBoy行がリスト末尾＝画面外になり、スポットライトが機能しないため）
+                let realFriendCount = list.count(where: { !$0.isLocalFriend })
+                AppLogger.rally.debug("onboarding gate: shown=\(onboardingShown) realFriends=\(realFriendCount)")
+                if !onboardingShown, !onboardingIntroAttempted, realFriendCount == 0 {
+                    // onboardingShown はここでは確定しない（scheduleOnboardingIntro() 内のguard通過後に確定する）。
+                    // このセッション内で開始を試行済みであることだけ記録し、二重スケジュールを防ぐ
+                    onboardingIntroAttempted = true
+                    if entranceTriggered {
+                        scheduleOnboardingIntro()
+                    } else {
+                        // 起動スプラッシュ明けを待って開始（onChange(of: entranceTriggered) で発火）
+                        onboardingIntroPending = true
+                    }
+                }
             }
             // 友だちリストを先に表示し、ラリー状態の取得＋受信購読を RallyService に委譲。
             // ローカル友だち（実 Firestore に無い）は無駄クエリになるので除外する
@@ -247,6 +307,31 @@ struct FriendsView: View {
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(3.5))
             if highlightedFriendId == friendId { highlightedFriendId = nil }
+        }
+    }
+
+    /// HeyBoyの新規追加ハイライト演出（ポップイン→枠線トレース→クロスフェード）が視覚的に落ち着くまで
+    /// 待ってから、オンボーディング吹き出しの初手を表示する
+    private func scheduleOnboardingIntro() {
+        Task { @MainActor in
+            let settleDelay = NewFriendHighlight.traceStartDelay + NewFriendHighlight.traceDuration
+                + Double(NewFriendHighlight.traceHoldMilliseconds) / 1000 + NewFriendHighlight.crossfadeDuration
+            try? await Task.sleep(for: .seconds(settleDelay))
+            // 吹き出し表示前にユーザーが先にHeyBoyへ送信済みなら開始しない
+            //（後から .tapToSend をセットすると遷移が噛み合わず、暗転が閉じられなくなる）
+            guard let botId = localBotFriend.id, rallyService.statuses[botId] == nil else { return }
+            // 実際に吹き出しが表示される瞬間に確定させる（表示前に確定すると、guardで早期returnした場合に
+            // 二度とオンボーディングが表示されなくなるレース条件になるため）
+            onboardingShown = true
+            onboardingStep = .tapToSend
+        }
+    }
+
+    /// オンボーディング完了メッセージを一定時間表示してから閉じる
+    private func scheduleOnboardingCompletionDismiss() {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(OnboardingTiming.completedDisplaySeconds))
+            if onboardingStep == .completed { onboardingStep = nil }
         }
     }
 
@@ -284,6 +369,14 @@ struct FriendsView: View {
         animationState = .sending(message: message, iconColor: myIconColorValue, name: name, token: UUID())
         // 送信アニメが終わるまでこの相手を無効化（letsGo でも再度押せるのはアニメ完了後）
         animatingFriendId = friendId
+
+        if friendId == localBotFriend.id {
+            switch message {
+            case .hey: onboardingStep = .afterSendingHey(current: onboardingStep)
+            case .letsGo: onboardingStep = .afterSendingLetsGo(current: onboardingStep)
+            case .ho: break
+            }
+        }
 
         // ローカル友だち（ボット・デバッグダミー）は実 Firestore に書けないので
         // 楽観更新＋擬似ラリーをローカルで完結させる
@@ -337,6 +430,8 @@ struct FriendsBodyView: View {
     let animatingFriendId: String?
     /// ポップイン＋枠線グロー演出の対象（新規追加された1行）
     let highlightedFriendId: String?
+    /// オンボーディングのスポットライト対象（HeyBoy行のid。非表示中はnil）
+    var onboardingTargetFriendId: String? = nil
     let isPremium: Bool
     @Binding var showMyPage: Bool
     @Binding var showAddFriendSheet: Bool
@@ -384,7 +479,8 @@ struct FriendsBodyView: View {
                                     // ヘッダー（delay 0）の次から、上の行ほど早くスタガー登場
                                     entranceDelay: HeyBoyEntrance.stagger * Double(index + 1),
                                     entranceTrigger: entranceTriggered,
-                                    isNewlyAdded: friend.id == highlightedFriendId
+                                    isNewlyAdded: friend.id == highlightedFriendId,
+                                    isOnboardingTarget: friend.id == onboardingTargetFriendId
                                 ) { onSend(friend) }
                                 .contextMenu {
                                     Button(role: .destructive) {
@@ -497,6 +593,8 @@ struct FriendRow: View {
     var entranceTrigger: Bool = false
     /// 新規追加された行かどうか（true でポップイン→枠線トレース→黒への変化を一度だけ再生）
     var isNewlyAdded: Bool = false
+    /// オンボーディングのスポットライト対象行かどうか
+    var isOnboardingTarget: Bool = false
     let onSend: () -> Void
 
     /// 送信不可（アニメ再生中 or 相手の返信待ち）
@@ -517,7 +615,7 @@ struct FriendRow: View {
     /// 新規追加ハイライトの二重発火を防ぐガード
     @State private var highlightPlayed = false
 
-    init(friend: AppUser, state: FriendRowState, isAnimating: Bool, awaitingReply: Bool, incomingMessage: MessageType? = nil, avatarIconColor: IconColorValue, entranceDelay: TimeInterval? = nil, entranceTrigger: Bool = false, isNewlyAdded: Bool = false, onSend: @escaping () -> Void) {
+    init(friend: AppUser, state: FriendRowState, isAnimating: Bool, awaitingReply: Bool, incomingMessage: MessageType? = nil, avatarIconColor: IconColorValue, entranceDelay: TimeInterval? = nil, entranceTrigger: Bool = false, isNewlyAdded: Bool = false, isOnboardingTarget: Bool = false, onSend: @escaping () -> Void) {
         self.friend = friend
         self.state = state
         self.isAnimating = isAnimating
@@ -527,6 +625,7 @@ struct FriendRow: View {
         self.entranceDelay = entranceDelay
         self.entranceTrigger = entranceTrigger
         self.isNewlyAdded = isNewlyAdded
+        self.isOnboardingTarget = isOnboardingTarget
         self.onSend = onSend
         // isNewlyAdded なら初回描画から「隠れた」状態にしておき、.onAppear のアニメで登場させる
         // （.onAppear 内で隠す→戻すだと1フレーム目が通常表示のまま描画され、アニメが視認できないことがある）
@@ -610,6 +709,7 @@ struct FriendRow: View {
                 ? Text("\(friend.displayName), unreplied message")
                 : Text(verbatim: friend.displayName)
         )
+        .onboardingSpotlightTarget(isOnboardingTarget)
         .onAppear {
             // entranceTrigger が既に true（起動スプラッシュ明け後に追加された等）なら即再生。
             // false の場合はスプラッシュに隠れて見えないため、下の onChange(of: entranceTrigger) まで待つ
@@ -679,6 +779,14 @@ private enum UnrepliedBadge {
     /// 登場スプリング（枠線トレース等の注目演出より控えめに、キビッと出す）
     static let springResponse: Double = 0.35
     static let springDamping: Double = 0.6
+}
+
+// MARK: - オンボーディング表示タイミングの定数
+
+/// オンボーディング吹き出しの表示タイミング（一元管理）
+private enum OnboardingTiming {
+    /// 完了メッセージ（That's all. Enjoy!）を送信アニメ明けから表示し続ける時間
+    static let completedDisplaySeconds: Double = 2.5
 }
 
 // MARK: - 起動後フレームイン演出の定数
@@ -858,6 +966,30 @@ private let previewStatuses: [String: FriendRallyStatus] = [
         onDelete: { _ in },
         onRefresh: {}
     )
+}
+
+#Preview("FriendsBodyView - オンボーディング") {
+    ZStack {
+        FriendsBodyView(
+            friends: [previewFriends[0]],
+            statuses: ["p1": FriendRallyStatus(rowState: .sendHey, awaitingReply: false, incomingMessage: nil)],
+            isLoading: false,
+            myIconColorValue: .solid(hex: AppColor.defaultIconHex),
+            animatingFriendId: nil,
+            highlightedFriendId: nil,
+            onboardingTargetFriendId: "p1",
+            isPremium: true,
+            showMyPage: .constant(false),
+            showAddFriendSheet: .constant(false),
+            resolvedIconColor: { IconColorValue(firestoreString: $0.iconColor) },
+            onSend: { _ in },
+            onDelete: { _ in },
+            onRefresh: {}
+        )
+        .overlayPreferenceValue(OnboardingSpotlightPreferenceKey.self) { anchor in
+            OnboardingSpotlightOverlay(step: .tapToSend, anchor: anchor)
+        }
+    }
 }
 
 #Preview("FriendRow - 各ステート") {
