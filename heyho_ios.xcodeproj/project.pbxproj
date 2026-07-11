@@ -62,8 +62,6 @@
 		B0010110 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010110 /* SplashView.swift */; };
 		B0010111 /* SplashTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010111 /* SplashTiming.swift */; };
 		B00101A0 /* AppVersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00101A0 /* AppVersionInfo.swift */; };
-		B0010120 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010120 /* OnboardingStep.swift */; };
-		B0010130 /* OnboardingCoachmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010130 /* OnboardingCoachmark.swift */; };
 		B0020001 /* HeyHoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020001 /* HeyHoTests.swift */; };
 		B0020002 /* InviteCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020002 /* InviteCodeTests.swift */; };
 		B0020003 /* DisplayNameValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020003 /* DisplayNameValidatorTests.swift */; };
@@ -82,11 +80,13 @@
 		B0020022 /* SplashTiming.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010111 /* SplashTiming.swift */; };
 		B00200A0 /* AppVersionInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00200A0 /* AppVersionInfoTests.swift */; };
 		B00200A1 /* AppVersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00101A0 /* AppVersionInfo.swift */; };
-		B0020008 /* OnboardingStepTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020008 /* OnboardingStepTests.swift */; };
-		B0020023 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010120 /* OnboardingStep.swift */; };
 		B0010121 /* FriendAddedAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010121 /* FriendAddedAction.swift */; };
+		B0010120 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010120 /* OnboardingStep.swift */; };
+		B0010130 /* OnboardingCoachmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010130 /* OnboardingCoachmark.swift */; };
 		B0020009 /* FriendAddedActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020009 /* FriendAddedActionTests.swift */; };
 		B0020024 /* FriendAddedAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010121 /* FriendAddedAction.swift */; };
+		B0020008 /* OnboardingStepTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020008 /* OnboardingStepTests.swift */; };
+		B0020023 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010120 /* OnboardingStep.swift */; };
 		B0010122 /* FriendListOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010122 /* FriendListOrder.swift */; };
 		B0020026 /* FriendListOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0020010 /* FriendListOrderTests.swift */; };
 		B0020025 /* FriendListOrder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0010122 /* FriendListOrder.swift */; };
@@ -149,8 +149,6 @@
 		F0010110 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		F0010111 /* SplashTiming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashTiming.swift; sourceTree = "<group>"; };
 		F00101A0 /* AppVersionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfo.swift; sourceTree = "<group>"; };
-		F0010120 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
-		F0010130 /* OnboardingCoachmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCoachmark.swift; sourceTree = "<group>"; };
 		F0020001 /* HeyHoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeyHoTests.swift; sourceTree = "<group>"; };
 		F0020002 /* InviteCodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteCodeTests.swift; sourceTree = "<group>"; };
 		F0020003 /* DisplayNameValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameValidatorTests.swift; sourceTree = "<group>"; };
@@ -158,10 +156,12 @@
 		F0020005 /* IconColorValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconColorValueTests.swift; sourceTree = "<group>"; };
 		F0020006 /* FriendRallyStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRallyStatusTests.swift; sourceTree = "<group>"; };
 		F0020007 /* SplashTimingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashTimingTests.swift; sourceTree = "<group>"; };
-		F0020008 /* OnboardingStepTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStepTests.swift; sourceTree = "<group>"; };
 		F00200A0 /* AppVersionInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfoTests.swift; sourceTree = "<group>"; };
 		F0010121 /* FriendAddedAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendAddedAction.swift; sourceTree = "<group>"; };
+		F0010120 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
+		F0010130 /* OnboardingCoachmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCoachmark.swift; sourceTree = "<group>"; };
 		F0020009 /* FriendAddedActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendAddedActionTests.swift; sourceTree = "<group>"; };
+		F0020008 /* OnboardingStepTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStepTests.swift; sourceTree = "<group>"; };
 		F0010122 /* FriendListOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendListOrder.swift; sourceTree = "<group>"; };
 		F0020010 /* FriendListOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendListOrderTests.swift; sourceTree = "<group>"; };
 		T0010001 /* HeyHo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeyHo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -274,8 +274,8 @@
 				F0010101 /* FriendRallyStatus.swift */,
 				F0010111 /* SplashTiming.swift */,
 				F00101A0 /* AppVersionInfo.swift */,
-				F0010120 /* OnboardingStep.swift */,
 				F0010121 /* FriendAddedAction.swift */,
+				F0010120 /* OnboardingStep.swift */,
 				F0010122 /* FriendListOrder.swift */,
 			);
 			path = Models;
@@ -374,8 +374,8 @@
 				F0020006 /* FriendRallyStatusTests.swift */,
 				F0020007 /* SplashTimingTests.swift */,
 				F00200A0 /* AppVersionInfoTests.swift */,
-				F0020008 /* OnboardingStepTests.swift */,
 				F0020009 /* FriendAddedActionTests.swift */,
+				F0020008 /* OnboardingStepTests.swift */,
 				F0020010 /* FriendListOrderTests.swift */,
 			);
 			path = HeyHoTests;
@@ -547,9 +547,9 @@
 				B0010110 /* SplashView.swift in Sources */,
 				B0010111 /* SplashTiming.swift in Sources */,
 				B00101A0 /* AppVersionInfo.swift in Sources */,
+				B0010121 /* FriendAddedAction.swift in Sources */,
 				B0010120 /* OnboardingStep.swift in Sources */,
 				B0010130 /* OnboardingCoachmark.swift in Sources */,
-				B0010121 /* FriendAddedAction.swift in Sources */,
 				B0010122 /* FriendListOrder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -576,10 +576,10 @@
 				B00200A0 /* AppVersionInfoTests.swift in Sources */,
 				B0020022 /* SplashTiming.swift in Sources */,
 				B00200A1 /* AppVersionInfo.swift in Sources */,
-				B0020008 /* OnboardingStepTests.swift in Sources */,
-				B0020023 /* OnboardingStep.swift in Sources */,
 				B0020009 /* FriendAddedActionTests.swift in Sources */,
 				B0020024 /* FriendAddedAction.swift in Sources */,
+				B0020008 /* OnboardingStepTests.swift in Sources */,
+				B0020023 /* OnboardingStep.swift in Sources */,
 				B0020026 /* FriendListOrderTests.swift in Sources */,
 				B0020025 /* FriendListOrder.swift in Sources */,
 			);
