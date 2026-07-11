@@ -10,5 +10,9 @@ if [ -z "$GOOGLE_SERVICE_INFO_PLIST_BASE64" ]; then
     exit 1
 fi
 
-echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > "$CI_PRIMARY_REPOSITORY_PATH/GoogleService-Info.plist"
-echo "GoogleService-Info.plist を復元しました"
+# ビルド時の Run Script（Config/Production または Config/Staging から
+# GoogleService-Info.plist をコピーする）が参照するパスに合わせて復元する。
+# Xcode Cloud は Production 構成のみビルドするため Config/Production/ に置く
+mkdir -p "$CI_PRIMARY_REPOSITORY_PATH/Config/Production"
+echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > "$CI_PRIMARY_REPOSITORY_PATH/Config/Production/GoogleService-Info.plist"
+echo "Config/Production/GoogleService-Info.plist を復元しました"
