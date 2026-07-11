@@ -97,16 +97,18 @@ struct OnboardingSpotlightOverlay: View {
             if let step, let anchor {
                 let targetRect = proxy[anchor]
                 let bubbleX = targetRect.minX + leadingInset
+                // 暗転部分（くり抜き穴＝対象行の外側全域）の形状。暗転の描画とヒットテストの両方に使う
+                let cutoutShape = Path { path in
+                    path.addRect(CGRect(origin: .zero, size: proxy.size))
+                    path.addRoundedRect(
+                        in: targetRect,
+                        cornerSize: CGSize(width: targetRect.height / 2, height: targetRect.height / 2)
+                    )
+                }
                 ZStack(alignment: .topLeading) {
-                    Path { path in
-                        path.addRect(CGRect(origin: .zero, size: proxy.size))
-                        path.addRoundedRect(
-                            in: targetRect,
-                            cornerSize: CGSize(width: targetRect.height / 2, height: targetRect.height / 2)
-                        )
-                    }
-                    .fill(AppColor.overlayScrim, style: FillStyle(eoFill: true))
-                    .transition(.opacity)
+                    cutoutShape
+                        .fill(AppColor.overlayScrim, style: FillStyle(eoFill: true))
+                        .transition(.opacity)
 
                     OnboardingCoachmark(step: step)
                         // ステップ切り替え時も毎回ポップインで登場させる（idでViewを差し替える）
@@ -116,11 +118,15 @@ struct OnboardingSpotlightOverlay: View {
                         .offset(x: bubbleX, y: targetRect.maxY + gapBelowTarget)
                         .transition(.scale(scale: 0.7, anchor: .topLeading).combined(with: .opacity))
                 }
+                // ヒットテスト領域を暗転と同じ「くり抜き穴の外側」に限定する。
+                // これにより穴の内側（対象行）は素通しで下層のFriendRowへタップが届き、
+                // 穴の外側（他の友だち行・ADD FRIENDS・マイページアイコン）は下のonTapGestureが吸収して無効化する
+                .contentShape(cutoutShape, eoFill: true)
+                .onTapGesture {} // くり抜き穴の外側へのタップを吸収し、暗転中のUIを無効化するためのダミーハンドラ（何もしない）
             }
         }
         // スクリムはセーフエリア（ステータスバー・ホームインジケータ帯）まで覆う
         .ignoresSafeArea()
-        .allowsHitTesting(false)
         .animation(
             .spring(response: OnboardingCoachmarkMetrics.appearSpringResponse,
                     dampingFraction: OnboardingCoachmarkMetrics.appearSpringDamping),

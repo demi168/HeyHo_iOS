@@ -80,6 +80,11 @@ struct FriendsView: View {
     @State private var onboardingStep: OnboardingStep?
     /// スプラッシュ明け（entranceTriggered）を待ってからオンボーディングを開始するための保留フラグ
     @State private var onboardingIntroPending = false
+    /// 今回のセッションで既にオンボーディング開始を試行したか（永続化しない）。
+    /// onboardingShown は実際に吹き出しが表示された瞬間に確定するため、
+    /// scheduleOnboardingIntro() のguard待ち（settleDelay中）に loadFriends() が再度呼ばれても
+    /// 二重スケジュールしないようにこのフラグで防ぐ
+    @State private var onboardingIntroAttempted = false
     @State private var simulationTask: Task<Void, Never>?
 
     var body: some View {
@@ -273,9 +278,10 @@ struct FriendsView: View {
                 //（友だちが多いとHeyBoy行がリスト末尾＝画面外になり、スポットライトが機能しないため）
                 let realFriendCount = list.count(where: { !$0.isLocalFriend })
                 AppLogger.rally.debug("onboarding gate: shown=\(onboardingShown) realFriends=\(realFriendCount)")
-                if !onboardingShown, realFriendCount == 0 {
-                    // 中断されても再表示しない（localBotIntroShownと同じ方針）
-                    onboardingShown = true
+                if !onboardingShown, !onboardingIntroAttempted, realFriendCount == 0 {
+                    // onboardingShown はここでは確定しない（scheduleOnboardingIntro() 内のguard通過後に確定する）。
+                    // このセッション内で開始を試行済みであることだけ記録し、二重スケジュールを防ぐ
+                    onboardingIntroAttempted = true
                     if entranceTriggered {
                         scheduleOnboardingIntro()
                     } else {
@@ -314,6 +320,9 @@ struct FriendsView: View {
             // 吹き出し表示前にユーザーが先にHeyBoyへ送信済みなら開始しない
             //（後から .tapToSend をセットすると遷移が噛み合わず、暗転が閉じられなくなる）
             guard let botId = localBotFriend.id, rallyService.statuses[botId] == nil else { return }
+            // 実際に吹き出しが表示される瞬間に確定させる（表示前に確定すると、guardで早期returnした場合に
+            // 二度とオンボーディングが表示されなくなるレース条件になるため）
+            onboardingShown = true
             onboardingStep = .tapToSend
         }
     }
