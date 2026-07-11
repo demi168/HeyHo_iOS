@@ -255,9 +255,6 @@ struct FriendsView: View {
         defer { isLoading = false; hasLoadedOnce = true }
         do {
             var list = try await FirestoreService.shared.friends(userId: uid)
-            #if DEBUG
-            list.append(contentsOf: debugDummyFriends)
-            #endif
             // 新しく追加された友だちを先頭に配置
             if let newId = newlyAddedFriendId,
                let idx = list.firstIndex(where: { $0.id == newId }) {
@@ -290,6 +287,13 @@ struct FriendsView: View {
                     }
                 }
             }
+            // DEBUGダミー友だちはHeyBoyより後ろに追加する。
+            // 先に追加するとHeyBoy行が末尾＝画面外に押し出され、オンボーディングの
+            // スポットライト対象が見えなくなる（ダミーも isLocalFriend 扱いのため
+            // 実友だち0人判定は素通りしてしまう）
+            #if DEBUG
+            list.append(contentsOf: debugDummyFriends)
+            #endif
             // 友だちリストを先に表示し、ラリー状態の取得＋受信購読を RallyService に委譲。
             // ローカル友だち（実 Firestore に無い）は無駄クエリになるので除外する
             friends = list
