@@ -85,7 +85,10 @@ struct FriendsView: View {
     /// scheduleOnboardingIntro() のguard待ち（settleDelay中）に loadFriends() が再度呼ばれても
     /// 二重スケジュールしないようにこのフラグで防ぐ
     @State private var onboardingIntroAttempted = false
-    @State private var simulationTask: Task<Void, Never>?
+    /// ローカル友だち（ボット・デバッグダミー）ごとの擬似返信タスク。
+    /// friendId をキーにすることで、別の友だちへ送信しても他の友だちの返信予約を
+    /// キャンセルしないようにする（同じ友だちへの連続送信時のみ前回分を上書き）
+    @State private var simulationTasks: [String: Task<Void, Never>] = [:]
 
     var body: some View {
         ZStack {
@@ -410,8 +413,9 @@ struct FriendsView: View {
         case .sendLetsGo: nil
         }
         guard let replyType else { return }
-        simulationTask?.cancel()
-        simulationTask = Task { @MainActor in
+        // 同じ友だちへの連続送信時のみ前回分をキャンセルする（他の友だちの予約には触れない）
+        simulationTasks[friendId]?.cancel()
+        simulationTasks[friendId] = Task { @MainActor in
             do {
                 try await Task.sleep(for: .seconds(3))
                 rallyService.simulateLocalReceive(fromUserId: friendId, messageType: replyType)
