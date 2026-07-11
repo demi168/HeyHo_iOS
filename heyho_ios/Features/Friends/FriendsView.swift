@@ -9,8 +9,26 @@ private let debugDummyPrefix = "dummy_"
 private let localBotPrefix = "bot_"
 /// チュートリアルボット。削除しない限り常に友だちリストに表示する
 private let localBotFriend = AppUser(id: "\(localBotPrefix)heyho", displayName: "HeyBoy", iconColor: AppColor.defaultIconHex)
-/// ユーザーがボットを削除済みかどうかを永続化するキー
-private let botDismissedKey = "heyho.localBotDismissed"
+
+/// 初回体験（チュートリアルボット・オンボーディング）関連の UserDefaults キー。
+/// MyPageView の DEBUG リセットボタンからも参照するため internal（一元管理）
+enum OnboardingStorageKey {
+    static let localBotDismissed = "heyho.localBotDismissed"
+    static let localBotIntroShown = "heyho.localBotIntroShown"
+    static let onboardingShown = "heyho.onboardingShown"
+
+    #if DEBUG
+    /// シミュレータ検証用: 初回体験フラグを全リセットする。
+    /// 次回の Friends 一覧ロード（MyPage を閉じた直後等）で HeyBoy ボットとオンボーディングが再度発火する。
+    /// simctl 経由の UserDefaults 書き換えは cfprefsd にキャッシュされ反映されないため、
+    /// アプリ内から直接リセットできるようにしている
+    static func debugReset() {
+        UserDefaults.standard.removeObject(forKey: localBotDismissed)
+        UserDefaults.standard.removeObject(forKey: localBotIntroShown)
+        UserDefaults.standard.removeObject(forKey: onboardingShown)
+    }
+    #endif
+}
 
 extension AppUser {
     /// DEBUG 用ダミー友だち（実 Firestore に存在しない）かどうか。リリースでは常に false
@@ -53,11 +71,11 @@ struct FriendsView: View {
     @State private var highlightedFriendId: String?
     /// 起動ローディング明けの一斉フレームインを発火するトリガー（FriendsView は root で永続のため一度きり）
     @State private var entranceTriggered = false
-    @AppStorage(botDismissedKey) private var localBotDismissed = false
+    @AppStorage(OnboardingStorageKey.localBotDismissed) private var localBotDismissed = false
     /// HeyBoy ボットの初回表示演出を再生済みかどうか（以後のセッション・再起動では発火させない）
-    @AppStorage("heyho.localBotIntroShown") private var localBotIntroShown = false
+    @AppStorage(OnboardingStorageKey.localBotIntroShown) private var localBotIntroShown = false
     /// 初回オンボーディング（HeyBoy行への吹き出し誘導）を表示済みかどうか（中断されても再表示しない）
-    @AppStorage("heyho.onboardingShown") private var onboardingShown = false
+    @AppStorage(OnboardingStorageKey.onboardingShown) private var onboardingShown = false
     /// オンボーディング吹き出しの現在ステップ（nilで非表示）
     @State private var onboardingStep: OnboardingStep?
     /// スプラッシュ明け（entranceTriggered）を待ってからオンボーディングを開始するための保留フラグ

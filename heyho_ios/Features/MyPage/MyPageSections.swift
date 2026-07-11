@@ -86,6 +86,7 @@ struct SettingsSectionView: View {
     let isDeletingAccount: Bool
     let onUpgrade: () -> Void
     let onDebugRevokePremium: () -> Void
+    let onDebugResetOnboarding: () -> Void
     let onOpenLink: (URL) -> Void
     let onSignOut: () -> Void
     let onDeleteAccount: () -> Void
@@ -120,6 +121,14 @@ struct SettingsSectionView: View {
                     }
                 }
             }
+
+            #if DEBUG
+            Button(action: onDebugResetOnboarding) {
+                Text("DEBUG: RESET ONBOARDING")
+                    .font(.system(size: AppTypography.body, weight: .black))
+                    .foregroundColor(.orange)
+            }
+            #endif
 
             // 情報系メニュー（グループ内 16・グループ間 32）
             VStack(alignment: .leading, spacing: AppSpacing.spLarge) {
@@ -189,6 +198,7 @@ struct SettingsSectionView: View {
         isDeletingAccount: false,
         onUpgrade: {},
         onDebugRevokePremium: {},
+        onDebugResetOnboarding: {},
         onOpenLink: { _ in },
         onSignOut: {},
         onDeleteAccount: {}

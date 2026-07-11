@@ -46,6 +46,11 @@ struct MyPageView: View {
                             storeService.debugRevokePremium()
                             #endif
                         },
+                        onDebugResetOnboarding: {
+                            #if DEBUG
+                            OnboardingStorageKey.debugReset()
+                            #endif
+                        },
                         onOpenLink: { safariURL = $0 },
                         onSignOut: { showSignOutConfirmation = true },
                         onDeleteAccount: { showDeleteConfirmation = true }
