@@ -85,18 +85,18 @@
         }
       }
     },
-    "Cancelled" : {
+    "center" : {
+
+    },
+    "Close" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キャンセルされたよ"
+            "value" : "閉じる"
           }
         }
       }
-    },
-    "center" : {
-
     },
     "Code not found" : {
       "localizations" : {
@@ -141,12 +141,12 @@
         }
       }
     },
-    "Could not retrieve token" : {
+    "Could not sign in" : {
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "トークンを取得できないって。"
+            "value" : "サインインできませんでした"
           }
         }
       }
@@ -337,9 +337,6 @@
         }
       }
     },
-    "OK" : {
-
-    },
     "Only alphanumeric characters allowed" : {
       "localizations" : {
         "ja" : {
@@ -366,6 +363,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "名前を入力してね"
+          }
+        }
+      }
+    },
+    "Please try signing in with Apple again." : {
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再度Appleでサインインをお試しください。"
           }
         }
       }
@@ -472,9 +479,6 @@
 
     },
     "Y: %.2f" : {
-
-    },
-    "エラー" : {
 
     },
     "カスタム" : {

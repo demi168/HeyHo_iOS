@@ -3,11 +3,13 @@ import SwiftUI
 // エラーアラートを表示する共通ViewModifier
 struct ErrorAlert: ViewModifier {
     @Binding var errorMessage: String?
+    var title: String = "エラー"
+    var actionTitle: String = "OK"
 
     func body(content: Content) -> some View {
         content
-            .alert("エラー", isPresented: .constant(errorMessage != nil)) {
-                Button("OK") { errorMessage = nil }
+            .alert(title, isPresented: .constant(errorMessage != nil)) {
+                Button(actionTitle) { errorMessage = nil }
             } message: {
                 if let msg = errorMessage { Text(msg) }
             }
@@ -15,7 +17,7 @@ struct ErrorAlert: ViewModifier {
 }
 
 extension View {
-    func errorAlert(_ errorMessage: Binding<String?>) -> some View {
-        modifier(ErrorAlert(errorMessage: errorMessage))
+    func errorAlert(_ errorMessage: Binding<String?>, title: String = "エラー", actionTitle: String = "OK") -> some View {
+        modifier(ErrorAlert(errorMessage: errorMessage, title: title, actionTitle: actionTitle))
     }
 }

@@ -25,6 +25,17 @@ func sha256(_ input: String) -> String {
     return hash.compactMap { String(format: "%02x", $0) }.joined()
 }
 
+extension Error {
+    /// ユーザーがApple Sign Inシートを明示的にキャンセルした、またはシートを閉じて途中離脱した場合に true。
+    /// 前者は ASAuthorizationError.canceled (1001)、後者は environment によって .unknown (1000) が返ることがある。
+    var isAppleSignInCancellation: Bool {
+        let nsError = self as NSError
+        guard nsError.domain == ASAuthorizationError.errorDomain else { return false }
+        return nsError.code == ASAuthorizationError.canceled.rawValue
+            || nsError.code == ASAuthorizationError.unknown.rawValue
+    }
+}
+
 // MARK: - Apple 再認証ヘルパー（アカウント削除時に使用）
 
 final class AppleReauthHelper: NSObject,
@@ -66,9 +77,9 @@ final class AppleReauthHelper: NSObject,
     }
 
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        UIApplication.shared.connectedScenes
+        let windows = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap(\.windows)
-            .first { $0.isKeyWindow } ?? ASPresentationAnchor()
+        return windows.first(where: { $0.isKeyWindow }) ?? windows.first ?? ASPresentationAnchor()
     }
 }

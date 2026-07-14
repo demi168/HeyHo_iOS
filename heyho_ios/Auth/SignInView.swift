@@ -17,6 +17,11 @@ struct SignInView: View {
             signInContent
         }
         .onAppear { errorMessage = nil }
+        .errorAlert(
+            $errorMessage,
+            title: String(localized: "Could not sign in"),
+            actionTitle: String(localized: "Close")
+        )
     }
 
     // MARK: - サインイン画面
@@ -55,14 +60,6 @@ struct SignInView: View {
 
     private var bottomAction: some View {
         VStack(spacing: AppSpacing.spLarge) {
-            if let msg = errorMessage {
-                Text(msg)
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, AppSpacing.spXlarge)
-            }
-
             SignInWithAppleButtonView(
                 onRequest: { _ in },
                 onCompletion: handleAppleSignInResult
@@ -91,21 +88,28 @@ struct SignInView: View {
                 switch result {
                 case .success(let (credential, nonce)):
                     guard let idTokenData = credential.identityToken else {
-                        await MainActor.run { errorMessage = String(localized: "Could not retrieve token") }
+                        AppLogger.auth.error("Apple Sign In: identityTokenが取得できなかった")
+                        await MainActor.run { errorMessage = signInErrorMessage }
                         return
                     }
                     // サインイン成功後、RootViewが認証状態とプロフィール完了状態を判定して遷移
                     _ = try await authState.signInWithApple(idToken: idTokenData, rawNonce: nonce)
                 case .failure(let error):
-                    let msg = (error as NSError).domain == "ASAuthorizationError" && (error as NSError).code == 1001
-                        ? String(localized: "Cancelled")
-                        : error.localizedDescription
-                    await MainActor.run { errorMessage = msg }
+                    // シートを閉じる/スワイプで中断した場合はエラー表示せず静かに戻す
+                    // （キャンセル時は1001、途中離脱時は1000が返ることがある）
+                    guard !error.isAppleSignInCancellation else { return }
+                    AppLogger.auth.error("Apple Sign In 失敗: \(error.localizedDescription)")
+                    await MainActor.run { errorMessage = signInErrorMessage }
                 }
             } catch {
-                await MainActor.run { errorMessage = error.localizedDescription }
+                AppLogger.auth.error("Apple Sign In (Firebase連携) 失敗: \(error.localizedDescription)")
+                await MainActor.run { errorMessage = signInErrorMessage }
             }
         }
+    }
+
+    private var signInErrorMessage: String {
+        String(localized: "Please try signing in with Apple again.")
     }
 
     #if DEBUG

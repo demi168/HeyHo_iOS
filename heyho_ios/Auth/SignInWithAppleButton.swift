@@ -54,13 +54,10 @@ private struct SignInWithAppleButtonViewRepresentable: UIViewRepresentable {
 
 extension SignInWithAppleButtonViewRepresentable.Coordinator: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        guard let window = UIApplication.shared.connectedScenes
-            .compactMap({ $0 as? UIWindowScene })
+        let windows = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
             .flatMap(\.windows)
-            .first(where: { $0.isKeyWindow }) else {
-            return ASPresentationAnchor()
-        }
-        return window
+        return windows.first(where: { $0.isKeyWindow }) ?? windows.first ?? ASPresentationAnchor()
     }
 }
 
